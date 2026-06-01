@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Atelier Orlo eBay Converter</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Atelier Orlo</p>
+          <h1>Shopify zu eBay Draft CSV</h1>
+        </div>
+        <div class="actions">
+          <button id="refreshBtn" type="button">Vorschau aktualisieren</button>
+          <button id="downloadBtn" type="button" class="primary" disabled>CSV herunterladen</button>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <aside class="panel controls">
+          <div class="field">
+            <label for="shopifyFile">Shopify CSV</label>
+            <input id="shopifyFile" type="file" accept=".csv,text/csv" />
+          </div>
+
+          <div class="field">
+            <label for="templateFile">eBay Vorlage</label>
+            <input id="templateFile" type="file" accept=".csv,text/csv" />
+          </div>
+
+          <div class="grid two">
+            <div class="field">
+              <label for="categoryId">Category ID</label>
+              <input id="categoryId" type="text" inputmode="numeric" placeholder="28009 Kunstplakate" />
+            </div>
+            <div class="field">
+              <label for="conditionId">Condition</label>
+              <input id="conditionId" type="text" value="NEW" />
+            </div>
+          </div>
+
+          <div class="grid two">
+            <div class="field">
+              <label for="quantity">Menge je Größe</label>
+              <input id="quantity" type="number" min="1" value="10" />
+            </div>
+            <div class="field">
+              <label for="maxImages">Fotos je Listing</label>
+              <input id="maxImages" type="number" min="1" max="24" value="5" />
+            </div>
+          </div>
+
+          <div class="grid two">
+            <div class="field">
+              <label for="variationTraitName">Variantenname</label>
+              <input id="variationTraitName" type="text" value="Größe" />
+            </div>
+            <div class="field">
+              <label for="format">Format</label>
+              <select id="format">
+                <option value="FixedPrice" selected>FixedPrice</option>
+                <option value="Auction">Auction</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="listingMode">Listing-Modus</label>
+            <select id="listingMode">
+              <option value="flat" selected>Eine eBay-Zeile je Größe</option>
+              <option value="variants">1 Listing mit Größenvarianten</option>
+            </select>
+          </div>
+
+          <label class="toggle">
+            <input id="prefixItemSpecifics" type="checkbox" checked />
+            <span>Artikelmerkmale als C:-Spalten schreiben</span>
+          </label>
+
+          <div class="grid three">
+            <div class="field">
+              <label for="priceMultiplier">Preisfaktor</label>
+              <input id="priceMultiplier" type="number" min="0" step="0.01" value="1" />
+            </div>
+            <div class="field">
+              <label for="priceAdd">Aufschlag</label>
+              <input id="priceAdd" type="number" step="0.01" value="0" />
+            </div>
+            <div class="field">
+              <label for="roundTo">Runden auf</label>
+              <input id="roundTo" type="number" min="0" step="0.01" value="0" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="descriptionSuffix">Beschreibung Zusatz</label>
+            <textarea id="descriptionSuffix" rows="4" placeholder="Optionaler Text für alle Listings"></textarea>
+          </div>
+
+          <div class="section-title">
+            <h2>Globale Merkmale</h2>
+            <button id="addSpecificBtn" type="button" class="ghost">Zeile hinzufügen</button>
+          </div>
+          <div id="globalSpecifics" class="specifics"></div>
+        </aside>
+
+        <section class="panel output">
+          <div class="stats" id="stats">
+            <div>
+              <span>Produkte</span>
+              <strong>0</strong>
+            </div>
+            <div>
+              <span>eBay-Zeilen</span>
+              <strong>0</strong>
+            </div>
+            <div>
+              <span>Fotos</span>
+              <strong>0</strong>
+            </div>
+            <div>
+              <span>Merkmale</span>
+              <strong>0</strong>
+            </div>
+          </div>
+
+          <div id="warnings" class="warnings" hidden></div>
+
+          <div class="section-title">
+            <h2>Automatische Merkmale</h2>
+            <div class="inline-actions">
+              <button id="selectAllTags" type="button" class="ghost">Alle</button>
+              <button id="selectNoTags" type="button" class="ghost">Keine</button>
+            </div>
+          </div>
+          <div id="tagSpecifics" class="tag-grid empty">Noch keine Shopify CSV geladen.</div>
+
+          <div class="section-title">
+            <h2>Vorschau</h2>
+            <button id="sampleBtn" type="button" class="ghost" disabled>Nur 5 Produkte exportieren</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Titel</th>
+                  <th>Varianten</th>
+                  <th>Fotos</th>
+                  <th>Erkannte Merkmale</th>
+                </tr>
+              </thead>
+              <tbody id="previewRows">
+                <tr>
+                  <td colspan="4" class="empty">Wähle deine Shopify CSV aus.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="./converter.js"></script>
+    <script>
+      const state = {
+        shopifyText: "",
+        templateText: "",
+        analysis: null,
+        result: null,
+        tagSelections: new Set(),
+        tagMappings: {},
+        tagsInitialized: false,
+        needsTagRender: true,
+      };
+
+      const elements = {
+        shopifyFile: document.getElementById("shopifyFile"),
+        templateFile: document.getElementById("templateFile"),
+        categoryId: document.getElementById("categoryId"),
+        conditionId: document.getElementById("conditionId"),
+        quantity: document.getElementById("quantity"),
+        maxImages: document.getElementById("maxImages"),
+        variationTraitName: document.getElementById("variationTraitName"),
+        format: document.getElementById("format"),
+        listingMode: document.getElementById("listingMode"),
+        prefixItemSpecifics: document.getElementById("prefixItemSpecifics"),
+        priceMultiplier: document.getElementById("priceMultiplier"),
+        priceAdd: document.getElementById("priceAdd"),
+        roundTo: document.getElementById("roundTo"),
+        descriptionSuffix: document.getElementById("descriptionSuffix"),
+        globalSpecifics: document.getElementById("globalSpecifics"),
+        tagSpecifics: document.getElementById("tagSpecifics"),
+        previewRows: document.getElementById("previewRows"),
+        warnings: document.getElementById("warnings"),
+        stats: document.getElementById("stats"),
+        downloadBtn: document.getElementById("downloadBtn"),
+        refreshBtn: document.getElementById("refreshBtn"),
+        addSpecificBtn: document.getElementById("addSpecificBtn"),
+        selectAllTags: document.getElementById("selectAllTags"),
+        selectNoTags: document.getElementById("selectNoTags"),
+        sampleBtn: document.getElementById("sampleBtn"),
+      };
+
+      function readFile(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => reject(reader.error);
+          reader.readAsText(file, "utf-8");
+        });
+      }
+
+      function makeSpecificRow(key = "", value = "") {
+        const row = document.createElement("div");
+        row.className = "specific-row";
+        row.innerHTML = `
+          <input class="specific-key" type="text" value="${escapeAttribute(key)}" placeholder="Merkmal" />
+          <input class="specific-value" type="text" value="${escapeAttribute(value)}" placeholder="Wert" />
+          <button class="icon danger" type="button" title="Entfernen">×</button>
+        `;
+        row.querySelector("button").addEventListener("click", () => {
+          row.remove();
+          updateConversion();
+        });
+        row.querySelectorAll("input").forEach((input) => {
+          input.addEventListener("input", updateConversion);
+        });
+        elements.globalSpecifics.appendChild(row);
+      }
+
+      function escapeAttribute(value) {
+        return String(value || "")
+          .replace(/&/g, "&amp;")
+          .replace(/"/g, "&quot;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+
+      function escapeHtml(value) {
+        return String(value || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function collectGlobalSpecifics() {
+        const specifics = {};
+        elements.globalSpecifics.querySelectorAll(".specific-row").forEach((row) => {
+          const key = row.querySelector(".specific-key").value.trim();
+          const value = row.querySelector(".specific-value").value.trim();
+          if (key && value) {
+            specifics[key] = value;
+          }
+        });
+        return specifics;
+      }
+
+      function collectConfig() {
+        return {
+          templateText: state.templateText,
+          categoryId: elements.categoryId.value.trim(),
+          conditionId: elements.conditionId.value.trim(),
+          quantity: Number(elements.quantity.value || 10),
+          maxImages: Math.min(24, Math.max(1, Number(elements.maxImages.value || 5))),
+          variationTraitName: elements.variationTraitName.value.trim() || "Größe",
+          format: elements.format.value,
+          listingMode: elements.listingMode.value,
+          prefixItemSpecifics: elements.prefixItemSpecifics.checked,
+          priceMultiplier: Number(elements.priceMultiplier.value || 1),
+          priceAdd: Number(elements.priceAdd.value || 0),
+          roundTo: Number(elements.roundTo.value || 0),
+          descriptionSuffix: elements.descriptionSuffix.value,
+          selectedTagKeys: Array.from(state.tagSelections),
+          tagKeyMap: state.tagMappings,
+          globalSpecifics: collectGlobalSpecifics(),
+          includeSpecifics: true,
+        };
+      }
+
+      function renderTags() {
+        if (!state.analysis || !state.analysis.specificKeys.length) {
+          elements.tagSpecifics.className = "tag-grid empty";
+          elements.tagSpecifics.textContent = "Keine strukturierten Tags gefunden.";
+          return;
+        }
+
+        elements.tagSpecifics.className = "tag-grid";
+        elements.tagSpecifics.innerHTML = "";
+        if (!state.tagsInitialized) {
+          state.tagSelections = new Set(state.analysis.specificKeys);
+          state.tagMappings = Object.fromEntries(state.analysis.specificKeys.map((key) => [key, key]));
+          state.tagsInitialized = true;
+        }
+        state.analysis.specificKeys.forEach((key) => {
+          const id = `tag-${key.replace(/[^a-z0-9]+/gi, "-")}`;
+          const row = document.createElement("div");
+          row.className = "tag-map-row";
+          row.innerHTML = `
+            <label class="tag-check" for="${id}">
+              <input id="${id}" type="checkbox" ${state.tagSelections.has(key) ? "checked" : ""} />
+              <span>${escapeHtml(key)}</span>
+            </label>
+            <input type="text" value="${escapeAttribute(state.tagMappings[key] || key)}" aria-label="eBay Spaltenname für ${escapeAttribute(key)}" />
+          `;
+          row.querySelector("input[type='checkbox']").addEventListener("change", (event) => {
+            if (event.target.checked) {
+              state.tagSelections.add(key);
+            } else {
+              state.tagSelections.delete(key);
+            }
+            updateConversion();
+          });
+          row.querySelector("input[type='text']").addEventListener("input", (event) => {
+            state.tagMappings[key] = event.target.value.trim() || key;
+            updateConversion();
+          });
+          elements.tagSpecifics.appendChild(row);
+        });
+      }
+
+      function renderStats(summary) {
+        const values = [
+          summary ? summary.products : 0,
+          summary ? summary.outputRows : 0,
+          summary ? summary.usedImages : 0,
+          summary ? summary.selectedSpecifics.length : 0,
+        ];
+        elements.stats.querySelectorAll("strong").forEach((node, index) => {
+          node.textContent = values[index].toLocaleString("de-DE");
+        });
+      }
+
+      function renderWarnings(warnings) {
+        const visible = warnings && warnings.length;
+        elements.warnings.hidden = !visible;
+        if (visible) {
+          elements.warnings.innerHTML = warnings.slice(0, 6).map((warning) => `<p>${escapeHtml(warning)}</p>`).join("");
+        }
+      }
+
+      function renderPreview(analysis) {
+        if (!analysis) {
+          elements.previewRows.innerHTML = '<tr><td colspan="4" class="empty">Wähle deine Shopify CSV aus.</td></tr>';
+          return;
+        }
+
+        elements.previewRows.innerHTML = analysis.products
+          .slice(0, 10)
+          .map((product) => {
+            const tagPairs = Object.entries(product.tags)
+              .slice(0, 4)
+              .map(([key, value]) => `${key}: ${value}`)
+              .join(" · ");
+            return `
+              <tr>
+                <td>${escapeHtml(product.title || product.handle)}</td>
+                <td>${product.variants.length || 1}</td>
+                <td>${product.images.length}</td>
+                <td>${escapeHtml(tagPairs || "—")}</td>
+              </tr>
+            `;
+          })
+          .join("");
+      }
+
+      function updateConversion() {
+        if (!state.shopifyText) {
+          state.result = null;
+          renderStats(null);
+          renderWarnings([]);
+          renderPreview(null);
+          elements.downloadBtn.disabled = true;
+          elements.sampleBtn.disabled = true;
+          return;
+        }
+
+        try {
+          state.analysis = EbayConverter.analyzeShopify(state.shopifyText);
+          if (state.needsTagRender) {
+            renderTags();
+            state.needsTagRender = false;
+          }
+          const result = EbayConverter.convert(state.shopifyText, collectConfig());
+          state.result = result;
+          renderStats(result.summary);
+          renderWarnings(result.warnings);
+          renderPreview(result.analysis);
+          elements.downloadBtn.disabled = false;
+          elements.sampleBtn.disabled = false;
+        } catch (error) {
+          state.result = null;
+          renderWarnings([error.message || String(error)]);
+          elements.downloadBtn.disabled = true;
+          elements.sampleBtn.disabled = true;
+        }
+      }
+
+      function downloadCsv(csv, filename) {
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      function createSampleCsv() {
+        const config = collectConfig();
+        const analysis = EbayConverter.analyzeShopify(state.shopifyText);
+        const keepHandles = new Set(analysis.products.slice(0, 5).map((product) => product.handle));
+        const parsed = EbayConverter.parseShopify(state.shopifyText);
+        const header = parsed.headers.join(",");
+        const rows = parsed.rows
+          .filter((row) => keepHandles.has(row.Handle))
+          .map((row) => parsed.headers.map((headerName) => {
+            const value = row[headerName] || "";
+            return /[",\r\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+          }).join(","));
+        return EbayConverter.convert([header, ...rows].join("\r\n"), config).csv;
+      }
+
+      Object.entries(EbayConverter.DEFAULT_GLOBAL_SPECIFICS).forEach(([key, value]) => makeSpecificRow(key, value));
+
+      elements.shopifyFile.addEventListener("change", async (event) => {
+        const file = event.target.files[0];
+        state.shopifyText = file ? await readFile(file) : "";
+        state.tagSelections.clear();
+        state.tagMappings = {};
+        state.tagsInitialized = false;
+        state.needsTagRender = true;
+        updateConversion();
+      });
+
+      elements.templateFile.addEventListener("change", async (event) => {
+        const file = event.target.files[0];
+        state.templateText = file ? await readFile(file) : "";
+        updateConversion();
+      });
+
+      [
+        elements.categoryId,
+        elements.conditionId,
+        elements.quantity,
+        elements.maxImages,
+        elements.variationTraitName,
+        elements.format,
+        elements.listingMode,
+        elements.prefixItemSpecifics,
+        elements.priceMultiplier,
+        elements.priceAdd,
+        elements.roundTo,
+        elements.descriptionSuffix,
+      ].forEach((input) => input.addEventListener("input", updateConversion));
+
+      elements.refreshBtn.addEventListener("click", updateConversion);
+      elements.addSpecificBtn.addEventListener("click", () => makeSpecificRow("", ""));
+      elements.selectAllTags.addEventListener("click", () => {
+        if (state.analysis) {
+          state.tagSelections = new Set(state.analysis.specificKeys);
+          state.needsTagRender = true;
+          updateConversion();
+        }
+      });
+      elements.selectNoTags.addEventListener("click", () => {
+        state.tagSelections.clear();
+        state.needsTagRender = true;
+        updateConversion();
+      });
+      elements.downloadBtn.addEventListener("click", () => {
+        if (state.result) {
+          downloadCsv(state.result.csv, "atelier-orlo-ebay-drafts.csv");
+        }
+      });
+      elements.sampleBtn.addEventListener("click", () => {
+        if (state.shopifyText) {
+          downloadCsv(createSampleCsv(), "atelier-orlo-ebay-drafts-test-5.csv");
+        }
+      });
+    </script>
+  </body>
+</html>

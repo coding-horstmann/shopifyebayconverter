@@ -1,0 +1,9 @@
+{
+  "name": "shopify-ebay-converter",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local Shopify CSV to eBay Draft CSV converter for Atelier Orlo.",
+  "scripts": {
+    "check": "node --check converter.js && node --check cli.js"
+  }
+}
