@@ -236,6 +236,13 @@ input[type="file"] {
   margin-top: 4px;
 }
 
+.hint {
+  margin: -6px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
 .specifics {
   display: grid;
   gap: 8px;

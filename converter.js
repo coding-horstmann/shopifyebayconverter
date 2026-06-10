@@ -919,6 +919,9 @@
 
   function manufacturerEntries(config) {
     const manufacturer = config.manufacturer || {};
+    if (!hasCompleteManufacturerAddress(manufacturer)) {
+      return [];
+    }
     return [
       ["Manufacturer Name", manufacturer.name],
       ["Manufacturer AddressLine1", manufacturer.addressLine1],
@@ -931,6 +934,29 @@
       ["Manufacturer Email", manufacturer.email],
       ["Manufacturer ContactUrl", manufacturer.contactUrl],
     ].filter(([, value]) => String(value || "").trim());
+  }
+
+  function hasAnyManufacturerValue(manufacturer) {
+    return Object.values(manufacturer || {}).some((value) => String(value || "").trim());
+  }
+
+  function hasCompleteManufacturerAddress(manufacturer) {
+    const required = [
+      manufacturer && manufacturer.name,
+      manufacturer && manufacturer.addressLine1,
+      manufacturer && manufacturer.city,
+      manufacturer && manufacturer.postalCode,
+      manufacturer && manufacturer.country,
+    ];
+    return required.every((value) => String(value || "").trim());
+  }
+
+  function manufacturerExportWarning(config) {
+    const manufacturer = config.manufacturer || {};
+    if (!hasAnyManufacturerValue(manufacturer) || hasCompleteManufacturerAddress(manufacturer)) {
+      return "";
+    }
+    return "Herstellerdaten wurden nicht als eBay-GPSR-Spalten exportiert, weil Name, Straße, Ort, PLZ und Land nicht vollständig ausgefüllt sind. Sie erscheinen nur in der HTML-Beschreibung.";
   }
 
   function internationalShippingEntries(config) {
@@ -985,7 +1011,7 @@
         "authentizität": { reproduktion: "Reproduktion" },
         authentizitaet: { reproduktion: "Reproduktion" },
       };
-      return (replacements[label] && replacements[label][lower]) || raw;
+      return limitSpecificValue((replacements[label] && replacements[label][lower]) || raw);
     };
 
     Object.entries(globalSpecifics).forEach(([key, value]) => {
@@ -1003,6 +1029,33 @@
     });
 
     return output;
+  }
+
+  function limitSpecificValue(value) {
+    const maxLength = 65;
+    const raw = String(value || "").trim();
+    if (raw.length <= maxLength) {
+      return raw;
+    }
+
+    const parts = raw
+      .split(";")
+      .map((part) => part.trim())
+      .filter(Boolean);
+    if (parts.length > 1) {
+      const kept = [];
+      parts.forEach((part) => {
+        const candidate = [...kept, part].join("; ");
+        if (candidate.length <= maxLength) {
+          kept.push(part);
+        }
+      });
+      if (kept.length) {
+        return kept.join("; ");
+      }
+    }
+
+    return raw.slice(0, maxLength).replace(/[\s,;:-]+$/g, "");
   }
 
   function buildVariationSummary(product, traitName) {
@@ -1154,6 +1207,10 @@
 
     const rows = [];
     const warnings = [];
+    const manufacturerWarning = manufacturerExportWarning(config);
+    if (manufacturerWarning) {
+      warnings.push(manufacturerWarning);
+    }
     let productsWithVariants = 0;
     let productsWithoutImages = 0;
     let usedImages = 0;

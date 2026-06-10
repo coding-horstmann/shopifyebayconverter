@@ -62,7 +62,9 @@ Für Logos und Icons sind öffentlich abrufbare HTTPS-URLs am zuverlässigsten. 
 
 ## Hersteller und EU-Versand
 
-Herstellerdaten werden als GPSR-kompatible Spalten ergänzt, z. B. `Manufacturer Name`, `Manufacturer AddressLine1`, `Manufacturer City`, `Manufacturer Country`, `Manufacturer PostalCode`, `Manufacturer StateOrProvince`, `Manufacturer Phone`, `Manufacturer Email` und `Manufacturer ContactUrl`. Zusätzlich erscheinen ausgefüllte Herstellerdaten unten in der HTML-Beschreibung in einem aufklappbaren Bereich.
+Herstellerdaten werden als GPSR-kompatible Spalten ergänzt, z. B. `Manufacturer Name`, `Manufacturer AddressLine1`, `Manufacturer City`, `Manufacturer Country`, `Manufacturer PostalCode`, `Manufacturer StateOrProvince`, `Manufacturer Phone`, `Manufacturer Email` und `Manufacturer ContactUrl`. Der Converter schreibt diese eBay-Spalten nur, wenn mindestens Name, Straße, Ort, PLZ und Land vollständig ausgefüllt sind. Unvollständige Herstellerdaten werden nicht als eBay-GPSR-Spalten exportiert, weil eBay sonst den gesamten Upload ablehnt. Zusätzlich erscheinen ausgefüllte Herstellerdaten unten in der HTML-Beschreibung in einem aufklappbaren Bereich.
+
+Artikelmerkmale werden auf eBay-taugliche Längen begrenzt. Wenn Shopify mehrere Werte wie `Humor und Karikatur; Literatur und Bücher; Zeitschriften und Cover` liefert und eBay die Gesamtlänge ablehnt, behält der Converter so viele Werte wie möglich innerhalb der 65-Zeichen-Grenze.
 
 Versand-, Rücknahme- und Zahlungsbedingungen können über die Felder `Versandprofil`, `Rücknahmeprofil` und `Zahlungsprofil` gesetzt werden. Der Wert muss exakt dem Namen der eBay Business Policy entsprechen, z. B. `Kostenloser Versand`. eBay erkennt diese Namen nur, wenn die jeweiligen Policies im Verkäuferkonto existieren.
 
