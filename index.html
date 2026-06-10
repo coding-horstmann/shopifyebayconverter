@@ -39,19 +39,25 @@
               <input id="categoryId" type="text" inputmode="numeric" placeholder="28009 Kunstplakate" />
             </div>
             <div class="field">
-              <label for="conditionId">Condition ID</label>
-              <input id="conditionId" type="text" value="1000" />
+              <label for="conditionId">Artikelzustand</label>
+              <select id="conditionId">
+                <option value="1000" selected>Neu</option>
+                <option value="3000">Gebraucht</option>
+                <option value="1500">Neu, sonstige</option>
+                <option value="2500">Generalüberholt</option>
+                <option value="7000">Als Ersatzteil / defekt</option>
+              </select>
             </div>
           </div>
 
           <div class="grid two">
             <div class="field">
               <label for="quantity">Menge je Größe</label>
-              <input id="quantity" type="number" min="1" value="10" />
+              <input id="quantity" type="number" min="1" value="3" />
             </div>
             <div class="field">
               <label for="maxImages">Fotos je Listing</label>
-              <input id="maxImages" type="number" min="1" max="24" value="5" />
+              <input id="maxImages" type="number" min="1" max="24" value="8" />
             </div>
           </div>
 
@@ -86,6 +92,29 @@
             <input id="prefixItemSpecifics" type="checkbox" checked />
             <span>Artikelmerkmale als C:-Spalten schreiben</span>
           </label>
+
+          <div class="section-title">
+            <h2>Zusatzfotos</h2>
+          </div>
+
+          <div class="field">
+            <label for="extraImageUrls">Zusatzfoto-URLs</label>
+            <textarea id="extraImageUrls" rows="4" placeholder="Eine öffentlich abrufbare Bild-URL pro Zeile, z. B. Infografik oder Maßtabelle"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="productExtraImageUrls">Zusatzfotos je Produkt</label>
+            <textarea id="productExtraImageUrls" rows="4" placeholder="handle=https://bild-1.jpg|https://bild-2.jpg"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="extraImagesPosition">Position der Zusatzfotos</label>
+            <select id="extraImagesPosition">
+              <option value="after-main" selected>Nach dem Hauptfoto</option>
+              <option value="before">Ganz vorne</option>
+              <option value="after">Ganz hinten</option>
+            </select>
+          </div>
 
           <div class="grid three">
             <div class="field">
@@ -132,6 +161,17 @@
             </div>
           </div>
 
+          <div class="grid two">
+            <div class="field">
+              <label for="logoUrl">Logo-URL</label>
+              <input id="logoUrl" type="url" placeholder="https://..." />
+            </div>
+            <div class="field">
+              <label for="logoFile">Logo-Datei</label>
+              <input id="logoFile" type="file" accept="image/*" />
+            </div>
+          </div>
+
           <div class="field">
             <label for="listingIntro">Intro für alle Listings</label>
             <textarea id="listingIntro" rows="3"></textarea>
@@ -152,21 +192,36 @@
             </div>
           </div>
 
-          <div class="grid three">
+          <div class="trust-editor">
             <div class="field">
-              <label for="highlight1Title">Trust-Block 1</label>
+              <label for="highlight1Title">Icon-Block 1</label>
+              <input id="highlight1IconUrl" type="url" placeholder="Icon-URL optional" />
               <input id="highlight1Title" type="text" />
               <textarea id="highlight1Text" rows="2"></textarea>
             </div>
             <div class="field">
-              <label for="highlight2Title">Trust-Block 2</label>
+              <label for="highlight2Title">Icon-Block 2</label>
+              <input id="highlight2IconUrl" type="url" placeholder="Icon-URL optional" />
               <input id="highlight2Title" type="text" />
               <textarea id="highlight2Text" rows="2"></textarea>
             </div>
             <div class="field">
-              <label for="highlight3Title">Trust-Block 3</label>
+              <label for="highlight3Title">Icon-Block 3</label>
+              <input id="highlight3IconUrl" type="url" placeholder="Icon-URL optional" />
               <input id="highlight3Title" type="text" />
               <textarea id="highlight3Text" rows="2"></textarea>
+            </div>
+            <div class="field">
+              <label for="highlight4Title">Icon-Block 4</label>
+              <input id="highlight4IconUrl" type="url" placeholder="Icon-URL optional" />
+              <input id="highlight4Title" type="text" />
+              <textarea id="highlight4Text" rows="2"></textarea>
+            </div>
+            <div class="field">
+              <label for="highlight5Title">Icon-Block 5</label>
+              <input id="highlight5IconUrl" type="url" placeholder="Icon-URL optional" />
+              <input id="highlight5Title" type="text" />
+              <textarea id="highlight5Text" rows="2"></textarea>
             </div>
           </div>
 
@@ -183,6 +238,73 @@
           <div class="field">
             <label for="noteText">Hinweis</label>
             <textarea id="noteText" rows="3"></textarea>
+          </div>
+
+          <div class="section-title">
+            <h2>Produkthersteller</h2>
+          </div>
+
+          <div class="grid two">
+            <div class="field">
+              <label for="manufacturerName">Name</label>
+              <input id="manufacturerName" type="text" />
+            </div>
+            <div class="field">
+              <label for="manufacturerCountry">Land/Region</label>
+              <input id="manufacturerCountry" type="text" placeholder="DE" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="manufacturerAddressLine1">Straße und Hausnummer</label>
+            <input id="manufacturerAddressLine1" type="text" />
+          </div>
+          <div class="field">
+            <label for="manufacturerAddressLine2">Adresszusatz</label>
+            <input id="manufacturerAddressLine2" type="text" />
+          </div>
+          <div class="grid two">
+            <div class="field">
+              <label for="manufacturerCity">Ort</label>
+              <input id="manufacturerCity" type="text" />
+            </div>
+            <div class="field">
+              <label for="manufacturerPostalCode">PLZ</label>
+              <input id="manufacturerPostalCode" type="text" />
+            </div>
+          </div>
+          <div class="grid two">
+            <div class="field">
+              <label for="manufacturerPhone">Telefon</label>
+              <input id="manufacturerPhone" type="text" />
+            </div>
+            <div class="field">
+              <label for="manufacturerEmail">E-Mail</label>
+              <input id="manufacturerEmail" type="email" />
+            </div>
+          </div>
+
+          <div class="section-title">
+            <h2>Internationaler Versand</h2>
+          </div>
+
+          <label class="toggle">
+            <input id="enableInternationalShipping" type="checkbox" />
+            <span>Internationale Versandspalten schreiben</span>
+          </label>
+
+          <div class="grid three">
+            <div class="field">
+              <label for="internationalShippingService">Versandservice-Code</label>
+              <input id="internationalShippingService" type="text" placeholder="z. B. DE_DHLPaketInternational" />
+            </div>
+            <div class="field">
+              <label for="internationalShippingCost">Kosten</label>
+              <input id="internationalShippingCost" type="number" min="0" step="0.01" value="0" />
+            </div>
+            <div class="field">
+              <label for="internationalShippingLocations">Länder/Regionen</label>
+              <input id="internationalShippingLocations" type="text" value="Europe" />
+            </div>
           </div>
 
           <div class="section-title">
@@ -259,6 +381,7 @@
         tagMappings: {},
         tagsInitialized: false,
         needsTagRender: true,
+        logoDataUrl: "",
       };
 
       const elements = {
@@ -268,6 +391,9 @@
         conditionId: document.getElementById("conditionId"),
         quantity: document.getElementById("quantity"),
         maxImages: document.getElementById("maxImages"),
+        extraImageUrls: document.getElementById("extraImageUrls"),
+        productExtraImageUrls: document.getElementById("productExtraImageUrls"),
+        extraImagesPosition: document.getElementById("extraImagesPosition"),
         variationTraitName: document.getElementById("variationTraitName"),
         format: document.getElementById("format"),
         listingMode: document.getElementById("listingMode"),
@@ -280,20 +406,43 @@
         templateEnabled: document.getElementById("templateEnabled"),
         showHeroImage: document.getElementById("showHeroImage"),
         shopName: document.getElementById("shopName"),
+        logoUrl: document.getElementById("logoUrl"),
+        logoFile: document.getElementById("logoFile"),
         listingHeadline: document.getElementById("listingHeadline"),
         listingIntro: document.getElementById("listingIntro"),
         primaryColor: document.getElementById("primaryColor"),
         accentColor: document.getElementById("accentColor"),
         backgroundColor: document.getElementById("backgroundColor"),
+        highlight1IconUrl: document.getElementById("highlight1IconUrl"),
         highlight1Title: document.getElementById("highlight1Title"),
         highlight1Text: document.getElementById("highlight1Text"),
+        highlight2IconUrl: document.getElementById("highlight2IconUrl"),
         highlight2Title: document.getElementById("highlight2Title"),
         highlight2Text: document.getElementById("highlight2Text"),
+        highlight3IconUrl: document.getElementById("highlight3IconUrl"),
         highlight3Title: document.getElementById("highlight3Title"),
         highlight3Text: document.getElementById("highlight3Text"),
+        highlight4IconUrl: document.getElementById("highlight4IconUrl"),
+        highlight4Title: document.getElementById("highlight4Title"),
+        highlight4Text: document.getElementById("highlight4Text"),
+        highlight5IconUrl: document.getElementById("highlight5IconUrl"),
+        highlight5Title: document.getElementById("highlight5Title"),
+        highlight5Text: document.getElementById("highlight5Text"),
         qualityText: document.getElementById("qualityText"),
         shippingText: document.getElementById("shippingText"),
         noteText: document.getElementById("noteText"),
+        manufacturerName: document.getElementById("manufacturerName"),
+        manufacturerCountry: document.getElementById("manufacturerCountry"),
+        manufacturerAddressLine1: document.getElementById("manufacturerAddressLine1"),
+        manufacturerAddressLine2: document.getElementById("manufacturerAddressLine2"),
+        manufacturerCity: document.getElementById("manufacturerCity"),
+        manufacturerPostalCode: document.getElementById("manufacturerPostalCode"),
+        manufacturerPhone: document.getElementById("manufacturerPhone"),
+        manufacturerEmail: document.getElementById("manufacturerEmail"),
+        enableInternationalShipping: document.getElementById("enableInternationalShipping"),
+        internationalShippingService: document.getElementById("internationalShippingService"),
+        internationalShippingCost: document.getElementById("internationalShippingCost"),
+        internationalShippingLocations: document.getElementById("internationalShippingLocations"),
         globalSpecifics: document.getElementById("globalSpecifics"),
         tagSpecifics: document.getElementById("tagSpecifics"),
         previewRows: document.getElementById("previewRows"),
@@ -313,6 +462,15 @@
           reader.onload = () => resolve(reader.result);
           reader.onerror = () => reject(reader.error);
           reader.readAsText(file, "utf-8");
+        });
+      }
+
+      function readDataUrl(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => reject(reader.error);
+          reader.readAsDataURL(file);
         });
       }
 
@@ -367,17 +525,27 @@
         elements.templateEnabled.checked = template.enabled !== false;
         elements.showHeroImage.checked = template.showHeroImage !== false;
         elements.shopName.value = template.shopName || "";
+        elements.logoUrl.value = template.logoUrl || "";
         elements.listingHeadline.value = template.headline || "";
         elements.listingIntro.value = template.intro || "";
         elements.primaryColor.value = template.primaryColor || "#1f4638";
         elements.accentColor.value = template.accentColor || "#b87333";
         elements.backgroundColor.value = template.backgroundColor || "#fbfaf7";
+        elements.highlight1IconUrl.value = template.highlight1IconUrl || "";
         elements.highlight1Title.value = template.highlight1Title || "";
         elements.highlight1Text.value = template.highlight1Text || "";
+        elements.highlight2IconUrl.value = template.highlight2IconUrl || "";
         elements.highlight2Title.value = template.highlight2Title || "";
         elements.highlight2Text.value = template.highlight2Text || "";
+        elements.highlight3IconUrl.value = template.highlight3IconUrl || "";
         elements.highlight3Title.value = template.highlight3Title || "";
         elements.highlight3Text.value = template.highlight3Text || "";
+        elements.highlight4IconUrl.value = template.highlight4IconUrl || "";
+        elements.highlight4Title.value = template.highlight4Title || "";
+        elements.highlight4Text.value = template.highlight4Text || "";
+        elements.highlight5IconUrl.value = template.highlight5IconUrl || "";
+        elements.highlight5Title.value = template.highlight5Title || "";
+        elements.highlight5Text.value = template.highlight5Text || "";
         elements.qualityText.value = template.qualityText || "";
         elements.shippingText.value = template.shippingText || "";
         elements.noteText.value = template.noteText || "";
@@ -390,17 +558,27 @@
           enabled: elements.templateEnabled.checked,
           showHeroImage: elements.showHeroImage.checked,
           shopName: elements.shopName.value.trim(),
+          logoUrl: state.logoDataUrl || elements.logoUrl.value.trim(),
           headline: elements.listingHeadline.value.trim(),
           intro: elements.listingIntro.value.trim(),
           primaryColor: elements.primaryColor.value,
           accentColor: elements.accentColor.value,
           backgroundColor: elements.backgroundColor.value,
+          highlight1IconUrl: elements.highlight1IconUrl.value.trim(),
           highlight1Title: elements.highlight1Title.value.trim(),
           highlight1Text: elements.highlight1Text.value.trim(),
+          highlight2IconUrl: elements.highlight2IconUrl.value.trim(),
           highlight2Title: elements.highlight2Title.value.trim(),
           highlight2Text: elements.highlight2Text.value.trim(),
+          highlight3IconUrl: elements.highlight3IconUrl.value.trim(),
           highlight3Title: elements.highlight3Title.value.trim(),
           highlight3Text: elements.highlight3Text.value.trim(),
+          highlight4IconUrl: elements.highlight4IconUrl.value.trim(),
+          highlight4Title: elements.highlight4Title.value.trim(),
+          highlight4Text: elements.highlight4Text.value.trim(),
+          highlight5IconUrl: elements.highlight5IconUrl.value.trim(),
+          highlight5Title: elements.highlight5Title.value.trim(),
+          highlight5Text: elements.highlight5Text.value.trim(),
           qualityText: elements.qualityText.value.trim(),
           shippingText: elements.shippingText.value.trim(),
           noteText: elements.noteText.value.trim(),
@@ -412,8 +590,11 @@
           templateText: state.templateText,
           categoryId: elements.categoryId.value.trim(),
           conditionId: elements.conditionId.value.trim(),
-          quantity: Number(elements.quantity.value || 10),
-          maxImages: Math.min(24, Math.max(1, Number(elements.maxImages.value || 5))),
+          quantity: Number(elements.quantity.value || 3),
+          maxImages: Math.min(24, Math.max(1, Number(elements.maxImages.value || 8))),
+          extraImageUrls: elements.extraImageUrls.value,
+          productExtraImageUrls: elements.productExtraImageUrls.value,
+          extraImagesPosition: elements.extraImagesPosition.value,
           variationTraitName: elements.variationTraitName.value.trim() || "Größe",
           format: elements.format.value,
           listingMode: elements.listingMode.value,
@@ -423,6 +604,20 @@
           priceAdd: Number(elements.priceAdd.value || 0),
           roundTo: Number(elements.roundTo.value || 0),
           descriptionSuffix: elements.descriptionSuffix.value,
+          manufacturer: {
+            name: elements.manufacturerName.value.trim(),
+            country: elements.manufacturerCountry.value.trim(),
+            addressLine1: elements.manufacturerAddressLine1.value.trim(),
+            addressLine2: elements.manufacturerAddressLine2.value.trim(),
+            city: elements.manufacturerCity.value.trim(),
+            postalCode: elements.manufacturerPostalCode.value.trim(),
+            phone: elements.manufacturerPhone.value.trim(),
+            email: elements.manufacturerEmail.value.trim(),
+          },
+          enableInternationalShipping: elements.enableInternationalShipping.checked,
+          internationalShippingService: elements.internationalShippingService.value.trim(),
+          internationalShippingCost: elements.internationalShippingCost.value.trim(),
+          internationalShippingLocations: elements.internationalShippingLocations.value.trim() || "Europe",
           selectedTagKeys: Array.from(state.tagSelections),
           tagKeyMap: state.tagMappings,
           globalSpecifics: collectGlobalSpecifics(),
@@ -595,11 +790,20 @@
         updateConversion();
       });
 
+      elements.logoFile.addEventListener("change", async (event) => {
+        const file = event.target.files[0];
+        state.logoDataUrl = file ? await readDataUrl(file) : "";
+        updateConversion();
+      });
+
       [
         elements.categoryId,
         elements.conditionId,
         elements.quantity,
         elements.maxImages,
+        elements.extraImageUrls,
+        elements.productExtraImageUrls,
+        elements.extraImagesPosition,
         elements.variationTraitName,
         elements.format,
         elements.listingMode,
@@ -612,22 +816,44 @@
         elements.templateEnabled,
         elements.showHeroImage,
         elements.shopName,
+        elements.logoUrl,
         elements.listingHeadline,
         elements.listingIntro,
         elements.primaryColor,
         elements.accentColor,
         elements.backgroundColor,
+        elements.highlight1IconUrl,
         elements.highlight1Title,
         elements.highlight1Text,
+        elements.highlight2IconUrl,
         elements.highlight2Title,
         elements.highlight2Text,
+        elements.highlight3IconUrl,
         elements.highlight3Title,
         elements.highlight3Text,
+        elements.highlight4IconUrl,
+        elements.highlight4Title,
+        elements.highlight4Text,
+        elements.highlight5IconUrl,
+        elements.highlight5Title,
+        elements.highlight5Text,
         elements.qualityText,
         elements.shippingText,
         elements.noteText,
+        elements.manufacturerName,
+        elements.manufacturerCountry,
+        elements.manufacturerAddressLine1,
+        elements.manufacturerAddressLine2,
+        elements.manufacturerCity,
+        elements.manufacturerPostalCode,
+        elements.manufacturerPhone,
+        elements.manufacturerEmail,
+        elements.enableInternationalShipping,
+        elements.internationalShippingService,
+        elements.internationalShippingCost,
+        elements.internationalShippingLocations,
       ].forEach((input) => input.addEventListener("input", updateConversion));
-      [elements.templateEnabled, elements.showHeroImage].forEach((input) =>
+      [elements.templateEnabled, elements.showHeroImage, elements.enableInternationalShipping].forEach((input) =>
         input.addEventListener("change", updateConversion),
       );
 

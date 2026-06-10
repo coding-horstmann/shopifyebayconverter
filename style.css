@@ -222,6 +222,12 @@ input[type="file"] {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.trust-editor {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
 .section-title {
   display: flex;
   align-items: center;
@@ -374,6 +380,7 @@ tr:last-child td {
 
   .grid.two,
   .grid.three,
+  .trust-editor,
   .specific-row,
   .tag-map-row {
     grid-template-columns: 1fr;

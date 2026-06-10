@@ -39,18 +39,28 @@
   const DEFAULT_LISTING_TEMPLATE = {
     enabled: true,
     shopName: "Atelier Orlo",
+    logoUrl: "",
     headline: "Ausgewählte Vintage-Plakatkunst als hochwertiger Kunstdruck",
     intro:
       "Ein ruhiges, kuratiertes Wandbild für Räume mit Charakter. Gedruckt auf mattem Premiumpapier und sorgfältig als Print-on-Demand produziert.",
     primaryColor: "#1f4638",
     accentColor: "#b87333",
     backgroundColor: "#fbfaf7",
-    highlight1Title: "Premiumdruck",
-    highlight1Text: "Mattes 200 g/m² Papier mit feiner, wertiger Haptik.",
-    highlight2Title: "Kuratiertes Motiv",
-    highlight2Text: "Sorgfältig ausgewählte historische Plakatkunst.",
-    highlight3Title: "Ohne Rahmen",
-    highlight3Text: "Geliefert wird der Kunstdruck ohne Rahmen und Dekoration.",
+    highlight1IconUrl: "",
+    highlight1Title: "Historische Reproduktion",
+    highlight1Text: "Sorgfältig ausgewähltes Plakatmotiv nach alter Vorlage.",
+    highlight2IconUrl: "",
+    highlight2Title: "Mattes Papier",
+    highlight2Text: "Gedruckt auf mattem 200 g/m² Papier mit ruhiger Oberfläche. FSC-zertifiziert oder gleichwertig.",
+    highlight3IconUrl: "",
+    highlight3Title: "30 Tage Widerrufsrecht",
+    highlight3Text: "Du kannst dein Poster nach Erhalt zurückgeben. Die Rücksendekosten trägst du.",
+    highlight4IconUrl: "",
+    highlight4Title: "Kostenloser Versand",
+    highlight4Text: "Der Versand ist im Preis enthalten. Zustellung in der Regel innerhalb von 3 bis 5 Werktagen.",
+    highlight5IconUrl: "",
+    highlight5Title: "Ohne Rahmen",
+    highlight5Text: "Alle Poster werden ungerahmt geliefert. So wählst du den Rahmen passend zu deinem Raum.",
     qualityTitle: "Material und Druck",
     qualityText:
       "Gedruckt auf FSC-Premiumpapier oder gleichwertigem Papier mit matter Oberfläche. Die Farben wirken klar, ruhig und wohnlich.",
@@ -367,14 +377,99 @@
     if (!value) {
       return "";
     }
-    return `<div style="border-top:1px solid #e7e1d8;padding:10px 0;"><span style="display:block;color:#6b6258;font-size:12px;text-transform:uppercase;letter-spacing:.04em;">${escapeHtml(label)}</span><strong style="display:block;color:#20201d;font-size:15px;margin-top:2px;">${escapeHtml(value)}</strong></div>`;
+    return `<div style="border:1px solid #e6ddd1;background:#fff;padding:12px 14px;border-radius:8px;"><span style="display:block;color:#6b6258;font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">${escapeHtml(label)}</span><strong style="display:block;color:#20201d;font-size:14px;line-height:1.35;">${escapeHtml(value)}</strong></div>`;
   }
 
-  function renderHighlight(title, text) {
+  function renderHighlight(title, text, iconUrl, fallbackIndex) {
     if (!title && !text) {
       return "";
     }
-    return `<div style="border:1px solid #e6ddd1;background:#fff;padding:16px;border-radius:8px;"><strong style="display:block;font-size:16px;color:#20201d;margin-bottom:6px;">${escapeHtml(title)}</strong><span style="display:block;color:#514b44;line-height:1.55;font-size:14px;">${escapeHtml(text)}</span></div>`;
+    const safeIcon = normalizeUrl(iconUrl);
+    const icon = safeIcon
+      ? `<img src="${escapeHtml(safeIcon)}" alt="" style="display:block;width:54px;height:54px;object-fit:contain;margin:0 auto 18px;">`
+      : `<span style="display:flex;width:54px;height:54px;border:1px solid #d9cdbf;border-radius:50%;align-items:center;justify-content:center;margin:0 auto 18px;color:#1f4638;font-size:18px;font-weight:bold;">${String(fallbackIndex || "").padStart(2, "0")}</span>`;
+    return `<div style="border:1px solid #eee4d8;background:#f7f1ea;padding:22px 18px;border-radius:8px;text-align:center;min-height:210px;">${icon}<strong style="display:block;font-size:20px;color:#20201d;margin-bottom:10px;font-family:Georgia,serif;font-weight:400;">${escapeHtml(title)}</strong><span style="display:block;color:#514b44;line-height:1.6;font-size:15px;">${escapeHtml(text)}</span></div>`;
+  }
+
+  function parseUrlList(value) {
+    return unique(
+      String(value || "")
+        .split(/[\n,]+/)
+        .map((part) => normalizeUrl(part))
+        .filter(Boolean),
+    );
+  }
+
+  function parseProductExtraImages(value) {
+    const map = {};
+    String(value || "")
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .forEach((line) => {
+        const separator = line.includes("=") ? "=" : line.includes(":") ? ":" : "";
+        if (!separator) {
+          return;
+        }
+        const index = line.indexOf(separator);
+        const key = line.slice(0, index).trim().toLowerCase();
+        const urls = parseUrlList(line.slice(index + 1).replace(/\|/g, "\n"));
+        if (key && urls.length) {
+          map[key] = urls;
+        }
+      });
+    return map;
+  }
+
+  function buildProductImages(product, config) {
+    const shopifyImages = product.images || [];
+    const productExtrasMap = parseProductExtraImages(config.productExtraImageUrls);
+    const productExtras = productExtrasMap[String(product.handle || "").toLowerCase()] || [];
+    const extras = unique([...parseUrlList(config.extraImageUrls), ...productExtras]);
+    const position = config.extraImagesPosition || "after-main";
+
+    if (!extras.length) {
+      return unique(shopifyImages);
+    }
+    if (position === "before") {
+      return unique([...extras, ...shopifyImages]);
+    }
+    if (position === "after-main") {
+      return unique([shopifyImages[0], ...extras, ...shopifyImages.slice(1)]);
+    }
+    return unique([...shopifyImages, ...extras]);
+  }
+
+  function renderPhotoGallery(images, title, template) {
+    const galleryImages = unique(images).slice(0, 12);
+    if (!galleryImages.length || template.showHeroImage === false) {
+      return "";
+    }
+
+    const total = galleryImages.length;
+    const duration = Math.max(total * 4, 8);
+    const visibleEnd = Math.max(6, 100 / total - 2).toFixed(2);
+    const fadeEnd = Math.max(8, 100 / total).toFixed(2);
+    const slides = galleryImages
+      .map(
+        (url, index) =>
+          `<img src="${escapeHtml(url)}" alt="${escapeHtml(title)} ${index + 1}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;animation:orloFade ${duration}s infinite;animation-delay:${index * 4}s;">`,
+      )
+      .join("");
+    const thumbs = galleryImages
+      .map(
+        (url, index) =>
+          `<a href="${escapeHtml(url)}" target="_blank" rel="noopener" style="display:block;border:1px solid #e6ddd1;border-radius:6px;background:#fff;padding:4px;height:82px;"><img src="${escapeHtml(url)}" alt="${escapeHtml(title)} Vorschau ${index + 1}" style="display:block;width:100%;height:100%;object-fit:cover;border-radius:4px;"></a>`,
+      )
+      .join("");
+
+    return [
+      `<style>@keyframes orloFade{0%{opacity:1}${visibleEnd}%{opacity:1}${fadeEnd}%{opacity:0}100%{opacity:0}}@media(max-width:680px){.orlo-hero{height:340px!important}.orlo-thumbs{grid-template-columns:repeat(3,1fr)!important}}</style>`,
+      `<div style="margin:0 0 28px;">`,
+      `<div class="orlo-hero" style="position:relative;width:100%;height:560px;border:1px solid #e6ddd1;background:#fbfaf7;border-radius:10px;overflow:hidden;">${slides}</div>`,
+      `<div class="orlo-thumbs" style="display:grid;grid-template-columns:repeat(${Math.min(total, 6)},minmax(0,1fr));gap:8px;margin-top:10px;">${thumbs}</div>`,
+      `</div>`,
+    ].join("");
   }
 
   function cleanSpecificLabel(label) {
@@ -443,38 +538,53 @@
     const background = cleanColor(template.backgroundColor, DEFAULT_LISTING_TEMPLATE.backgroundColor);
     const title = cleanTitle(details && details.title ? details.title : product.title, 120);
     const description = sanitizeInlineHtml(product.description) || `<p>${escapeHtml(toPlainText(product.description))}</p>`;
-    const mainImage = template.showHeroImage === false ? "" : product.images[0] || "";
     const suffix = String(config.descriptionSuffix || "").trim();
     const facts = buildTemplateFacts(product, config, details).map(([label, value]) => renderFact(label, value)).join("");
-
-    const imageBlock = mainImage
-      ? `<div style="margin:0 0 22px;"><img src="${escapeHtml(mainImage)}" alt="${escapeHtml(title)}" style="display:block;width:100%;max-width:760px;height:auto;border-radius:10px;border:1px solid #e6ddd1;margin:0 auto;"></div>`
-      : "";
+    const images = details && details.images ? details.images : buildProductImages(product, config);
+    const gallery = renderPhotoGallery(images, title, template);
+    const logoUrl = normalizeUrl(template.logoUrl);
+    const logoBlock = logoUrl
+      ? `<img src="${escapeHtml(logoUrl)}" alt="${escapeHtml(template.shopName)}" style="display:block;max-width:170px;max-height:80px;height:auto;">`
+      : `<div style="font-size:20px;font-weight:bold;color:${primary};letter-spacing:.08em;text-transform:uppercase;">${escapeHtml(template.shopName)}</div>`;
+    const highlightBlocks = [1, 2, 3, 4, 5]
+      .map((index) =>
+        renderHighlight(
+          template[`highlight${index}Title`],
+          template[`highlight${index}Text`],
+          template[`highlight${index}IconUrl`],
+          index,
+        ),
+      )
+      .join("");
 
     const suffixBlock = suffix
       ? `<div style="margin-top:22px;padding:16px;border-left:4px solid ${accent};background:#fff7ef;color:#4b4038;line-height:1.6;">${escapeHtml(suffix).replace(/\n/g, "<br>")}</div>`
       : "";
 
     return [
-      `<div style="max-width:860px;margin:0 auto;background:${background};color:#20201d;font-family:Arial,Helvetica,sans-serif;line-height:1.55;">`,
-      `<div style="padding:28px 24px 24px;border:1px solid #e6ddd1;border-radius:12px;background:#fff;">`,
-      `<div style="border-bottom:3px solid ${accent};padding-bottom:16px;margin-bottom:22px;">`,
-      `<div style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:${primary};font-weight:bold;">${escapeHtml(template.shopName)}</div>`,
-      `<h1 style="margin:8px 0 8px;font-size:28px;line-height:1.2;color:#20201d;">${escapeHtml(title)}</h1>`,
-      `<p style="margin:0;color:#5a534b;font-size:16px;">${escapeHtml(template.headline)}</p>`,
+      `<div style="max-width:1180px;margin:0 auto;background:${background};color:#20201d;font-family:Arial,Helvetica,sans-serif;line-height:1.55;">`,
+      `<div style="padding:24px 26px;border:1px solid #e6ddd1;background:#fff;">`,
+      `<div style="display:flex;align-items:center;justify-content:space-between;gap:18px;border-bottom:1px solid #e6ddd1;padding-bottom:18px;margin-bottom:26px;">`,
+      logoBlock,
+      `<div style="font-size:14px;color:#5a534b;text-align:right;">Schneller Versand nach Zahlungseingang<br>Kuratiertes Motiv, hochwertig gedruckt</div>`,
       `</div>`,
-      imageBlock,
-      `<div style="display:block;margin-bottom:22px;padding:18px;background:${background};border-radius:10px;border:1px solid #e6ddd1;">`,
-      `<p style="margin:0;color:#39342f;font-size:16px;">${escapeHtml(template.intro)}</p>`,
+      `<div style="display:grid;grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr);gap:34px;align-items:start;">`,
+      `<div>${gallery}</div>`,
+      `<div style="padding-top:8px;">`,
+      `<div style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:${primary};font-weight:bold;margin-bottom:10px;">${escapeHtml(template.shopName)}</div>`,
+      `<h1 style="margin:0 0 16px;font-size:31px;line-height:1.18;color:#20201d;font-family:Georgia,serif;font-weight:400;">${escapeHtml(title)}</h1>`,
+      `<p style="margin:0 0 18px;color:#5a534b;font-size:17px;line-height:1.6;">${escapeHtml(template.headline)}</p>`,
+      `<div style="width:68px;height:3px;background:${accent};margin:0 0 22px;"></div>`,
+      `<p style="margin:0 0 20px;color:#39342f;font-size:16px;line-height:1.7;">${escapeHtml(template.intro)}</p>`,
+      `<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:22px;">${facts || renderFact("Produktart", "Kunstdruck")}</div>`,
       `</div>`,
-      `<div style="margin-bottom:24px;color:#39342f;font-size:16px;">${description}</div>`,
-      `<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:22px 0;">`,
-      renderHighlight(template.highlight1Title, template.highlight1Text),
-      renderHighlight(template.highlight2Title, template.highlight2Text),
-      renderHighlight(template.highlight3Title, template.highlight3Text),
       `</div>`,
-      `<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,280px);gap:22px;margin-top:24px;">`,
-      `<div>`,
+      `<div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:34px 0 30px;">${highlightBlocks}</div>`,
+      `<div style="border-top:1px solid #e6ddd1;padding-top:26px;margin-top:8px;">`,
+      `<h2 style="margin:0 0 14px;font-size:24px;color:${primary};font-family:Georgia,serif;font-weight:400;">Beschreibung</h2>`,
+      `<div style="margin-bottom:26px;color:#39342f;font-size:16px;line-height:1.75;">${description}</div>`,
+      `<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;margin-top:24px;">`,
+      `<div style="grid-column:span 2;">`,
       `<h2 style="margin:0 0 10px;font-size:20px;color:${primary};">${escapeHtml(template.qualityTitle)}</h2>`,
       `<p style="margin:0 0 18px;color:#4b463f;">${escapeHtml(template.qualityText)}</p>`,
       `<h2 style="margin:0 0 10px;font-size:20px;color:${primary};">${escapeHtml(template.shippingTitle)}</h2>`,
@@ -483,9 +593,10 @@
       `<p style="margin:0;color:#4b463f;">${escapeHtml(template.noteText)}</p>`,
       suffixBlock,
       `</div>`,
-      `<div style="background:#fff;border:1px solid #e6ddd1;border-radius:10px;padding:14px 16px;height:max-content;">`,
-      `<h3 style="margin:0 0 8px;font-size:17px;color:#20201d;">Details</h3>`,
-      facts || renderFact("Produktart", "Kunstdruck"),
+      `<div style="background:${background};border:1px solid #e6ddd1;border-radius:10px;padding:18px;height:max-content;">`,
+      `<h3 style="margin:0 0 12px;font-size:18px;color:#20201d;">Produktdetails</h3>`,
+      `<div style="display:grid;grid-template-columns:1fr;gap:8px;">${facts || renderFact("Produktart", "Kunstdruck")}</div>`,
+      `</div>`,
       `</div>`,
       `</div>`,
       `<div style="margin-top:26px;padding-top:16px;border-top:1px solid #e6ddd1;color:#6b6258;font-size:13px;">${escapeHtml(template.footerText)}</div>`,
@@ -716,6 +827,42 @@
     setIfPresent(headers, row, ["Product:ReturnSearchResultsOnDuplicates"], "0");
   }
 
+  function manufacturerEntries(config) {
+    const manufacturer = config.manufacturer || {};
+    return [
+      ["Manufacturer Name", manufacturer.name],
+      ["Manufacturer AddressLine1", manufacturer.addressLine1],
+      ["Manufacturer AddressLine2", manufacturer.addressLine2],
+      ["Manufacturer City", manufacturer.city],
+      ["Manufacturer Country", manufacturer.country],
+      ["Manufacturer PostalCode", manufacturer.postalCode],
+      ["Manufacturer StateOrProvince", manufacturer.stateOrProvince],
+      ["Manufacturer Phone", manufacturer.phone],
+      ["Manufacturer Email", manufacturer.email],
+    ].filter(([, value]) => String(value || "").trim());
+  }
+
+  function internationalShippingEntries(config) {
+    if (!config.enableInternationalShipping) {
+      return [];
+    }
+    return [
+      ["ShippingType", config.shippingType || "Flat"],
+      ["IntlShippingService-1:Option", config.internationalShippingService || ""],
+      ["IntlShippingService-1:Cost", config.internationalShippingCost || "0"],
+      ["IntlShippingService-1:Priority", "1"],
+      ["IntlShippingService-1:Locations", config.internationalShippingLocations || "Europe"],
+    ].filter(([, value]) => String(value || "").trim());
+  }
+
+  function mergeOperationalHeaders(headers, config) {
+    [...manufacturerEntries(config), ...internationalShippingEntries(config)].forEach(([header]) => ensureHeader(headers, header));
+  }
+
+  function applyOperationalFields(row, config) {
+    [...manufacturerEntries(config), ...internationalShippingEntries(config)].forEach(([header, value]) => setIfHeader(row, header, value));
+  }
+
   function makeSpecifics(product, config) {
     const output = {};
     const selectedTagKeys = config.selectedTagKeys || [];
@@ -761,7 +908,7 @@
     }
 
     const header = String(actionHeader || "");
-    if (/^\*Action/i.test(header) || /Version=941/i.test(header)) {
+    if (/^\*?Action/i.test(header) || /Version=/i.test(header)) {
       return config.verifyOnly ? "VerifyAdd" : "Add";
     }
     return "Draft";
@@ -792,16 +939,25 @@
       categoryId: "",
       conditionId: "1000",
       format: "FixedPrice",
-      quantity: 10,
+      quantity: 3,
       maxImages: 5,
       listingMode: "variants",
       variationTraitName: "Größe",
       verifyOnly: false,
       actionValue: "",
+      extraImageUrls: "",
+      productExtraImageUrls: "",
+      extraImagesPosition: "after-main",
       upcValue: "",
       priceMultiplier: 1,
       priceAdd: 0,
       roundTo: 0,
+      manufacturer: {},
+      enableInternationalShipping: false,
+      shippingType: "Flat",
+      internationalShippingService: "",
+      internationalShippingCost: "0",
+      internationalShippingLocations: "Europe",
       selectedTagKeys: [],
       tagKeyMap: {},
       globalSpecifics: DEFAULT_GLOBAL_SPECIFICS,
@@ -847,6 +1003,7 @@
     const mappedTagKeys = (config.selectedTagKeys || []).map((key) => addSpecificPrefix(config.tagKeyMap[key] || key));
     const selectedKeys = config.includeSpecifics ? [...globalKeys, ...mappedTagKeys] : [];
     mergeSpecificHeaders(headers, unique(selectedKeys));
+    mergeOperationalHeaders(headers, config);
 
     const rows = [];
     const warnings = [];
@@ -858,7 +1015,7 @@
       const variants = product.variants.length ? product.variants : [{ sku: product.handle, price: product.firstPrice }];
       const hasVariants = config.listingMode === "variants" && variants.length > 1;
       const traitName = config.variationTraitName || product.option1Name || "Größe";
-      const photoUrls = product.images.slice(0, Number(config.maxImages || 5));
+      const photoUrls = buildProductImages(product, config).slice(0, Number(config.maxImages || 5));
       const photos = photoUrls.join("|");
       const specifics = config.includeSpecifics ? makeSpecifics(product, config) : {};
       const parent = createEmptyRow(headers);
@@ -878,7 +1035,7 @@
           const optionValue = variant.option1Value || "Standard";
           setIfHeader(flat, actionHeader, actionValue);
           setIfHeader(flat, skuHeader, variant.sku);
-          setIfHeader(flat, productNameHeader, variant.sku);
+          setIfHeader(flat, productNameHeader, cleanTitle(`${product.title} - ${optionValue}`, 80));
           setIfHeader(flat, categoryHeader, config.categoryId);
           setIfHeader(flat, titleHeader, cleanTitle(`${product.title} - ${optionValue}`, 80));
           setIfHeader(flat, upcHeader, config.upcValue);
@@ -893,10 +1050,12 @@
               title: `${product.title} - ${optionValue}`,
               optionValue,
               price: formatPrice(variant.price, config),
+              images: photoUrls,
             }),
           );
           setIfHeader(flat, formatHeader, config.format);
           applyTemplateDefaults(headers, flat, config);
+          applyOperationalFields(flat, config);
           Object.entries({ ...specifics, [addSpecificPrefix(traitName)]: optionValue }).forEach(([key, value]) => {
             const headerKey = addSpecificPrefix(key);
             if (!headers.includes(headerKey)) {
@@ -914,8 +1073,8 @@
       }
 
       setIfHeader(parent, actionHeader, actionValue);
-      setIfHeader(parent, skuHeader, makeSku(product.handle));
-      setIfHeader(parent, productNameHeader, makeSku(product.handle));
+      setIfHeader(parent, skuHeader, hasVariants ? "" : makeSku(product.handle));
+      setIfHeader(parent, productNameHeader, cleanTitle(product.title, 80));
       setIfHeader(parent, categoryHeader, config.categoryId);
       setIfHeader(parent, titleHeader, cleanTitle(product.title, 80));
       setIfHeader(parent, upcHeader, config.upcValue);
@@ -927,10 +1086,12 @@
         buildDescription(product, config, {
           title: product.title,
           price: hasVariants ? "" : formatPrice(variants[0].price, config),
+          images: photoUrls,
         }),
       );
       setIfHeader(parent, formatHeader, config.format);
       applyTemplateDefaults(headers, parent, config);
+      applyOperationalFields(parent, config);
 
       if (hasVariants) {
         setIfHeader(parent, relationshipDetailsHeader, buildVariationSummary(product, traitName));
@@ -951,7 +1112,7 @@
         variants.forEach((variant) => {
           const child = createEmptyRow(headers);
           const optionValue = variant.option1Value || "Standard";
-          const variantImage = variant.image || product.images[0] || "";
+          setIfHeader(child, actionHeader, actionValue);
           setIfHeader(child, skuHeader, variant.sku);
           setIfHeader(child, priceHeader, formatPrice(variant.price, config));
           setIfHeader(child, quantityHeader, config.quantity);
@@ -959,9 +1120,6 @@
           setIfHeader(child, conditionHeader, conditionValueFor(conditionHeader, config.conditionId));
           setIfHeader(child, relationshipHeader, "Variation");
           setIfHeader(child, relationshipDetailsHeader, `${traitName}=${optionValue}`);
-          if (variantImage) {
-            setIfHeader(child, photosHeader, `${optionValue}=${variantImage}`);
-          }
           rows.push(child);
         });
       }
