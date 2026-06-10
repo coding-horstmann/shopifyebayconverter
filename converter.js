@@ -453,7 +453,7 @@
     const slides = galleryImages
       .map(
         (url, index) =>
-          `<img src="${escapeHtml(url)}" alt="${escapeHtml(title)} ${index + 1}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;animation:orloFade ${duration}s infinite;animation-delay:${index * 4}s;">`,
+          `<img src="${escapeHtml(url)}" alt="${escapeHtml(title)} ${index + 1}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:${index === 0 ? "1" : "0"};animation:orloFade ${duration}s infinite;animation-delay:${index * 4}s;">`,
       )
       .join("");
     const thumbs = galleryImages
