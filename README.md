@@ -7,11 +7,11 @@ Lokales und Vercel-taugliches Tool für Shopify-Exports von Atelier Orlo. Ziel i
 Öffne die App im Browser und wähle:
 
 1. Shopify-CSV bei `Shopify CSV` laden.
-2. Eine eBay-SMP/File-Exchange-Vorlage bei `eBay Vorlage` laden, wenn eBay sonst meldet, dass die Vorlage nicht identifiziert werden konnte.
+2. Optional eine eBay-SMP/File-Exchange-Vorlage bei `eBay Vorlage` laden. Ohne Vorlage nutzt der Converter jetzt ebenfalls eine SMP-kompatible Header-Zeile, nicht mehr die eBay-Draft-Vorlage.
 3. `Category ID`, Bestand je Größe, Artikelzustand, MwSt., Bilderzahl und Listing-Modus setzen.
 4. Zusatzfotos global oder produkt-spezifisch per Shopify-Handle ergänzen und die Position festlegen.
 5. Im Bereich `Listing-Design` Logo, globale Texte, Farben und Icon-Blöcke für alle eBay-Beschreibungen pflegen.
-6. Herstellerdaten und optionale internationale Versandspalten setzen.
+6. Herstellerdaten, eBay-Rahmenbedingungen und optionale internationale Versandspalten setzen.
 7. Automatische Merkmale aktivieren, deaktivieren oder auf eBay-Spaltennamen umbenennen.
 8. Zuerst `Nur 5 Produkte exportieren` testen, danach die komplette CSV herunterladen.
 
@@ -22,13 +22,15 @@ Wichtig: Varianten bitte bei eBay als Seller-Hub-Reports `Create new listings` /
 Der Standard ist `1 Listing mit Größenvarianten`. Der Converter gruppiert Shopify-Zeilen nach `Handle` und erzeugt:
 
 - eine Parent-Zeile pro Shopify-Produkt mit Titel, Beschreibung, Kategorie, Fotos und allgemeinen Artikelmerkmalen
-- darunter Child-Zeilen mit `Relationship=Variation`, `RelationshipDetails=Groesse=...`, `P:UPC=Does not apply`, Preis, Menge und SKU
+- darunter Child-Zeilen mit `Relationship=Variation`, `RelationshipDetails=Groesse=...`, `P:UPC=Does not apply`, Preis, Menge, SKU und `ConditionID`
+
+Die `Action=Add` steht nur auf der Parent-Zeile. Die Child-Zeilen bleiben in der Action-Spalte leer, damit eBay sie als Varianten des Parent-Listings und nicht als eigene Listings verarbeitet.
 
 Die Spalte wird konsequent als `RelationshipDetails` ohne Leerzeichen geschrieben. Variantenwerte werden eBay-sicher normalisiert, also z. B. `30x45 cm / 12x18″` zu `30x45cm`. eBay dokumentiert, dass in `RelationshipDetails` keine Leerzeichen zwischen Merkmalen und Werten stehen dürfen.
 
 Der Flat-Modus bleibt nur als Fallback erhalten und erzeugt bewusst ein eigenes eBay-Angebot pro Größe.
 
-Wenn eine eBay-Vorlage hochgeladen wird, bleibt deren erste Zeile unverändert die erste Zeile im Export. Ohne Vorlage nutzt der Converter die eBay-Draft-Template-Kennung als Fallback.
+Wenn eine eBay-Vorlage hochgeladen wird, bleibt deren erste Zeile unverändert die erste Zeile im Export. Ohne Vorlage nutzt der Converter die SMPBase-kompatible Zeile `*Action(SiteID=Germany|Country=DE|Currency=EUR|Version=941)` als erste Zeile.
 
 ## Fotos
 
@@ -46,7 +48,7 @@ Die Zusatzfotos können vor allen Shopify-Bildern, nach dem Hauptbild oder am En
 
 Strukturierte Shopify-Tags wie `Künstler: ...`, `Epoche: ...` und Shopify-Metafelder wie Material, Finish, Rahmenstil, Ausrichtung und Kunststil werden als auswählbare eBay-Artikelmerkmale erkannt. Eigene globale Merkmale werden auf alle Listings angewendet.
 
-Die Artikelmerkmale werden als echte eBay-Merkmale geschrieben. Die HTML-Beschreibung wiederholt sie nicht mehr als eigene Produktdetailbox, damit eBay-Artikelmerkmale und Verkäuferbeschreibung nicht doppelt wirken.
+Die Artikelmerkmale werden als echte eBay-Merkmale geschrieben. Die HTML-Beschreibung wiederholt sie nicht mehr als eigene Produktdetailbox, damit eBay-Artikelmerkmale und Verkäuferbeschreibung nicht doppelt wirken. Werte wie `papier` und `reproduktion` werden im Export zu `Papier` und `Reproduktion` normalisiert.
 
 Die MwSt. wird standardmäßig als `VATPercent=19` geschrieben.
 
@@ -60,7 +62,9 @@ Für Logos und Icons sind öffentlich abrufbare HTTPS-URLs am zuverlässigsten. 
 
 ## Hersteller und EU-Versand
 
-Herstellerdaten werden als GPSR-kompatible Spalten ergänzt, z. B. `Manufacturer Name`, `Manufacturer AddressLine1`, `Manufacturer City`, `Manufacturer Country`, `Manufacturer PostalCode`, `Manufacturer StateOrProvince`, `Manufacturer Phone`, `Manufacturer Email` und `Manufacturer ContactUrl`.
+Herstellerdaten werden als GPSR-kompatible Spalten ergänzt, z. B. `Manufacturer Name`, `Manufacturer AddressLine1`, `Manufacturer City`, `Manufacturer Country`, `Manufacturer PostalCode`, `Manufacturer StateOrProvince`, `Manufacturer Phone`, `Manufacturer Email` und `Manufacturer ContactUrl`. Zusätzlich erscheinen ausgefüllte Herstellerdaten unten in der HTML-Beschreibung in einem aufklappbaren Bereich.
+
+Versand-, Rücknahme- und Zahlungsbedingungen können über die Felder `Versandprofil`, `Rücknahmeprofil` und `Zahlungsprofil` gesetzt werden. Der Wert muss exakt dem Namen der eBay Business Policy entsprechen, z. B. `Kostenloser Versand`. eBay erkennt diese Namen nur, wenn die jeweiligen Policies im Verkäuferkonto existieren.
 
 Optional können internationale Versandspalten ergänzt werden: `IntlShippingService-1:Option`, `IntlShippingService-1:Cost`, `IntlShippingService-1:Priority` und `IntlShippingService-1:Locations`. Der Versandservice-Code muss zu deinem eBay-Konto bzw. deiner Vorlage passen.
 
@@ -74,6 +78,8 @@ node .\cli.js `
   --category 28009 `
   --quantity 3 `
   --vat-percent 19 `
+  --shipping-profile "Kostenloser Versand" `
+  --return-profile "30 Tage Rueckgabe" `
   --max-images 8
 ```
 

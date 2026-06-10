@@ -300,6 +300,25 @@
             <h2>Internationaler Versand</h2>
           </div>
 
+          <div class="section-title">
+            <h2>eBay Rahmenbedingungen</h2>
+          </div>
+
+          <div class="grid three">
+            <div class="field">
+              <label for="shippingProfileName">Versandprofil</label>
+              <input id="shippingProfileName" type="text" placeholder="z. B. Kostenloser Versand" />
+            </div>
+            <div class="field">
+              <label for="returnProfileName">Rücknahmeprofil</label>
+              <input id="returnProfileName" type="text" placeholder="exakter eBay-Profilname" />
+            </div>
+            <div class="field">
+              <label for="paymentProfileName">Zahlungsprofil</label>
+              <input id="paymentProfileName" type="text" placeholder="optional" />
+            </div>
+          </div>
+
           <label class="toggle">
             <input id="enableInternationalShipping" type="checkbox" />
             <span>Internationale Versandspalten schreiben</span>
@@ -455,6 +474,9 @@
         manufacturerPhone: document.getElementById("manufacturerPhone"),
         manufacturerEmail: document.getElementById("manufacturerEmail"),
         manufacturerContactUrl: document.getElementById("manufacturerContactUrl"),
+        shippingProfileName: document.getElementById("shippingProfileName"),
+        returnProfileName: document.getElementById("returnProfileName"),
+        paymentProfileName: document.getElementById("paymentProfileName"),
         enableInternationalShipping: document.getElementById("enableInternationalShipping"),
         internationalShippingService: document.getElementById("internationalShippingService"),
         internationalShippingCost: document.getElementById("internationalShippingCost"),
@@ -620,6 +642,9 @@
           priceAdd: Number(elements.priceAdd.value || 0),
           roundTo: Number(elements.roundTo.value || 0),
           vatPercent: elements.vatPercent.value.trim() || "19",
+          shippingProfileName: elements.shippingProfileName.value.trim(),
+          returnProfileName: elements.returnProfileName.value.trim(),
+          paymentProfileName: elements.paymentProfileName.value.trim(),
           descriptionSuffix: elements.descriptionSuffix.value,
           manufacturer: {
             name: elements.manufacturerName.value.trim(),
@@ -870,6 +895,9 @@
         elements.manufacturerPhone,
         elements.manufacturerEmail,
         elements.manufacturerContactUrl,
+        elements.shippingProfileName,
+        elements.returnProfileName,
+        elements.paymentProfileName,
         elements.enableInternationalShipping,
         elements.internationalShippingService,
         elements.internationalShippingCost,

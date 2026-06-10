@@ -5,25 +5,54 @@
     root.EbayConverter = factory();
   }
 })(typeof self !== "undefined" ? self : this, function () {
-  const DEFAULT_INFO_ROWS = [
-    "#INFO;Version=0.0.2;Template= eBay-draft-listings-template_DE;;;;;;;",
-    "#INFO Action und Category ID sind erforderliche Felder. 1) Stellen Sie Action auf Draft ein. 2) Die Kategorie-ID für Ihre Angebote finden Sie hier: https://pages.ebay.com/sellerinformation/news/categorychanges.html;;;;;;;;;",
-    "#INFO Nachdem Sie Ihren Entwurf erfolgreich im Berichte-Tab Ihres Verkäufer-Cockpit Pro heruntergeladen haben; können Sie die Entwürfe hier zu aktiven Angeboten vervollständigen: https://www.ebay.de/sh/lst/drafts;;;;;;;;;",
-    "#INFO;;;;;;;;;;",
-  ];
+  const DEFAULT_INFO_ROWS = [];
 
   const DEFAULT_HEADERS = [
-    "Action(SiteID=Germany|Country=DE|Currency=EUR|Version=1193|CC=UTF-8)",
-    "Custom label (SKU)",
-    "Category ID",
-    "Title",
-    "UPC",
-    "Price",
-    "Quantity",
-    "Item photo URL",
-    "Condition ID",
-    "Description",
-    "Format",
+    "*Action(SiteID=Germany|Country=DE|Currency=EUR|Version=941)",
+    "*ProductName",
+    "SaleTemplateName",
+    "*Category",
+    "*Title",
+    "Subtitle",
+    "*Description",
+    "*ConditionID",
+    "PicURL",
+    "*Quantity",
+    "*Format",
+    "*StartPrice",
+    "BuyItNowPrice",
+    "*Duration",
+    "ImmediatePayRequired",
+    "*Location",
+    "GalleryType",
+    "PayPalAccepted",
+    "PayPalEmailAddress",
+    "PaymentInstructions",
+    "DomesticInsuranceOption",
+    "DomesticInsuranceFee",
+    "InternationalInsuranceOption",
+    "InternationalInsuranceFee",
+    "StoreCategory",
+    "ShippingDiscountProfileID",
+    "eBay Plus",
+    "DomesticRateTable",
+    "ShippingType",
+    "ShippingService-1:Option",
+    "ShippingService-1:Cost",
+    "ShippingService-1:Priority",
+    "ShippingService-2:Option",
+    "ShippingService-2:Cost",
+    "ShippingService-2:Priority",
+    "DispatchTimeMax",
+    "CustomLabel",
+    "ReturnsAcceptedOption",
+    "ReturnsWithinOption",
+    "ShippingCostPaidByOption",
+    "AdditionalDetails",
+    "ShippingProfileName",
+    "ReturnProfileName",
+    "PaymentProfileName",
+    "P:UPC",
     "Relationship",
     "RelationshipDetails",
   ];
@@ -204,7 +233,7 @@
   function parseEbayTemplate(text) {
     if (!text) {
       return {
-        delimiter: ";",
+        delimiter: ",",
         infoRows: DEFAULT_INFO_ROWS.slice(),
         headers: DEFAULT_HEADERS.slice(),
       };
@@ -424,7 +453,7 @@
     const icon = safeIcon
       ? `<img src="${escapeHtml(safeIcon)}" alt="" style="display:block;width:54px;height:54px;object-fit:contain;margin:0 auto 18px;">`
       : `<span style="display:flex;width:54px;height:54px;border:1px solid #d9cdbf;border-radius:50%;align-items:center;justify-content:center;margin:0 auto 18px;color:#1f4638;font-size:18px;font-weight:bold;">${String(fallbackIndex || "").padStart(2, "0")}</span>`;
-    return `<div style="border:1px solid #eee4d8;background:#f7f1ea;padding:22px 18px;border-radius:8px;text-align:center;min-height:210px;">${icon}<strong style="display:block;font-size:20px;color:#20201d;margin-bottom:10px;font-family:Georgia,serif;font-weight:400;">${escapeHtml(title)}</strong><span style="display:block;color:#514b44;line-height:1.6;font-size:15px;">${escapeHtml(text)}</span></div>`;
+    return `<div style="display:inline-block;width:18%;min-width:150px;box-sizing:border-box;vertical-align:top;margin:0 .6% 12px;border:1px solid #eee4d8;background:#f7f1ea;padding:22px 14px;border-radius:8px;text-align:center;min-height:220px;">${icon}<strong style="display:block;font-size:20px;color:#20201d;margin-bottom:10px;font-family:Georgia,serif;font-weight:400;">${escapeHtml(title)}</strong><span style="display:block;color:#514b44;line-height:1.6;font-size:15px;">${escapeHtml(text)}</span></div>`;
   }
 
   function parseUrlList(value) {
@@ -502,7 +531,7 @@
     return [
       `<style>@keyframes orloFade{0%{opacity:1}${visibleEnd}%{opacity:1}${fadeEnd}%{opacity:0}100%{opacity:0}}</style>`,
       `<div style="margin:0 0 24px;width:100%;box-sizing:border-box;">`,
-      `<div class="orlo-hero" style="position:relative;width:100%;height:80vw;min-height:340px;max-height:620px;max-width:760px;margin:0 auto;border:1px solid #e6ddd1;background:#fbfaf7;border-radius:8px;overflow:hidden;box-sizing:border-box;">${slides}</div>`,
+      `<div class="orlo-hero" style="position:relative;width:100%;height:70vw;min-height:340px;max-height:720px;max-width:1120px;margin:0 auto;border:1px solid #e6ddd1;background:#fbfaf7;border-radius:8px;overflow:hidden;box-sizing:border-box;">${slides}</div>`,
       `<div class="orlo-thumbs" style="display:block;margin-top:12px;text-align:center;line-height:0;">${thumbs}</div>`,
       `</div>`,
     ].join("");
@@ -567,6 +596,35 @@
     return facts;
   }
 
+  function renderManufacturerDisclosure(config, primary) {
+    const manufacturer = config.manufacturer || {};
+    const rows = [
+      ["Name", manufacturer.name],
+      ["Land/Region", manufacturer.country],
+      ["Straße und Hausnummer", manufacturer.addressLine1],
+      ["Adresszusatz", manufacturer.addressLine2],
+      ["Ort", manufacturer.city],
+      ["PLZ", manufacturer.postalCode],
+      ["Bundesland/Provinz", manufacturer.stateOrProvince],
+      ["Telefon", manufacturer.phone],
+      ["E-Mail", manufacturer.email],
+      ["Kontakt-URL", manufacturer.contactUrl],
+    ].filter(([, value]) => String(value || "").trim());
+
+    if (!rows.length) {
+      return "";
+    }
+
+    const content = rows
+      .map(
+        ([label, value]) =>
+          `<div style="display:inline-block;width:48%;min-width:220px;box-sizing:border-box;margin:0 1% 10px 0;vertical-align:top;"><span style="display:block;color:#6b6258;font-size:12px;text-transform:uppercase;letter-spacing:.04em;">${escapeHtml(label)}</span><strong style="display:block;color:#20201d;font-size:14px;line-height:1.4;">${escapeHtml(value)}</strong></div>`,
+      )
+      .join("");
+
+    return `<details style="margin-top:24px;border:1px solid #e6ddd1;background:#fbfaf7;border-radius:8px;padding:14px 16px;"><summary style="cursor:pointer;color:${primary};font-weight:bold;font-size:16px;">Produkthersteller</summary><div style="margin-top:14px;">${content}</div></details>`;
+  }
+
   function renderListingTemplate(product, config, details) {
     const template = { ...DEFAULT_LISTING_TEMPLATE, ...(config.listingTemplate || {}) };
     const primary = cleanColor(template.primaryColor, DEFAULT_LISTING_TEMPLATE.primaryColor);
@@ -578,6 +636,7 @@
     const suffix = String(config.descriptionSuffix || "").trim();
     const images = details && details.images ? details.images : buildProductImages(product, config);
     const gallery = renderPhotoGallery(images, title, template);
+    const manufacturerBlock = renderManufacturerDisclosure(config, primary);
     const logoUrl = normalizeUrl(template.logoUrl);
     const logoBlock = logoUrl
       ? `<img src="${escapeHtml(logoUrl)}" alt="${escapeHtml(template.shopName)}" style="display:block;max-width:170px;max-height:80px;height:auto;">`
@@ -598,14 +657,14 @@
       : "";
 
     return [
-      `<div style="width:100%;max-width:980px;margin:0 auto;background:${background};color:#20201d;font-family:Arial,Helvetica,sans-serif;line-height:1.6;box-sizing:border-box;">`,
+      `<div style="width:100%;max-width:none;margin:0;background:${background};color:#20201d;font-family:Arial,Helvetica,sans-serif;line-height:1.6;box-sizing:border-box;">`,
       `<div style="padding:18px;border:1px solid #e6ddd1;background:#fff;box-sizing:border-box;">`,
       `<div style="border-bottom:1px solid #e6ddd1;padding-bottom:16px;margin-bottom:22px;">`,
       logoBlock,
       `<div style="margin-top:12px;font-size:14px;color:#5a534b;">Schneller Versand nach Zahlungseingang<br>Kuratiertes Motiv, hochwertig gedruckt</div>`,
       `</div>`,
       gallery,
-      `<div style="padding-top:4px;max-width:760px;margin:0 auto 28px;">`,
+      `<div style="padding-top:4px;max-width:1120px;margin:0 auto 28px;">`,
       `<div style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:${primary};font-weight:bold;margin-bottom:10px;">${escapeHtml(template.shopName)}</div>`,
       `<h1 style="margin:0 0 14px;font-size:28px;line-height:1.22;color:#20201d;font-family:Georgia,serif;font-weight:400;">${escapeHtml(title)}</h1>`,
       `<p style="margin:0 0 16px;color:#5a534b;font-size:16px;line-height:1.6;">${escapeHtml(template.headline)}</p>`,
@@ -614,7 +673,7 @@
         ? `<div style="margin:0 0 20px;color:#39342f;font-size:16px;line-height:1.75;">${topDescription}</div>`
         : "",
       `</div>`,
-      `<div style="margin:26px 0 24px;">${highlightBlocks}</div>`,
+      `<div style="margin:26px 0 24px;text-align:center;">${highlightBlocks}</div>`,
       `<div style="border-top:1px solid #e6ddd1;padding-top:26px;margin-top:8px;">`,
       `<div style="margin-top:24px;">`,
       `<h2 style="margin:0 0 10px;font-size:20px;color:${primary};">${escapeHtml(template.qualityTitle)}</h2>`,
@@ -624,6 +683,7 @@
       `<h2 style="margin:0 0 10px;font-size:20px;color:${primary};">${escapeHtml(template.noteTitle)}</h2>`,
       `<p style="margin:0;color:#4b463f;">${escapeHtml(template.noteText)}</p>`,
       suffixBlock,
+      manufacturerBlock,
       `</div>`,
       `</div>`,
       `<div style="margin-top:26px;padding-top:16px;border-top:1px solid #e6ddd1;color:#6b6258;font-size:13px;">${escapeHtml(template.footerText)}</div>`,
@@ -845,6 +905,9 @@
     setIfPresent(headers, row, ["ReturnsAcceptedOption"], config.returnsAcceptedOption || "ReturnsAccepted");
     setIfPresent(headers, row, ["ReturnsWithinOption"], config.returnsWithinOption || "Days_30");
     setIfPresent(headers, row, ["ShippingCostPaidByOption"], config.shippingCostPaidByOption || "Buyer");
+    setIfPresent(headers, row, ["ShippingProfileName"], config.shippingProfileName || "");
+    setIfPresent(headers, row, ["ReturnProfileName"], config.returnProfileName || "");
+    setIfPresent(headers, row, ["PaymentProfileName"], config.paymentProfileName || "");
     setIfPresent(headers, row, ["Product:Brand"], config.brand || "Atelier Orlo");
     setIfPresent(headers, row, ["Product:MPN"], config.mpn || "Nicht zutreffend");
     setIfPresent(headers, row, ["Product:EAN"], config.ean || "Nicht zutreffend");
@@ -913,10 +976,21 @@
       }
       return `C:${clean}`;
     };
+    const normalizeValue = (key, value) => {
+      const label = cleanSpecificLabel(key).toLowerCase();
+      const raw = String(value || "").trim();
+      const lower = raw.toLowerCase();
+      const replacements = {
+        material: { papier: "Papier" },
+        "authentizität": { reproduktion: "Reproduktion" },
+        authentizitaet: { reproduktion: "Reproduktion" },
+      };
+      return (replacements[label] && replacements[label][lower]) || raw;
+    };
 
     Object.entries(globalSpecifics).forEach(([key, value]) => {
       if (key && value) {
-        output[normalizeKey(key)] = value;
+        output[normalizeKey(key)] = normalizeValue(key, value);
       }
     });
 
@@ -924,7 +998,7 @@
       const value = product.tags[key];
       const outputKey = normalizeKey(tagKeyMap[key] || key);
       if (value) {
-        output[outputKey] = value;
+        output[outputKey] = normalizeValue(outputKey, value);
       }
     });
 
@@ -1020,6 +1094,9 @@
       priceAdd: 0,
       roundTo: 0,
       vatPercent: "19",
+      shippingProfileName: "",
+      returnProfileName: "",
+      paymentProfileName: "",
       manufacturer: {},
       enableInternationalShipping: false,
       shippingType: "Flat",
@@ -1182,11 +1259,11 @@
         variants.forEach((variant, index) => {
           const child = createEmptyRow(headers);
           const optionValue = variant.option1Value || "Standard";
-          setIfHeader(child, actionHeader, actionValue);
           setIfHeader(child, skuHeader, variant.sku);
           setIfHeader(child, priceHeader, formatPrice(variant.price, config));
           setIfHeader(child, quantityHeader, config.quantity);
           setIfHeader(child, upcHeader, config.upcValue || "Does not apply");
+          setIfHeader(child, conditionHeader, conditionValueFor(conditionHeader, config.conditionId));
           setIfHeader(child, relationshipHeader, "Variation");
           setIfHeader(child, relationshipDetailsHeader, buildVariationDetail(traitName, optionValue, index));
           rows.push(child);

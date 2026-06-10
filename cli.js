@@ -29,7 +29,7 @@ function usage() {
     "  node cli.js --shopify products_export_1.csv --template ebay-template.csv --out ebay-variants-add.csv --category 12345",
     "",
     "Optional:",
-    "  --quantity 3 --max-images 8 --condition 1000 --vat-percent 19 --listing-mode variants --verify-only --extra-images image1|image2 --product-extra-images handle=image1|image2 --extra-position after-main --no-c-prefix --price-multiplier 1 --price-add 0 --round-to 0",
+    "  --quantity 3 --max-images 8 --condition 1000 --vat-percent 19 --shipping-profile \"Kostenloser Versand\" --return-profile \"30 Tage Rueckgabe\" --listing-mode variants --verify-only --extra-images image1|image2 --product-extra-images handle=image1|image2 --extra-position after-main --no-c-prefix --price-multiplier 1 --price-add 0 --round-to 0",
     "  --sample 5",
   ].join("\n");
 }
@@ -88,6 +88,9 @@ function main() {
     priceAdd: Number(args["price-add"] || 0),
     roundTo: Number(args["round-to"] || 0),
     vatPercent: args["vat-percent"] || "19",
+    shippingProfileName: args["shipping-profile"] || "",
+    returnProfileName: args["return-profile"] || "",
+    paymentProfileName: args["payment-profile"] || "",
     selectedTagKeys: analysis.specificKeys,
     globalSpecifics: converter.DEFAULT_GLOBAL_SPECIFICS,
     prefixItemSpecifics: !args["no-c-prefix"],
