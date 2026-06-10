@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Atelier Orlo eBay Converter</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
@@ -101,6 +102,84 @@
           </div>
 
           <div class="section-title">
+            <h2>Listing-Design</h2>
+          </div>
+
+          <label class="toggle">
+            <input id="templateEnabled" type="checkbox" checked />
+            <span>Schöne HTML-Beschreibung verwenden</span>
+          </label>
+
+          <label class="toggle">
+            <input id="showHeroImage" type="checkbox" checked />
+            <span>Hauptbild in Beschreibung zeigen</span>
+          </label>
+
+          <div class="grid two">
+            <div class="field">
+              <label for="shopName">Shop-Name</label>
+              <input id="shopName" type="text" />
+            </div>
+            <div class="field">
+              <label for="listingHeadline">Headline</label>
+              <input id="listingHeadline" type="text" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="listingIntro">Intro für alle Listings</label>
+            <textarea id="listingIntro" rows="3"></textarea>
+          </div>
+
+          <div class="grid three">
+            <div class="field">
+              <label for="primaryColor">Hauptfarbe</label>
+              <input id="primaryColor" type="color" />
+            </div>
+            <div class="field">
+              <label for="accentColor">Akzentfarbe</label>
+              <input id="accentColor" type="color" />
+            </div>
+            <div class="field">
+              <label for="backgroundColor">Hintergrund</label>
+              <input id="backgroundColor" type="color" />
+            </div>
+          </div>
+
+          <div class="grid three">
+            <div class="field">
+              <label for="highlight1Title">Trust-Block 1</label>
+              <input id="highlight1Title" type="text" />
+              <textarea id="highlight1Text" rows="2"></textarea>
+            </div>
+            <div class="field">
+              <label for="highlight2Title">Trust-Block 2</label>
+              <input id="highlight2Title" type="text" />
+              <textarea id="highlight2Text" rows="2"></textarea>
+            </div>
+            <div class="field">
+              <label for="highlight3Title">Trust-Block 3</label>
+              <input id="highlight3Title" type="text" />
+              <textarea id="highlight3Text" rows="2"></textarea>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="qualityText">Material und Druck</label>
+            <textarea id="qualityText" rows="3"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="shippingText">Produktion und Versand</label>
+            <textarea id="shippingText" rows="3"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="noteText">Hinweis</label>
+            <textarea id="noteText" rows="3"></textarea>
+          </div>
+
+          <div class="section-title">
             <h2>Globale Merkmale</h2>
             <button id="addSpecificBtn" type="button" class="ghost">Zeile hinzufügen</button>
           </div>
@@ -191,6 +270,23 @@
         priceAdd: document.getElementById("priceAdd"),
         roundTo: document.getElementById("roundTo"),
         descriptionSuffix: document.getElementById("descriptionSuffix"),
+        templateEnabled: document.getElementById("templateEnabled"),
+        showHeroImage: document.getElementById("showHeroImage"),
+        shopName: document.getElementById("shopName"),
+        listingHeadline: document.getElementById("listingHeadline"),
+        listingIntro: document.getElementById("listingIntro"),
+        primaryColor: document.getElementById("primaryColor"),
+        accentColor: document.getElementById("accentColor"),
+        backgroundColor: document.getElementById("backgroundColor"),
+        highlight1Title: document.getElementById("highlight1Title"),
+        highlight1Text: document.getElementById("highlight1Text"),
+        highlight2Title: document.getElementById("highlight2Title"),
+        highlight2Text: document.getElementById("highlight2Text"),
+        highlight3Title: document.getElementById("highlight3Title"),
+        highlight3Text: document.getElementById("highlight3Text"),
+        qualityText: document.getElementById("qualityText"),
+        shippingText: document.getElementById("shippingText"),
+        noteText: document.getElementById("noteText"),
         globalSpecifics: document.getElementById("globalSpecifics"),
         tagSpecifics: document.getElementById("tagSpecifics"),
         previewRows: document.getElementById("previewRows"),
@@ -259,6 +355,51 @@
         return specifics;
       }
 
+      function setTemplateDefaults() {
+        const template = EbayConverter.DEFAULT_LISTING_TEMPLATE;
+        elements.templateEnabled.checked = template.enabled !== false;
+        elements.showHeroImage.checked = template.showHeroImage !== false;
+        elements.shopName.value = template.shopName || "";
+        elements.listingHeadline.value = template.headline || "";
+        elements.listingIntro.value = template.intro || "";
+        elements.primaryColor.value = template.primaryColor || "#1f4638";
+        elements.accentColor.value = template.accentColor || "#b87333";
+        elements.backgroundColor.value = template.backgroundColor || "#fbfaf7";
+        elements.highlight1Title.value = template.highlight1Title || "";
+        elements.highlight1Text.value = template.highlight1Text || "";
+        elements.highlight2Title.value = template.highlight2Title || "";
+        elements.highlight2Text.value = template.highlight2Text || "";
+        elements.highlight3Title.value = template.highlight3Title || "";
+        elements.highlight3Text.value = template.highlight3Text || "";
+        elements.qualityText.value = template.qualityText || "";
+        elements.shippingText.value = template.shippingText || "";
+        elements.noteText.value = template.noteText || "";
+      }
+
+      function collectListingTemplate() {
+        const defaults = EbayConverter.DEFAULT_LISTING_TEMPLATE;
+        return {
+          ...defaults,
+          enabled: elements.templateEnabled.checked,
+          showHeroImage: elements.showHeroImage.checked,
+          shopName: elements.shopName.value.trim(),
+          headline: elements.listingHeadline.value.trim(),
+          intro: elements.listingIntro.value.trim(),
+          primaryColor: elements.primaryColor.value,
+          accentColor: elements.accentColor.value,
+          backgroundColor: elements.backgroundColor.value,
+          highlight1Title: elements.highlight1Title.value.trim(),
+          highlight1Text: elements.highlight1Text.value.trim(),
+          highlight2Title: elements.highlight2Title.value.trim(),
+          highlight2Text: elements.highlight2Text.value.trim(),
+          highlight3Title: elements.highlight3Title.value.trim(),
+          highlight3Text: elements.highlight3Text.value.trim(),
+          qualityText: elements.qualityText.value.trim(),
+          shippingText: elements.shippingText.value.trim(),
+          noteText: elements.noteText.value.trim(),
+        };
+      }
+
       function collectConfig() {
         return {
           templateText: state.templateText,
@@ -277,6 +418,7 @@
           selectedTagKeys: Array.from(state.tagSelections),
           tagKeyMap: state.tagMappings,
           globalSpecifics: collectGlobalSpecifics(),
+          listingTemplate: collectListingTemplate(),
           includeSpecifics: true,
         };
       }
@@ -426,6 +568,7 @@
         return EbayConverter.convert([header, ...rows].join("\r\n"), config).csv;
       }
 
+      setTemplateDefaults();
       Object.entries(EbayConverter.DEFAULT_GLOBAL_SPECIFICS).forEach(([key, value]) => makeSpecificRow(key, value));
 
       elements.shopifyFile.addEventListener("change", async (event) => {
@@ -457,7 +600,27 @@
         elements.priceAdd,
         elements.roundTo,
         elements.descriptionSuffix,
+        elements.templateEnabled,
+        elements.showHeroImage,
+        elements.shopName,
+        elements.listingHeadline,
+        elements.listingIntro,
+        elements.primaryColor,
+        elements.accentColor,
+        elements.backgroundColor,
+        elements.highlight1Title,
+        elements.highlight1Text,
+        elements.highlight2Title,
+        elements.highlight2Text,
+        elements.highlight3Title,
+        elements.highlight3Text,
+        elements.qualityText,
+        elements.shippingText,
+        elements.noteText,
       ].forEach((input) => input.addEventListener("input", updateConversion));
+      [elements.templateEnabled, elements.showHeroImage].forEach((input) =>
+        input.addEventListener("change", updateConversion),
+      );
 
       elements.refreshBtn.addEventListener("click", updateConversion);
       elements.addSpecificBtn.addEventListener("click", () => makeSpecificRow("", ""));

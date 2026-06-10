@@ -36,6 +36,33 @@
     Herstellungsart: "Kunstdruck",
   };
 
+  const DEFAULT_LISTING_TEMPLATE = {
+    enabled: true,
+    shopName: "Atelier Orlo",
+    headline: "Ausgewählte Vintage-Plakatkunst als hochwertiger Kunstdruck",
+    intro:
+      "Ein ruhiges, kuratiertes Wandbild für Räume mit Charakter. Gedruckt auf mattem Premiumpapier und sorgfältig als Print-on-Demand produziert.",
+    primaryColor: "#1f4638",
+    accentColor: "#b87333",
+    backgroundColor: "#fbfaf7",
+    highlight1Title: "Premiumdruck",
+    highlight1Text: "Mattes 200 g/m² Papier mit feiner, wertiger Haptik.",
+    highlight2Title: "Kuratiertes Motiv",
+    highlight2Text: "Sorgfältig ausgewählte historische Plakatkunst.",
+    highlight3Title: "Ohne Rahmen",
+    highlight3Text: "Geliefert wird der Kunstdruck ohne Rahmen und Dekoration.",
+    qualityTitle: "Material und Druck",
+    qualityText:
+      "Gedruckt auf FSC-Premiumpapier oder gleichwertigem Papier mit matter Oberfläche. Die Farben wirken klar, ruhig und wohnlich.",
+    shippingTitle: "Produktion und Versand",
+    shippingText:
+      "Jeder Kunstdruck wird nach Bestellung produziert und sicher verpackt verschickt. Die Lieferzeit kann je nach Zielland leicht variieren.",
+    noteTitle: "Hinweis",
+    noteText:
+      "Farben können je nach Bildschirm leicht abweichen. Rahmen, Passepartout und Dekoration sind nicht Teil des Angebots.",
+    footerText: "Atelier Orlo - Vintage Poster, Plakatkunst und Kunstdrucke für besondere Räume.",
+  };
+
   const FIELD_ALIASES = {
     action: [/^Action\b/i],
     sku: [/^Custom label/i, /^CustomLabel$/i, /^SKU$/i],
@@ -288,6 +315,37 @@
       .trim();
   }
 
+  function escapeHtml(value) {
+    return String(value == null ? "" : value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function sanitizeInlineHtml(html) {
+    return stripScripts(html)
+      .replace(/<a\b[^>]*>([\s\S]*?)<\/a>/gi, "$1")
+      .replace(/\s(?:class|id|onclick|onload|onerror|style|data-[a-z0-9-]+)="[^"]*"/gi, "")
+      .replace(/\s(?:class|id|onclick|onload|onerror|style|data-[a-z0-9-]+)='[^']*'/gi, "")
+      .replace(/<(?!\/?(p|br|strong|b|em|i|ul|ol|li|h2|h3|h4)\b)[^>]+>/gi, "")
+      .trim();
+  }
+
+  function toPlainText(html) {
+    return stripScripts(html)
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<\/p>/gi, "\n")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function cleanColor(value, fallback) {
+    const color = String(value || "").trim();
+    return /^#[0-9a-f]{6}$/i.test(color) ? color : fallback;
+  }
+
   function formatPrice(raw, config) {
     const multiplier = Number(config.priceMultiplier || 1);
     const add = Number(config.priceAdd || 0);
@@ -302,6 +360,94 @@
       price = Math.ceil(price / roundTo) * roundTo;
     }
     return price.toFixed(2);
+  }
+
+  function renderFact(label, value) {
+    if (!value) {
+      return "";
+    }
+    return `<div style="border-top:1px solid #e7e1d8;padding:10px 0;"><span style="display:block;color:#6b6258;font-size:12px;text-transform:uppercase;letter-spacing:.04em;">${escapeHtml(label)}</span><strong style="display:block;color:#20201d;font-size:15px;margin-top:2px;">${escapeHtml(value)}</strong></div>`;
+  }
+
+  function renderHighlight(title, text) {
+    if (!title && !text) {
+      return "";
+    }
+    return `<div style="border:1px solid #e6ddd1;background:#fff;padding:16px;border-radius:8px;"><strong style="display:block;font-size:16px;color:#20201d;margin-bottom:6px;">${escapeHtml(title)}</strong><span style="display:block;color:#514b44;line-height:1.55;font-size:14px;">${escapeHtml(text)}</span></div>`;
+  }
+
+  function renderListingTemplate(product, config, details) {
+    const template = { ...DEFAULT_LISTING_TEMPLATE, ...(config.listingTemplate || {}) };
+    const primary = cleanColor(template.primaryColor, DEFAULT_LISTING_TEMPLATE.primaryColor);
+    const accent = cleanColor(template.accentColor, DEFAULT_LISTING_TEMPLATE.accentColor);
+    const background = cleanColor(template.backgroundColor, DEFAULT_LISTING_TEMPLATE.backgroundColor);
+    const title = cleanTitle(details && details.title ? details.title : product.title, 120);
+    const size = details && details.optionValue ? details.optionValue : "";
+    const price = details && details.price ? `${details.price} EUR` : "";
+    const artist = product.tags["Künstler"] || "";
+    const period = product.tags.Epoche || "";
+    const origin = product.tags.Herkunft || "";
+    const style = product.tags.Stil || "";
+    const theme = product.tags.Thema || "";
+    const description = sanitizeInlineHtml(product.description) || `<p>${escapeHtml(toPlainText(product.description))}</p>`;
+    const mainImage = template.showHeroImage === false ? "" : product.images[0] || "";
+    const suffix = String(config.descriptionSuffix || "").trim();
+
+    const imageBlock = mainImage
+      ? `<div style="margin:0 0 22px;"><img src="${escapeHtml(mainImage)}" alt="${escapeHtml(title)}" style="display:block;width:100%;max-width:760px;height:auto;border-radius:10px;border:1px solid #e6ddd1;margin:0 auto;"></div>`
+      : "";
+
+    const facts = [
+      renderFact("Künstler", artist),
+      renderFact("Epoche", period),
+      renderFact("Herkunft", origin),
+      renderFact("Stil", style),
+      renderFact("Thema", theme),
+      renderFact("Größe", size),
+      renderFact("Preis", price),
+    ].join("");
+
+    const suffixBlock = suffix
+      ? `<div style="margin-top:22px;padding:16px;border-left:4px solid ${accent};background:#fff7ef;color:#4b4038;line-height:1.6;">${escapeHtml(suffix).replace(/\n/g, "<br>")}</div>`
+      : "";
+
+    return [
+      `<div style="max-width:860px;margin:0 auto;background:${background};color:#20201d;font-family:Arial,Helvetica,sans-serif;line-height:1.55;">`,
+      `<div style="padding:28px 24px 24px;border:1px solid #e6ddd1;border-radius:12px;background:#fff;">`,
+      `<div style="border-bottom:3px solid ${accent};padding-bottom:16px;margin-bottom:22px;">`,
+      `<div style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:${primary};font-weight:bold;">${escapeHtml(template.shopName)}</div>`,
+      `<h1 style="margin:8px 0 8px;font-size:28px;line-height:1.2;color:#20201d;">${escapeHtml(title)}</h1>`,
+      `<p style="margin:0;color:#5a534b;font-size:16px;">${escapeHtml(template.headline)}</p>`,
+      `</div>`,
+      imageBlock,
+      `<div style="display:block;margin-bottom:22px;padding:18px;background:${background};border-radius:10px;border:1px solid #e6ddd1;">`,
+      `<p style="margin:0;color:#39342f;font-size:16px;">${escapeHtml(template.intro)}</p>`,
+      `</div>`,
+      `<div style="margin-bottom:24px;color:#39342f;font-size:16px;">${description}</div>`,
+      `<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:22px 0;">`,
+      renderHighlight(template.highlight1Title, template.highlight1Text),
+      renderHighlight(template.highlight2Title, template.highlight2Text),
+      renderHighlight(template.highlight3Title, template.highlight3Text),
+      `</div>`,
+      `<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,280px);gap:22px;margin-top:24px;">`,
+      `<div>`,
+      `<h2 style="margin:0 0 10px;font-size:20px;color:${primary};">${escapeHtml(template.qualityTitle)}</h2>`,
+      `<p style="margin:0 0 18px;color:#4b463f;">${escapeHtml(template.qualityText)}</p>`,
+      `<h2 style="margin:0 0 10px;font-size:20px;color:${primary};">${escapeHtml(template.shippingTitle)}</h2>`,
+      `<p style="margin:0 0 18px;color:#4b463f;">${escapeHtml(template.shippingText)}</p>`,
+      `<h2 style="margin:0 0 10px;font-size:20px;color:${primary};">${escapeHtml(template.noteTitle)}</h2>`,
+      `<p style="margin:0;color:#4b463f;">${escapeHtml(template.noteText)}</p>`,
+      suffixBlock,
+      `</div>`,
+      `<div style="background:#fff;border:1px solid #e6ddd1;border-radius:10px;padding:14px 16px;height:max-content;">`,
+      `<h3 style="margin:0 0 8px;font-size:17px;color:#20201d;">Details</h3>`,
+      facts || renderFact("Produktart", "Kunstdruck"),
+      `</div>`,
+      `</div>`,
+      `<div style="margin-top:26px;padding-top:16px;border-top:1px solid #e6ddd1;color:#6b6258;font-size:13px;">${escapeHtml(template.footerText)}</div>`,
+      `</div>`,
+      `</div>`,
+    ].join("");
   }
 
   function parseTags(rawTags) {
@@ -497,7 +643,12 @@
     return `${traitName}=${values.join(";")}`;
   }
 
-  function buildDescription(product, config) {
+  function buildDescription(product, config, details) {
+    const template = { ...DEFAULT_LISTING_TEMPLATE, ...(config.listingTemplate || {}) };
+    if (template.enabled !== false) {
+      return renderListingTemplate(product, config, details || {});
+    }
+
     const description = stripScripts(product.description);
     const suffix = String(config.descriptionSuffix || "").trim();
     if (description && suffix) {
@@ -524,10 +675,12 @@
       tagKeyMap: {},
       globalSpecifics: DEFAULT_GLOBAL_SPECIFICS,
       descriptionSuffix: "",
+      listingTemplate: DEFAULT_LISTING_TEMPLATE,
       includeSpecifics: true,
       prefixItemSpecifics: true,
       ...options,
     };
+    config.listingTemplate = { ...DEFAULT_LISTING_TEMPLATE, ...((options && options.listingTemplate) || {}) };
 
     const analysis = analyzeShopify(shopifyText);
     const template = parseEbayTemplate(config.templateText);
@@ -599,7 +752,15 @@
           setIfHeader(flat, quantityHeader, config.quantity);
           setIfHeader(flat, photosHeader, photos);
           setIfHeader(flat, conditionHeader, config.conditionId);
-          setIfHeader(flat, descriptionHeader, buildDescription(product, config));
+          setIfHeader(
+            flat,
+            descriptionHeader,
+            buildDescription(product, config, {
+              title: `${product.title} - ${optionValue}`,
+              optionValue,
+              price: formatPrice(variant.price, config),
+            }),
+          );
           setIfHeader(flat, formatHeader, config.format);
           Object.entries({ ...specifics, [addSpecificPrefix(traitName)]: optionValue }).forEach(([key, value]) => {
             const headerKey = addSpecificPrefix(key);
@@ -624,7 +785,14 @@
       setIfHeader(parent, upcHeader, config.upcValue);
       setIfHeader(parent, photosHeader, photos);
       setIfHeader(parent, conditionHeader, config.conditionId);
-      setIfHeader(parent, descriptionHeader, buildDescription(product, config));
+      setIfHeader(
+        parent,
+        descriptionHeader,
+        buildDescription(product, config, {
+          title: product.title,
+          price: hasVariants ? "" : formatPrice(variants[0].price, config),
+        }),
+      );
       setIfHeader(parent, formatHeader, config.format);
 
       if (hasVariants) {
@@ -687,6 +855,7 @@
   return {
     DEFAULT_GLOBAL_SPECIFICS,
     DEFAULT_HEADERS,
+    DEFAULT_LISTING_TEMPLATE,
     analyzeShopify,
     convert,
     detectDelimiter,

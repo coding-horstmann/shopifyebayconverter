@@ -9,13 +9,18 @@ Lokales Tool für Shopify-Exports von Atelier Orlo.
 1. Shopify-CSV exportieren und bei `Shopify CSV` laden.
 2. Optional die eBay-Draft-Vorlage bei `eBay Vorlage` laden.
 3. `Category ID`, Menge, Zustand, Listing-Modus und globale Merkmale setzen.
-4. Automatische Merkmale aktivieren, deaktivieren oder auf den eBay-Spaltennamen umbenennen.
-5. `CSV herunterladen` oder zuerst `Nur 5 Produkte exportieren`.
+4. Im Bereich `Listing-Design` globale Texte, Farben und Trust-Blöcke für alle eBay-Beschreibungen pflegen.
+5. Automatische Merkmale aktivieren, deaktivieren oder auf den eBay-Spaltennamen umbenennen.
+6. `CSV herunterladen` oder zuerst `Nur 5 Produkte exportieren`.
 
 Der Converter gruppiert Shopify-Zeilen nach `Handle`, übernimmt bis zu 5 Produktfotos pro Listing,
 baut Größenvarianten aus `Option1 Value` und konvertiert strukturierte Shopify-Tags wie
 `Künstler: Edward Penfield` in eBay-Merkmale. Eigene Merkmale werden standardmäßig als
 `C:Merkmal` geschrieben, weil eBay freie Merkmalsspalten sonst oft ignoriert.
+
+Die `Description`-Spalte wird standardmäßig als eBay-kompatibles HTML-Template erzeugt. Titel,
+Motivbeschreibung, Bild, Künstler, Epoche, Thema, Größe und Preis bleiben produkt- bzw. größenbezogen;
+Branding, Qualitätsversprechen, Versandhinweise und Trust-Blöcke werden global gepflegt.
 
 ## Kommandozeile
 
@@ -38,3 +43,5 @@ Mit `--no-c-prefix` werden Merkmale ohne `C:` geschrieben, wenn du eine eBay-Kat
   werden mit `|` getrennt.
 - Für die alte SMP/File-Exchange-Vorlage ist meist nur ein Bild pro Angebot zuverlässig.
 - Die eBay-Kategorie-ID sollte vor dem Upload bewusst gesetzt werden.
+- Auf Vercel kann die App über `APP_PASSWORD` geschützt werden. Der Standard-Benutzername ist
+  `atelier`; optional kann er mit `APP_USERNAME` geändert werden.
