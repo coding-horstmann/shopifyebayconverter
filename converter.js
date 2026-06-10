@@ -6,9 +6,9 @@
   }
 })(typeof self !== "undefined" ? self : this, function () {
   const DEFAULT_INFO_ROWS = [
-    "#INFO;Version=0.0.2;Template= eBay-draft-listings-template_DE;;;;;;;",
-    "#INFO Action und Category ID sind erforderliche Felder. 1) Stellen Sie Action auf Draft ein. 2) Die Kategorie-ID für Ihre Angebote finden Sie hier: https://pages.ebay.com/sellerinformation/news/categorychanges.html;;;;;;;;;",
-    "#INFO Nachdem Sie Ihren Entwurf erfolgreich im Berichte-Tab Ihres Verkäufer-Cockpit Pro heruntergeladen haben; können Sie die Entwürfe hier zu aktiven Angeboten vervollständigen: https://www.ebay.de/sh/lst/drafts;;;;;;;;;",
+    "#INFO;Version=0.0.3;Template= Atelier-Orlo-eBay-variations;;;;;;;",
+    "#INFO Fuer Varianten als Seller Hub Reports Create new listings / Add hochladen. Draft-Uploads koennen Child-Zeilen als einzelne Entwuerfe behandeln.;;;;;;;",
+    "#INFO RelationshipDetails darf keine Leerzeichen zwischen Merkmalen und Werten enthalten. Variantenwerte werden deshalb eBay-sicher normalisiert.;;;;;;;",
     "#INFO;;;;;;;;;;",
   ];
 
@@ -25,7 +25,7 @@
     "Description",
     "Format",
     "Relationship",
-    "Relationship details",
+    "RelationshipDetails",
   ];
 
   const DEFAULT_GLOBAL_SPECIFICS = {
@@ -319,6 +319,43 @@
     return compact.length > maxLength ? compact.slice(0, maxLength).trim() : compact;
   }
 
+  function asciiFold(value) {
+    return String(value || "")
+      .replace(/Ä/g, "Ae")
+      .replace(/Ö/g, "Oe")
+      .replace(/Ü/g, "Ue")
+      .replace(/ä/g, "ae")
+      .replace(/ö/g, "oe")
+      .replace(/ü/g, "ue")
+      .replace(/ß/g, "ss")
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "");
+  }
+
+  function relationshipSafeTrait(value) {
+    const normalized = asciiFold(value || "Groesse")
+      .replace(/\s+/g, "")
+      .replace(/[^a-zA-Z0-9_-]/g, "")
+      .slice(0, 40);
+    return normalized || "Groesse";
+  }
+
+  function relationshipSafeValue(value, fallback) {
+    const raw = String(value || fallback || "Standard").trim();
+    const metric = raw.match(/(\d+(?:[.,]\d+)?)\s*[x×]\s*(\d+(?:[.,]\d+)?)\s*cm/i);
+    if (metric) {
+      return `${metric[1].replace(",", ".")}x${metric[2].replace(",", ".")}cm`;
+    }
+    const normalized = asciiFold(raw)
+      .replace(/[″“”"]/g, "in")
+      .replace(/[’']/g, "")
+      .replace(/\s*\/\s*/g, "-")
+      .replace(/\s+/g, "")
+      .replace(/[^a-zA-Z0-9_.-]/g, "")
+      .slice(0, 55);
+    return normalized || "Standard";
+  }
+
   function stripScripts(html) {
     return String(html || "")
       .replace(/<script[\s\S]*?<\/script>/gi, "")
@@ -453,21 +490,21 @@
     const slides = galleryImages
       .map(
         (url, index) =>
-          `<img src="${escapeHtml(url)}" alt="${escapeHtml(title)} ${index + 1}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:${index === 0 ? "1" : "0"};animation:orloFade ${duration}s infinite;animation-delay:${index * 4}s;">`,
+          `<img src="${escapeHtml(url)}" alt="${escapeHtml(title)} ${index + 1}" style="position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain;opacity:${index === 0 ? "1" : "0"};animation:orloFade ${duration}s infinite;animation-delay:${index * 4}s;">`,
       )
       .join("");
     const thumbs = galleryImages
       .map(
         (url, index) =>
-          `<a href="${escapeHtml(url)}" target="_blank" rel="noopener" style="display:block;border:1px solid #e6ddd1;border-radius:6px;background:#fff;padding:4px;height:82px;"><img src="${escapeHtml(url)}" alt="${escapeHtml(title)} Vorschau ${index + 1}" style="display:block;width:100%;height:100%;object-fit:cover;border-radius:4px;"></a>`,
+          `<a href="${escapeHtml(url)}" target="_blank" rel="noopener" style="display:inline-block;vertical-align:top;border:1px solid #e6ddd1;border-radius:6px;background:#fff;padding:4px;margin:0 6px 8px 0;max-width:128px;"><img src="${escapeHtml(url)}" alt="${escapeHtml(title)} Vorschau ${index + 1}" style="display:block;max-width:118px;max-height:96px;width:auto;height:auto;object-fit:contain;border-radius:4px;"></a>`,
       )
       .join("");
 
     return [
-      `<style>@keyframes orloFade{0%{opacity:1}${visibleEnd}%{opacity:1}${fadeEnd}%{opacity:0}100%{opacity:0}}@media(max-width:680px){.orlo-hero{height:340px!important}.orlo-thumbs{grid-template-columns:repeat(3,1fr)!important}}</style>`,
-      `<div style="margin:0 0 28px;">`,
-      `<div class="orlo-hero" style="position:relative;width:100%;height:560px;border:1px solid #e6ddd1;background:#fbfaf7;border-radius:10px;overflow:hidden;">${slides}</div>`,
-      `<div class="orlo-thumbs" style="display:grid;grid-template-columns:repeat(${Math.min(total, 6)},minmax(0,1fr));gap:8px;margin-top:10px;">${thumbs}</div>`,
+      `<style>@keyframes orloFade{0%{opacity:1}${visibleEnd}%{opacity:1}${fadeEnd}%{opacity:0}100%{opacity:0}}</style>`,
+      `<div style="margin:0 0 24px;width:100%;box-sizing:border-box;">`,
+      `<div class="orlo-hero" style="position:relative;width:100%;height:80vw;min-height:340px;max-height:620px;max-width:760px;margin:0 auto;border:1px solid #e6ddd1;background:#fbfaf7;border-radius:8px;overflow:hidden;box-sizing:border-box;">${slides}</div>`,
+      `<div class="orlo-thumbs" style="display:block;margin-top:12px;text-align:center;line-height:0;">${thumbs}</div>`,
       `</div>`,
     ].join("");
   }
@@ -539,7 +576,6 @@
     const title = cleanTitle(details && details.title ? details.title : product.title, 120);
     const description = sanitizeInlineHtml(product.description) || `<p>${escapeHtml(toPlainText(product.description))}</p>`;
     const suffix = String(config.descriptionSuffix || "").trim();
-    const facts = buildTemplateFacts(product, config, details).map(([label, value]) => renderFact(label, value)).join("");
     const images = details && details.images ? details.images : buildProductImages(product, config);
     const gallery = renderPhotoGallery(images, title, template);
     const logoUrl = normalizeUrl(template.logoUrl);
@@ -562,29 +598,25 @@
       : "";
 
     return [
-      `<div style="max-width:1180px;margin:0 auto;background:${background};color:#20201d;font-family:Arial,Helvetica,sans-serif;line-height:1.55;">`,
-      `<div style="padding:24px 26px;border:1px solid #e6ddd1;background:#fff;">`,
-      `<div style="display:flex;align-items:center;justify-content:space-between;gap:18px;border-bottom:1px solid #e6ddd1;padding-bottom:18px;margin-bottom:26px;">`,
+      `<div style="width:100%;max-width:980px;margin:0 auto;background:${background};color:#20201d;font-family:Arial,Helvetica,sans-serif;line-height:1.6;box-sizing:border-box;">`,
+      `<div style="padding:18px;border:1px solid #e6ddd1;background:#fff;box-sizing:border-box;">`,
+      `<div style="border-bottom:1px solid #e6ddd1;padding-bottom:16px;margin-bottom:22px;">`,
       logoBlock,
-      `<div style="font-size:14px;color:#5a534b;text-align:right;">Schneller Versand nach Zahlungseingang<br>Kuratiertes Motiv, hochwertig gedruckt</div>`,
+      `<div style="margin-top:12px;font-size:14px;color:#5a534b;">Schneller Versand nach Zahlungseingang<br>Kuratiertes Motiv, hochwertig gedruckt</div>`,
       `</div>`,
-      `<div style="display:grid;grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr);gap:34px;align-items:start;">`,
-      `<div>${gallery}</div>`,
-      `<div style="padding-top:8px;">`,
+      gallery,
+      `<div style="padding-top:4px;max-width:760px;margin:0 auto 28px;">`,
       `<div style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:${primary};font-weight:bold;margin-bottom:10px;">${escapeHtml(template.shopName)}</div>`,
-      `<h1 style="margin:0 0 16px;font-size:31px;line-height:1.18;color:#20201d;font-family:Georgia,serif;font-weight:400;">${escapeHtml(title)}</h1>`,
-      `<p style="margin:0 0 18px;color:#5a534b;font-size:17px;line-height:1.6;">${escapeHtml(template.headline)}</p>`,
+      `<h1 style="margin:0 0 14px;font-size:28px;line-height:1.22;color:#20201d;font-family:Georgia,serif;font-weight:400;">${escapeHtml(title)}</h1>`,
+      `<p style="margin:0 0 16px;color:#5a534b;font-size:16px;line-height:1.6;">${escapeHtml(template.headline)}</p>`,
       `<div style="width:68px;height:3px;background:${accent};margin:0 0 22px;"></div>`,
       `<p style="margin:0 0 20px;color:#39342f;font-size:16px;line-height:1.7;">${escapeHtml(template.intro)}</p>`,
-      `<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:22px;">${facts || renderFact("Produktart", "Kunstdruck")}</div>`,
       `</div>`,
-      `</div>`,
-      `<div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:34px 0 30px;">${highlightBlocks}</div>`,
+      `<div style="margin:26px 0 24px;">${highlightBlocks}</div>`,
       `<div style="border-top:1px solid #e6ddd1;padding-top:26px;margin-top:8px;">`,
       `<h2 style="margin:0 0 14px;font-size:24px;color:${primary};font-family:Georgia,serif;font-weight:400;">Beschreibung</h2>`,
       `<div style="margin-bottom:26px;color:#39342f;font-size:16px;line-height:1.75;">${description}</div>`,
-      `<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;margin-top:24px;">`,
-      `<div style="grid-column:span 2;">`,
+      `<div style="margin-top:24px;">`,
       `<h2 style="margin:0 0 10px;font-size:20px;color:${primary};">${escapeHtml(template.qualityTitle)}</h2>`,
       `<p style="margin:0 0 18px;color:#4b463f;">${escapeHtml(template.qualityText)}</p>`,
       `<h2 style="margin:0 0 10px;font-size:20px;color:${primary};">${escapeHtml(template.shippingTitle)}</h2>`,
@@ -592,11 +624,6 @@
       `<h2 style="margin:0 0 10px;font-size:20px;color:${primary};">${escapeHtml(template.noteTitle)}</h2>`,
       `<p style="margin:0;color:#4b463f;">${escapeHtml(template.noteText)}</p>`,
       suffixBlock,
-      `</div>`,
-      `<div style="background:${background};border:1px solid #e6ddd1;border-radius:10px;padding:18px;height:max-content;">`,
-      `<h3 style="margin:0 0 12px;font-size:18px;color:#20201d;">Produktdetails</h3>`,
-      `<div style="display:grid;grid-template-columns:1fr;gap:8px;">${facts || renderFact("Produktart", "Kunstdruck")}</div>`,
-      `</div>`,
       `</div>`,
       `</div>`,
       `<div style="margin-top:26px;padding-top:16px;border-top:1px solid #e6ddd1;color:#6b6258;font-size:13px;">${escapeHtml(template.footerText)}</div>`,
@@ -839,6 +866,7 @@
       ["Manufacturer StateOrProvince", manufacturer.stateOrProvince],
       ["Manufacturer Phone", manufacturer.phone],
       ["Manufacturer Email", manufacturer.email],
+      ["Manufacturer ContactUrl", manufacturer.contactUrl],
     ].filter(([, value]) => String(value || "").trim());
   }
 
@@ -895,11 +923,42 @@
   }
 
   function buildVariationSummary(product, traitName) {
-    const values = unique(product.variants.map((variant) => variant.option1Value).filter(Boolean));
+    const safeTrait = relationshipSafeTrait(traitName);
+    const values = unique(product.variants.map((variant, index) => relationshipSafeValue(variant.option1Value, `Option${index + 1}`)).filter(Boolean));
     if (!values.length) {
       return "";
     }
-    return `${traitName}=${values.join(";")}`;
+    return `${safeTrait}=${values.join(";")}`;
+  }
+
+  function buildVariationDetail(traitName, optionValue, index) {
+    return `${relationshipSafeTrait(traitName)}=${relationshipSafeValue(optionValue, `Option${index + 1}`)}`;
+  }
+
+  function normalizeRelationshipDetailsHeader(headers) {
+    const exact = headers.find((header) => /^RelationshipDetails$/i.test(header));
+    if (exact) {
+      return exact;
+    }
+    const spacedIndex = headers.findIndex((header) => /^Relationship details$/i.test(header) || /^Relationship detail$/i.test(header));
+    if (spacedIndex >= 0) {
+      headers[spacedIndex] = "RelationshipDetails";
+      return "RelationshipDetails";
+    }
+    return ensureHeader(headers, "RelationshipDetails");
+  }
+
+  function normalizeVariantUpcHeader(headers) {
+    const exact = headers.find((header) => /^P:UPC$/i.test(header));
+    if (exact) {
+      return exact;
+    }
+    const upcIndex = headers.findIndex((header) => /^UPC$/i.test(header) || /^Product:UPC$/i.test(header));
+    if (upcIndex >= 0) {
+      headers[upcIndex] = "P:UPC";
+      return "P:UPC";
+    }
+    return ensureHeader(headers, "P:UPC");
   }
 
   function pickActionValue(actionHeader, config) {
@@ -915,8 +974,7 @@
   }
 
   function defaultRelationshipDetailsHeader(actionHeader) {
-    const header = String(actionHeader || "");
-    return /^\*Action/i.test(header) || /Version=941/i.test(header) ? "RelationshipDetails" : "Relationship details";
+    return "RelationshipDetails";
   }
 
   function buildDescription(product, config, details) {
@@ -978,7 +1036,8 @@
     const productNameHeader = findHeader(headers, "productName");
     const categoryHeader = findHeader(headers, "category") || ensureHeader(headers, "Category ID");
     const titleHeader = findHeader(headers, "title") || ensureHeader(headers, "Title");
-    const upcHeader = findHeader(headers, "upc") || ensureHeader(headers, "UPC");
+    const hasVariantMode = config.listingMode === "variants";
+    const upcHeader = hasVariantMode ? normalizeVariantUpcHeader(headers) : findHeader(headers, "upc") || ensureHeader(headers, "UPC");
     const priceHeader = findHeader(headers, "price") || ensureHeader(headers, "Price");
     const quantityHeader = findHeader(headers, "quantity") || ensureHeader(headers, "Quantity");
     const photosHeader = findHeader(headers, "photos") || ensureHeader(headers, "Item photo URL");
@@ -986,8 +1045,9 @@
     const descriptionHeader = findHeader(headers, "description") || ensureHeader(headers, "Description");
     const formatHeader = findHeader(headers, "format") || ensureHeader(headers, "Format");
     const relationshipHeader = findHeader(headers, "relationship") || ensureHeader(headers, "Relationship");
-    const relationshipDetailsHeader =
-      findHeader(headers, "relationshipDetails") || ensureHeader(headers, defaultRelationshipDetailsHeader(actionHeader));
+    const relationshipDetailsHeader = hasVariantMode
+      ? normalizeRelationshipDetailsHeader(headers)
+      : findHeader(headers, "relationshipDetails") || ensureHeader(headers, defaultRelationshipDetailsHeader(actionHeader));
     const actionValue = pickActionValue(actionHeader, config);
 
     const addSpecificPrefix = (key) => {
@@ -1077,7 +1137,7 @@
       setIfHeader(parent, productNameHeader, cleanTitle(product.title, 80));
       setIfHeader(parent, categoryHeader, config.categoryId);
       setIfHeader(parent, titleHeader, cleanTitle(product.title, 80));
-      setIfHeader(parent, upcHeader, config.upcValue);
+      setIfHeader(parent, upcHeader, hasVariants ? "" : config.upcValue);
       setIfHeader(parent, photosHeader, photos);
       setIfHeader(parent, conditionHeader, conditionValueFor(conditionHeader, config.conditionId));
       setIfHeader(
@@ -1109,17 +1169,16 @@
       rows.push(parent);
 
       if (hasVariants) {
-        variants.forEach((variant) => {
+        variants.forEach((variant, index) => {
           const child = createEmptyRow(headers);
           const optionValue = variant.option1Value || "Standard";
           setIfHeader(child, actionHeader, actionValue);
           setIfHeader(child, skuHeader, variant.sku);
           setIfHeader(child, priceHeader, formatPrice(variant.price, config));
           setIfHeader(child, quantityHeader, config.quantity);
-          setIfHeader(child, upcHeader, config.upcValue);
-          setIfHeader(child, conditionHeader, conditionValueFor(conditionHeader, config.conditionId));
+          setIfHeader(child, upcHeader, config.upcValue || "Does not apply");
           setIfHeader(child, relationshipHeader, "Variation");
-          setIfHeader(child, relationshipDetailsHeader, `${traitName}=${optionValue}`);
+          setIfHeader(child, relationshipDetailsHeader, buildVariationDetail(traitName, optionValue, index));
           rows.push(child);
         });
       }

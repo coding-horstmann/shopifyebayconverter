@@ -26,7 +26,7 @@ function parseArgs(argv) {
 function usage() {
   return [
     "Usage:",
-    "  node cli.js --shopify products_export_1.csv --template ebay-template.csv --out ebay-drafts.csv --category 12345",
+    "  node cli.js --shopify products_export_1.csv --template ebay-template.csv --out ebay-variants-add.csv --category 12345",
     "",
     "Optional:",
     "  --quantity 3 --max-images 8 --condition 1000 --listing-mode variants --verify-only --extra-images image1|image2 --product-extra-images handle=image1|image2 --extra-position after-main --no-c-prefix --price-multiplier 1 --price-add 0 --round-to 0",

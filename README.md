@@ -17,12 +17,14 @@ Lokales und Vercel-taugliches Tool für Shopify-Exports von Atelier Orlo. Ziel i
 
 ## eBay-Varianten
 
+Wichtig: Varianten bitte bei eBay als Seller-Hub-Reports `Create new listings` / `Add` Upload testen, nicht als reinen Draft-Upload. Der Draft-Import kann Parent-Zeilen als Entwürfe anlegen und Child-Zeilen als eigene fehlerhafte Entwürfe behandeln. Genau dann entstehen sichtbare Listings ohne Varianten.
+
 Der Standard ist `1 Listing mit Größenvarianten`. Der Converter gruppiert Shopify-Zeilen nach `Handle` und erzeugt:
 
 - eine Parent-Zeile pro Shopify-Produkt mit Titel, Beschreibung, Kategorie, Fotos und allgemeinen Artikelmerkmalen
-- darunter Child-Zeilen mit `Relationship=Variation`, `RelationshipDetails=Größe=...`, Preis, Menge, SKU und Condition ID
+- darunter Child-Zeilen mit `Relationship=Variation`, `RelationshipDetails=Groesse=...`, `P:UPC=Does not apply`, Preis, Menge und SKU
 
-Für die alte SMP/File-Exchange-Vorlage wird die Spalte `RelationshipDetails` ohne Leerzeichen ergänzt. Für moderne Seller-Hub-Vorlagen wird ein vorhandenes `Relationship details` weiterverwendet.
+Die Spalte wird konsequent als `RelationshipDetails` ohne Leerzeichen geschrieben. Variantenwerte werden eBay-sicher normalisiert, also z. B. `30x45 cm / 12x18″` zu `30x45cm`. eBay dokumentiert, dass in `RelationshipDetails` keine Leerzeichen zwischen Merkmalen und Werten stehen dürfen.
 
 Der Flat-Modus bleibt nur als Fallback erhalten und erzeugt bewusst ein eigenes eBay-Angebot pro Größe.
 
@@ -42,17 +44,17 @@ Die Zusatzfotos können vor allen Shopify-Bildern, nach dem Hauptbild oder am En
 
 Strukturierte Shopify-Tags wie `Künstler: ...`, `Epoche: ...` und Shopify-Metafelder wie Material, Finish, Rahmenstil, Ausrichtung und Kunststil werden als auswählbare eBay-Artikelmerkmale erkannt. Eigene globale Merkmale werden auf alle Listings angewendet.
 
-Die HTML-Beschreibung wiederholt die ausgewählten Artikelmerkmale zusätzlich sichtbar in einer Detailbox. So stehen wichtige Informationen nicht nur als eBay-Suchmerkmale, sondern auch im Listingtext.
+Die Artikelmerkmale werden als echte eBay-Merkmale geschrieben. Die HTML-Beschreibung wiederholt sie nicht mehr als eigene Produktdetailbox, damit eBay-Artikelmerkmale und Verkäuferbeschreibung nicht doppelt wirken.
 
 ## HTML-Beschreibung
 
-Die Beschreibung nutzt ein breiteres Template mit Logo, automatischem CSS-Bildkarussell, Thumbnail-Vorschau, Produktdetails als Grid und fünf Icon-/Trust-Blöcken. Das funktioniert ohne JavaScript. Falls eBay einzelne CSS-Animationen entfernt, bleiben die Bilder weiterhin als normale Bilder in der Beschreibung und in der eBay-Fotospalte vorhanden.
+Die Beschreibung nutzt ein mobiles Ein-Spalten-Template mit Logo, CSS-Bildkarussell, Thumbnail-Vorschau mit echtem Bildverhältnis und fünf Icon-/Trust-Blöcken. Das funktioniert ohne JavaScript. Falls eBay einzelne CSS-Animationen entfernt, bleibt das erste Bild sichtbar und alle Bilder stehen weiterhin als Links/Thumbnails sowie in der eBay-Fotospalte.
 
 Für Logos und Icons sind öffentlich abrufbare HTTPS-URLs am zuverlässigsten. Datei-Uploads im Dashboard werden als Data-URL eingebettet, können aber je nach eBay-HTML-Filter weniger robust sein.
 
 ## Hersteller und EU-Versand
 
-Herstellerdaten werden als GPSR-kompatible Spalten ergänzt, z. B. `Manufacturer Name`, `Manufacturer AddressLine1`, `Manufacturer City`, `Manufacturer Country`, `Manufacturer PostalCode`, `Manufacturer Phone` und `Manufacturer Email`.
+Herstellerdaten werden als GPSR-kompatible Spalten ergänzt, z. B. `Manufacturer Name`, `Manufacturer AddressLine1`, `Manufacturer City`, `Manufacturer Country`, `Manufacturer PostalCode`, `Manufacturer StateOrProvince`, `Manufacturer Phone`, `Manufacturer Email` und `Manufacturer ContactUrl`.
 
 Optional können internationale Versandspalten ergänzt werden: `IntlShippingService-1:Option`, `IntlShippingService-1:Cost`, `IntlShippingService-1:Priority` und `IntlShippingService-1:Locations`. Der Versandservice-Code muss zu deinem eBay-Konto bzw. deiner Vorlage passen.
 

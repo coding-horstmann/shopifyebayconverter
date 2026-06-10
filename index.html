@@ -12,7 +12,7 @@
       <header class="topbar">
         <div>
           <p class="eyebrow">Atelier Orlo</p>
-          <h1>Shopify zu eBay Draft CSV</h1>
+          <h1>Shopify zu eBay Varianten CSV</h1>
         </div>
         <div class="actions">
           <button id="refreshBtn" type="button">Vorschau aktualisieren</button>
@@ -272,6 +272,10 @@
               <input id="manufacturerPostalCode" type="text" />
             </div>
           </div>
+          <div class="field">
+            <label for="manufacturerStateOrProvince">Bundesland/Provinz</label>
+            <input id="manufacturerStateOrProvince" type="text" />
+          </div>
           <div class="grid two">
             <div class="field">
               <label for="manufacturerPhone">Telefon</label>
@@ -281,6 +285,10 @@
               <label for="manufacturerEmail">E-Mail</label>
               <input id="manufacturerEmail" type="email" />
             </div>
+          </div>
+          <div class="field">
+            <label for="manufacturerContactUrl">Kontakt-URL</label>
+            <input id="manufacturerContactUrl" type="url" placeholder="https://..." />
           </div>
 
           <div class="section-title">
@@ -437,8 +445,10 @@
         manufacturerAddressLine2: document.getElementById("manufacturerAddressLine2"),
         manufacturerCity: document.getElementById("manufacturerCity"),
         manufacturerPostalCode: document.getElementById("manufacturerPostalCode"),
+        manufacturerStateOrProvince: document.getElementById("manufacturerStateOrProvince"),
         manufacturerPhone: document.getElementById("manufacturerPhone"),
         manufacturerEmail: document.getElementById("manufacturerEmail"),
+        manufacturerContactUrl: document.getElementById("manufacturerContactUrl"),
         enableInternationalShipping: document.getElementById("enableInternationalShipping"),
         internationalShippingService: document.getElementById("internationalShippingService"),
         internationalShippingCost: document.getElementById("internationalShippingCost"),
@@ -611,8 +621,10 @@
             addressLine2: elements.manufacturerAddressLine2.value.trim(),
             city: elements.manufacturerCity.value.trim(),
             postalCode: elements.manufacturerPostalCode.value.trim(),
+            stateOrProvince: elements.manufacturerStateOrProvince.value.trim(),
             phone: elements.manufacturerPhone.value.trim(),
             email: elements.manufacturerEmail.value.trim(),
+            contactUrl: elements.manufacturerContactUrl.value.trim(),
           },
           enableInternationalShipping: elements.enableInternationalShipping.checked,
           internationalShippingService: elements.internationalShippingService.value.trim(),
@@ -846,8 +858,10 @@
         elements.manufacturerAddressLine2,
         elements.manufacturerCity,
         elements.manufacturerPostalCode,
+        elements.manufacturerStateOrProvince,
         elements.manufacturerPhone,
         elements.manufacturerEmail,
+        elements.manufacturerContactUrl,
         elements.enableInternationalShipping,
         elements.internationalShippingService,
         elements.internationalShippingCost,
@@ -873,12 +887,12 @@
       });
       elements.downloadBtn.addEventListener("click", () => {
         if (state.result) {
-          downloadCsv(state.result.csv, "atelier-orlo-ebay-drafts.csv");
+          downloadCsv(state.result.csv, "atelier-orlo-ebay-variants-add.csv");
         }
       });
       elements.sampleBtn.addEventListener("click", () => {
         if (state.shopifyText) {
-          downloadCsv(createSampleCsv(), "atelier-orlo-ebay-drafts-test-5.csv");
+          downloadCsv(createSampleCsv(), "atelier-orlo-ebay-variants-test-5.csv");
         }
       });
     </script>
