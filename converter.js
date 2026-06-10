@@ -6,9 +6,9 @@
   }
 })(typeof self !== "undefined" ? self : this, function () {
   const DEFAULT_INFO_ROWS = [
-    "#INFO;Version=0.0.3;Template= Atelier-Orlo-eBay-variations;;;;;;;",
-    "#INFO Fuer Varianten als Seller Hub Reports Create new listings / Add hochladen. Draft-Uploads koennen Child-Zeilen als einzelne Entwuerfe behandeln.;;;;;;;",
-    "#INFO RelationshipDetails darf keine Leerzeichen zwischen Merkmalen und Werten enthalten. Variantenwerte werden deshalb eBay-sicher normalisiert.;;;;;;;",
+    "#INFO;Version=0.0.2;Template= eBay-draft-listings-template_DE;;;;;;;",
+    "#INFO Action und Category ID sind erforderliche Felder. 1) Stellen Sie Action auf Draft ein. 2) Die Kategorie-ID für Ihre Angebote finden Sie hier: https://pages.ebay.com/sellerinformation/news/categorychanges.html;;;;;;;;;",
+    "#INFO Nachdem Sie Ihren Entwurf erfolgreich im Berichte-Tab Ihres Verkäufer-Cockpit Pro heruntergeladen haben; können Sie die Entwürfe hier zu aktiven Angeboten vervollständigen: https://www.ebay.de/sh/lst/drafts;;;;;;;;;",
     "#INFO;;;;;;;;;;",
   ];
 
@@ -41,8 +41,7 @@
     shopName: "Atelier Orlo",
     logoUrl: "",
     headline: "Ausgewählte Vintage-Plakatkunst als hochwertiger Kunstdruck",
-    intro:
-      "Ein ruhiges, kuratiertes Wandbild für Räume mit Charakter. Gedruckt auf mattem Premiumpapier und sorgfältig als Print-on-Demand produziert.",
+    intro: "",
     primaryColor: "#1f4638",
     accentColor: "#b87333",
     backgroundColor: "#fbfaf7",
@@ -227,7 +226,7 @@
 
     return {
       delimiter,
-      infoRows: infoRows.length ? infoRows : DEFAULT_INFO_ROWS.slice(),
+      infoRows,
       headers: headers.length ? headers : DEFAULT_HEADERS.slice(),
     };
   }
@@ -575,6 +574,7 @@
     const background = cleanColor(template.backgroundColor, DEFAULT_LISTING_TEMPLATE.backgroundColor);
     const title = cleanTitle(details && details.title ? details.title : product.title, 120);
     const description = sanitizeInlineHtml(product.description) || `<p>${escapeHtml(toPlainText(product.description))}</p>`;
+    const topDescription = description || (template.intro ? `<p>${escapeHtml(template.intro)}</p>` : "");
     const suffix = String(config.descriptionSuffix || "").trim();
     const images = details && details.images ? details.images : buildProductImages(product, config);
     const gallery = renderPhotoGallery(images, title, template);
@@ -610,12 +610,12 @@
       `<h1 style="margin:0 0 14px;font-size:28px;line-height:1.22;color:#20201d;font-family:Georgia,serif;font-weight:400;">${escapeHtml(title)}</h1>`,
       `<p style="margin:0 0 16px;color:#5a534b;font-size:16px;line-height:1.6;">${escapeHtml(template.headline)}</p>`,
       `<div style="width:68px;height:3px;background:${accent};margin:0 0 22px;"></div>`,
-      `<p style="margin:0 0 20px;color:#39342f;font-size:16px;line-height:1.7;">${escapeHtml(template.intro)}</p>`,
+      topDescription
+        ? `<div style="margin:0 0 20px;color:#39342f;font-size:16px;line-height:1.75;">${topDescription}</div>`
+        : "",
       `</div>`,
       `<div style="margin:26px 0 24px;">${highlightBlocks}</div>`,
       `<div style="border-top:1px solid #e6ddd1;padding-top:26px;margin-top:8px;">`,
-      `<h2 style="margin:0 0 14px;font-size:24px;color:${primary};font-family:Georgia,serif;font-weight:400;">Beschreibung</h2>`,
-      `<div style="margin-bottom:26px;color:#39342f;font-size:16px;line-height:1.75;">${description}</div>`,
       `<div style="margin-top:24px;">`,
       `<h2 style="margin:0 0 10px;font-size:20px;color:${primary};">${escapeHtml(template.qualityTitle)}</h2>`,
       `<p style="margin:0 0 18px;color:#4b463f;">${escapeHtml(template.qualityText)}</p>`,
@@ -883,12 +883,21 @@
     ].filter(([, value]) => String(value || "").trim());
   }
 
+  function vatEntries(config) {
+    const vatPercent = String(config.vatPercent == null ? "" : config.vatPercent).trim();
+    return vatPercent ? [["VATPercent", vatPercent]] : [];
+  }
+
   function mergeOperationalHeaders(headers, config) {
-    [...manufacturerEntries(config), ...internationalShippingEntries(config)].forEach(([header]) => ensureHeader(headers, header));
+    [...vatEntries(config), ...manufacturerEntries(config), ...internationalShippingEntries(config)].forEach(([header]) =>
+      ensureHeader(headers, header),
+    );
   }
 
   function applyOperationalFields(row, config) {
-    [...manufacturerEntries(config), ...internationalShippingEntries(config)].forEach(([header, value]) => setIfHeader(row, header, value));
+    [...vatEntries(config), ...manufacturerEntries(config), ...internationalShippingEntries(config)].forEach(([header, value]) =>
+      setIfHeader(row, header, value),
+    );
   }
 
   function makeSpecifics(product, config) {
@@ -1010,6 +1019,7 @@
       priceMultiplier: 1,
       priceAdd: 0,
       roundTo: 0,
+      vatPercent: "19",
       manufacturer: {},
       enableInternationalShipping: false,
       shippingType: "Flat",

@@ -132,6 +132,11 @@
           </div>
 
           <div class="field">
+            <label for="vatPercent">MwSt. in Prozent</label>
+            <input id="vatPercent" type="number" min="0" max="100" step="0.01" value="19" />
+          </div>
+
+          <div class="field">
             <label for="descriptionSuffix">Beschreibung Zusatz</label>
             <textarea id="descriptionSuffix" rows="4" placeholder="Optionaler Text für alle Listings"></textarea>
           </div>
@@ -410,6 +415,7 @@
         priceMultiplier: document.getElementById("priceMultiplier"),
         priceAdd: document.getElementById("priceAdd"),
         roundTo: document.getElementById("roundTo"),
+        vatPercent: document.getElementById("vatPercent"),
         descriptionSuffix: document.getElementById("descriptionSuffix"),
         templateEnabled: document.getElementById("templateEnabled"),
         showHeroImage: document.getElementById("showHeroImage"),
@@ -613,6 +619,7 @@
           priceMultiplier: Number(elements.priceMultiplier.value || 1),
           priceAdd: Number(elements.priceAdd.value || 0),
           roundTo: Number(elements.roundTo.value || 0),
+          vatPercent: elements.vatPercent.value.trim() || "19",
           descriptionSuffix: elements.descriptionSuffix.value,
           manufacturer: {
             name: elements.manufacturerName.value.trim(),
@@ -824,6 +831,7 @@
         elements.priceMultiplier,
         elements.priceAdd,
         elements.roundTo,
+        elements.vatPercent,
         elements.descriptionSuffix,
         elements.templateEnabled,
         elements.showHeroImage,

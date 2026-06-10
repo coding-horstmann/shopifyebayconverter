@@ -7,8 +7,8 @@ Lokales und Vercel-taugliches Tool für Shopify-Exports von Atelier Orlo. Ziel i
 Öffne die App im Browser und wähle:
 
 1. Shopify-CSV bei `Shopify CSV` laden.
-2. Optional eine eBay-SMP/File-Exchange-Vorlage bei `eBay Vorlage` laden.
-3. `Category ID`, Bestand je Größe, Artikelzustand, Bilderzahl und Listing-Modus setzen.
+2. Eine eBay-SMP/File-Exchange-Vorlage bei `eBay Vorlage` laden, wenn eBay sonst meldet, dass die Vorlage nicht identifiziert werden konnte.
+3. `Category ID`, Bestand je Größe, Artikelzustand, MwSt., Bilderzahl und Listing-Modus setzen.
 4. Zusatzfotos global oder produkt-spezifisch per Shopify-Handle ergänzen und die Position festlegen.
 5. Im Bereich `Listing-Design` Logo, globale Texte, Farben und Icon-Blöcke für alle eBay-Beschreibungen pflegen.
 6. Herstellerdaten und optionale internationale Versandspalten setzen.
@@ -28,6 +28,8 @@ Die Spalte wird konsequent als `RelationshipDetails` ohne Leerzeichen geschriebe
 
 Der Flat-Modus bleibt nur als Fallback erhalten und erzeugt bewusst ein eigenes eBay-Angebot pro Größe.
 
+Wenn eine eBay-Vorlage hochgeladen wird, bleibt deren erste Zeile unverändert die erste Zeile im Export. Ohne Vorlage nutzt der Converter die eBay-Draft-Template-Kennung als Fallback.
+
 ## Fotos
 
 Der Converter übernimmt standardmäßig bis zu 8 Bilder pro Parent-Listing und schreibt sie in `PicURL` bzw. `Item photo URL`, getrennt mit `|`. Damit landen die Produktfotos direkt in der eBay-Datei, sofern eBay die Bild-URLs abrufen kann.
@@ -46,9 +48,13 @@ Strukturierte Shopify-Tags wie `Künstler: ...`, `Epoche: ...` und Shopify-Metaf
 
 Die Artikelmerkmale werden als echte eBay-Merkmale geschrieben. Die HTML-Beschreibung wiederholt sie nicht mehr als eigene Produktdetailbox, damit eBay-Artikelmerkmale und Verkäuferbeschreibung nicht doppelt wirken.
 
+Die MwSt. wird standardmäßig als `VATPercent=19` geschrieben.
+
 ## HTML-Beschreibung
 
 Die Beschreibung nutzt ein mobiles Ein-Spalten-Template mit Logo, CSS-Bildkarussell, Thumbnail-Vorschau mit echtem Bildverhältnis und fünf Icon-/Trust-Blöcken. Das funktioniert ohne JavaScript. Falls eBay einzelne CSS-Animationen entfernt, bleibt das erste Bild sichtbar und alle Bilder stehen weiterhin als Links/Thumbnails sowie in der eBay-Fotospalte.
+
+Die Shopify-Beschreibung steht im Template direkt oben unter Titel und Headline. Der frühere generische Intro-Satz wird nicht mehr ausgegeben.
 
 Für Logos und Icons sind öffentlich abrufbare HTTPS-URLs am zuverlässigsten. Datei-Uploads im Dashboard werden als Data-URL eingebettet, können aber je nach eBay-HTML-Filter weniger robust sein.
 
@@ -67,6 +73,7 @@ node .\cli.js `
   --out ".\out\atelier-orlo-ebay-variants.csv" `
   --category 28009 `
   --quantity 3 `
+  --vat-percent 19 `
   --max-images 8
 ```
 
