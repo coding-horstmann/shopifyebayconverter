@@ -57,6 +57,23 @@ button.primary {
   color: #fff;
 }
 
+.logout-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.logout-link:hover {
+  border-color: #bdb9ad;
+  color: var(--ink);
+}
+
 button.ghost {
   background: transparent;
 }

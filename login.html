@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Login | Atelier Orlo eBay Converter</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #20201d;
+        --muted: #6f706a;
+        --line: #d8d6cf;
+        --accent: #1f4638;
+        --gold: #b87333;
+        --bg: #f6f3ef;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background:
+          radial-gradient(circle at 15% 15%, rgba(184, 115, 51, 0.14), transparent 28rem),
+          linear-gradient(135deg, #fbfaf7, var(--bg));
+        color: var(--ink);
+        padding: 22px;
+      }
+
+      .login {
+        width: min(440px, 100%);
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        box-shadow: 0 20px 56px rgba(38, 36, 30, 0.12);
+        padding: 28px;
+      }
+
+      .brand {
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        margin-bottom: 22px;
+      }
+
+      .brand img {
+        width: 48px;
+        height: 48px;
+      }
+
+      h1 {
+        font-size: 24px;
+        line-height: 1.15;
+        margin: 0 0 4px;
+        letter-spacing: 0;
+      }
+
+      p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      form {
+        display: grid;
+        gap: 14px;
+      }
+
+      label {
+        display: grid;
+        gap: 7px;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      input {
+        width: 100%;
+        min-height: 44px;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        padding: 9px 11px;
+        font: inherit;
+        color: var(--ink);
+      }
+
+      input:focus {
+        border-color: var(--accent);
+        outline: 3px solid rgba(31, 70, 56, 0.12);
+      }
+
+      button {
+        min-height: 44px;
+        border: 1px solid var(--accent);
+        border-radius: 7px;
+        background: var(--accent);
+        color: #fff;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .hint {
+        border-left: 4px solid var(--gold);
+        padding: 10px 12px;
+        background: #fff7ef;
+        color: #5f4530;
+        border-radius: 6px;
+        font-size: 13px;
+        line-height: 1.45;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="login">
+      <div class="brand">
+        <img src="./favicon.svg" alt="" />
+        <div>
+          <h1>Atelier Orlo Converter</h1>
+          <p>Geschützter Zugang</p>
+        </div>
+      </div>
+
+      <form action="/api/login" method="post">
+        <input id="next" name="next" type="hidden" value="/" />
+        <label>
+          Benutzername
+          <input name="username" autocomplete="username" value="atelier" required />
+        </label>
+        <label>
+          Passwort
+          <input name="password" type="password" autocomplete="current-password" required autofocus />
+        </label>
+        <button type="submit">Einloggen</button>
+      </form>
+
+      <p class="hint" id="error" hidden>Login fehlgeschlagen. Bitte Benutzername und Passwort prüfen.</p>
+    </main>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      document.getElementById("next").value = params.get("next") || "/";
+      document.getElementById("error").hidden = params.get("error") !== "1";
+    </script>
+  </body>
+</html>

@@ -4,7 +4,7 @@
   "private": true,
   "description": "Local Shopify CSV to eBay Draft CSV converter for Atelier Orlo.",
   "dependencies": {
-    "@vercel/functions": "latest"
+    "@vercel/functions": "^3.6.3"
   },
   "scripts": {
     "check": "node --check converter.js && node --check cli.js"

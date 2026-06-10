@@ -64,8 +64,9 @@
   };
 
   const FIELD_ALIASES = {
-    action: [/^Action\b/i],
+    action: [/^\*?Action\b/i, /^\*?Action\(/i],
     sku: [/^Custom label/i, /^CustomLabel$/i, /^SKU$/i],
+    productName: [/^\*?ProductName$/i, /^Product Name$/i],
     category: [/^Category ID$/i, /^\*?Category$/i],
     title: [/^\*?Title$/i],
     upc: [/^UPC$/i, /^P:UPC$/i, /^Product:UPC$/i],
@@ -376,36 +377,79 @@
     return `<div style="border:1px solid #e6ddd1;background:#fff;padding:16px;border-radius:8px;"><strong style="display:block;font-size:16px;color:#20201d;margin-bottom:6px;">${escapeHtml(title)}</strong><span style="display:block;color:#514b44;line-height:1.55;font-size:14px;">${escapeHtml(text)}</span></div>`;
   }
 
+  function cleanSpecificLabel(label) {
+    return String(label || "")
+      .replace(/^C:/i, "")
+      .trim();
+  }
+
+  function pushFact(facts, seen, label, value) {
+    const cleanLabel = cleanSpecificLabel(label);
+    const cleanValue = String(value || "").trim();
+    const key = cleanLabel.toLowerCase();
+    if (!cleanLabel || !cleanValue || seen.has(key)) {
+      return;
+    }
+    seen.add(key);
+    facts.push([cleanLabel, cleanValue]);
+  }
+
+  function buildTemplateFacts(product, config, details) {
+    const facts = [];
+    const seen = new Set();
+    const specifics = makeSpecifics(product, config);
+    const preferredOrder = [
+      "Produktart",
+      "Material",
+      "Materialinfo",
+      "Rahmung",
+      "Rahmenstil",
+      "Kunststil",
+      "Stil",
+      "Thema",
+      "Künstler",
+      "Epoche",
+      "Authentizität",
+      "Finish",
+      "Ausrichtung",
+      "Farbe",
+      "Herstellungsart",
+      "Marke",
+      "Zustand",
+    ];
+
+    if (details && details.optionValue) {
+      pushFact(facts, seen, config.variationTraitName || product.option1Name || "Größe", details.optionValue);
+    }
+    if (details && details.price) {
+      pushFact(facts, seen, "Preis", `${details.price} EUR`);
+    }
+
+    preferredOrder.forEach((preferred) => {
+      const match = Object.entries(specifics).find(([key]) => cleanSpecificLabel(key).toLowerCase() === preferred.toLowerCase());
+      if (match) {
+        pushFact(facts, seen, match[0], match[1]);
+      }
+    });
+
+    Object.entries(specifics).forEach(([label, value]) => pushFact(facts, seen, label, value));
+    return facts;
+  }
+
   function renderListingTemplate(product, config, details) {
     const template = { ...DEFAULT_LISTING_TEMPLATE, ...(config.listingTemplate || {}) };
     const primary = cleanColor(template.primaryColor, DEFAULT_LISTING_TEMPLATE.primaryColor);
     const accent = cleanColor(template.accentColor, DEFAULT_LISTING_TEMPLATE.accentColor);
     const background = cleanColor(template.backgroundColor, DEFAULT_LISTING_TEMPLATE.backgroundColor);
     const title = cleanTitle(details && details.title ? details.title : product.title, 120);
-    const size = details && details.optionValue ? details.optionValue : "";
-    const price = details && details.price ? `${details.price} EUR` : "";
-    const artist = product.tags["Künstler"] || "";
-    const period = product.tags.Epoche || "";
-    const origin = product.tags.Herkunft || "";
-    const style = product.tags.Stil || "";
-    const theme = product.tags.Thema || "";
     const description = sanitizeInlineHtml(product.description) || `<p>${escapeHtml(toPlainText(product.description))}</p>`;
     const mainImage = template.showHeroImage === false ? "" : product.images[0] || "";
     const suffix = String(config.descriptionSuffix || "").trim();
+    const facts = buildTemplateFacts(product, config, details).map(([label, value]) => renderFact(label, value)).join("");
 
     const imageBlock = mainImage
       ? `<div style="margin:0 0 22px;"><img src="${escapeHtml(mainImage)}" alt="${escapeHtml(title)}" style="display:block;width:100%;max-width:760px;height:auto;border-radius:10px;border:1px solid #e6ddd1;margin:0 auto;"></div>`
       : "";
-
-    const facts = [
-      renderFact("Künstler", artist),
-      renderFact("Epoche", period),
-      renderFact("Herkunft", origin),
-      renderFact("Stil", style),
-      renderFact("Thema", theme),
-      renderFact("Größe", size),
-      renderFact("Preis", price),
-    ].join("");
 
     const suffixBlock = suffix
       ? `<div style="margin-top:22px;padding:16px;border-left:4px solid ${accent};background:#fff7ef;color:#4b4038;line-height:1.6;">${escapeHtml(suffix).replace(/\n/g, "<br>")}</div>`
@@ -483,6 +527,36 @@
     return result;
   }
 
+  function humanizeValue(value) {
+    return String(value || "")
+      .replace(/^gid:\/\/shopify\/TaxonomyValue\//i, "")
+      .replace(/-/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function applyShopifyMetafields(records, tags) {
+    const fieldMap = [
+      ["Kunststil (product.metafields.shopify.art-style)", "Kunststil"],
+      ["Authentizität des Kunstwerks (product.metafields.shopify.artwork-authenticity)", "Authentizität"],
+      ["Farbe (product.metafields.shopify.color-pattern)", "Farbe"],
+      ["Finish (product.metafields.shopify.finish)", "Finish"],
+      ["Rahmenstil (product.metafields.shopify.frame-style)", "Rahmenstil"],
+      ["Material (product.metafields.shopify.material)", "Material"],
+      ["Ausrichtung (product.metafields.shopify.orientation)", "Ausrichtung"],
+      ["material_info (product.metafields.taxonomy_backup.material_info)", "Materialinfo"],
+      ["Google Shopping / MPN", "MPN"],
+      ["Google Shopping / Condition", "Zustand"],
+    ];
+
+    fieldMap.forEach(([source, target]) => {
+      const value = humanizeValue(firstValue(records, source));
+      if (value && !tags[target]) {
+        tags[target] = value;
+      }
+    });
+  }
+
   function groupShopifyProducts(shopifyRows) {
     const groups = new Map();
     shopifyRows.forEach((row, index) => {
@@ -531,6 +605,7 @@
       if (materialText && !tags.Material) {
         tags.Material = materialText;
       }
+      applyShopifyMetafields(records, tags);
 
       return {
         handle,
@@ -604,6 +679,43 @@
     }
   }
 
+  function findExactHeader(headers, names) {
+    return headers.find((header) => names.some((name) => header.toLowerCase() === name.toLowerCase())) || null;
+  }
+
+  function setIfPresent(headers, row, names, value) {
+    const header = findExactHeader(headers, names);
+    if (header && (row[header] == null || row[header] === "")) {
+      row[header] = value == null ? "" : value;
+    }
+  }
+
+  function conditionValueFor(header, value) {
+    const raw = String(value || "").trim();
+    if (/^\*?Condition\s*ID$/i.test(String(header || "")) && /^NEW$/i.test(raw)) {
+      return "1000";
+    }
+    return raw;
+  }
+
+  function applyTemplateDefaults(headers, row, config) {
+    setIfPresent(headers, row, ["*Duration", "Duration"], config.duration || "GTC");
+    setIfPresent(headers, row, ["ImmediatePayRequired"], config.immediatePayRequired || "1");
+    setIfPresent(headers, row, ["*Location", "Location"], config.location || "Deutschland");
+    setIfPresent(headers, row, ["GalleryType"], config.galleryType || "Gallery");
+    setIfPresent(headers, row, ["DispatchTimeMax"], config.dispatchTimeMax || "3");
+    setIfPresent(headers, row, ["ReturnsAcceptedOption"], config.returnsAcceptedOption || "ReturnsAccepted");
+    setIfPresent(headers, row, ["ReturnsWithinOption"], config.returnsWithinOption || "Days_30");
+    setIfPresent(headers, row, ["ShippingCostPaidByOption"], config.shippingCostPaidByOption || "Buyer");
+    setIfPresent(headers, row, ["Product:Brand"], config.brand || "Atelier Orlo");
+    setIfPresent(headers, row, ["Product:MPN"], config.mpn || "Nicht zutreffend");
+    setIfPresent(headers, row, ["Product:EAN"], config.ean || "Nicht zutreffend");
+    setIfPresent(headers, row, ["Product:UPC"], config.upcValue || "Nicht zutreffend");
+    setIfPresent(headers, row, ["Product:IncludePreFilledItemInformation"], "0");
+    setIfPresent(headers, row, ["Product:IncludeStockPhotoURL"], "0");
+    setIfPresent(headers, row, ["Product:ReturnSearchResultsOnDuplicates"], "0");
+  }
+
   function makeSpecifics(product, config) {
     const output = {};
     const selectedTagKeys = config.selectedTagKeys || [];
@@ -643,6 +755,23 @@
     return `${traitName}=${values.join(";")}`;
   }
 
+  function pickActionValue(actionHeader, config) {
+    if (config.actionValue) {
+      return config.actionValue;
+    }
+
+    const header = String(actionHeader || "");
+    if (/^\*Action/i.test(header) || /Version=941/i.test(header)) {
+      return config.verifyOnly ? "VerifyAdd" : "Add";
+    }
+    return "Draft";
+  }
+
+  function defaultRelationshipDetailsHeader(actionHeader) {
+    const header = String(actionHeader || "");
+    return /^\*Action/i.test(header) || /Version=941/i.test(header) ? "RelationshipDetails" : "Relationship details";
+  }
+
   function buildDescription(product, config, details) {
     const template = { ...DEFAULT_LISTING_TEMPLATE, ...(config.listingTemplate || {}) };
     if (template.enabled !== false) {
@@ -661,12 +790,14 @@
     const config = {
       templateText: "",
       categoryId: "",
-      conditionId: "NEW",
+      conditionId: "1000",
       format: "FixedPrice",
       quantity: 10,
       maxImages: 5,
-      listingMode: "flat",
+      listingMode: "variants",
       variationTraitName: "Größe",
+      verifyOnly: false,
+      actionValue: "",
       upcValue: "",
       priceMultiplier: 1,
       priceAdd: 0,
@@ -688,6 +819,7 @@
 
     const actionHeader = findHeader(headers, "action") || ensureHeader(headers, DEFAULT_HEADERS[0]);
     const skuHeader = findHeader(headers, "sku") || ensureHeader(headers, "Custom label (SKU)");
+    const productNameHeader = findHeader(headers, "productName");
     const categoryHeader = findHeader(headers, "category") || ensureHeader(headers, "Category ID");
     const titleHeader = findHeader(headers, "title") || ensureHeader(headers, "Title");
     const upcHeader = findHeader(headers, "upc") || ensureHeader(headers, "UPC");
@@ -699,7 +831,8 @@
     const formatHeader = findHeader(headers, "format") || ensureHeader(headers, "Format");
     const relationshipHeader = findHeader(headers, "relationship") || ensureHeader(headers, "Relationship");
     const relationshipDetailsHeader =
-      findHeader(headers, "relationshipDetails") || ensureHeader(headers, "Relationship details");
+      findHeader(headers, "relationshipDetails") || ensureHeader(headers, defaultRelationshipDetailsHeader(actionHeader));
+    const actionValue = pickActionValue(actionHeader, config);
 
     const addSpecificPrefix = (key) => {
       const clean = String(key || "").trim();
@@ -743,15 +876,16 @@
         variants.forEach((variant) => {
           const flat = createEmptyRow(headers);
           const optionValue = variant.option1Value || "Standard";
-          setIfHeader(flat, actionHeader, "Draft");
+          setIfHeader(flat, actionHeader, actionValue);
           setIfHeader(flat, skuHeader, variant.sku);
+          setIfHeader(flat, productNameHeader, variant.sku);
           setIfHeader(flat, categoryHeader, config.categoryId);
           setIfHeader(flat, titleHeader, cleanTitle(`${product.title} - ${optionValue}`, 80));
           setIfHeader(flat, upcHeader, config.upcValue);
           setIfHeader(flat, priceHeader, formatPrice(variant.price, config));
           setIfHeader(flat, quantityHeader, config.quantity);
           setIfHeader(flat, photosHeader, photos);
-          setIfHeader(flat, conditionHeader, config.conditionId);
+          setIfHeader(flat, conditionHeader, conditionValueFor(conditionHeader, config.conditionId));
           setIfHeader(
             flat,
             descriptionHeader,
@@ -762,6 +896,7 @@
             }),
           );
           setIfHeader(flat, formatHeader, config.format);
+          applyTemplateDefaults(headers, flat, config);
           Object.entries({ ...specifics, [addSpecificPrefix(traitName)]: optionValue }).forEach(([key, value]) => {
             const headerKey = addSpecificPrefix(key);
             if (!headers.includes(headerKey)) {
@@ -778,13 +913,14 @@
         return;
       }
 
-      setIfHeader(parent, actionHeader, "Draft");
+      setIfHeader(parent, actionHeader, actionValue);
       setIfHeader(parent, skuHeader, makeSku(product.handle));
+      setIfHeader(parent, productNameHeader, makeSku(product.handle));
       setIfHeader(parent, categoryHeader, config.categoryId);
       setIfHeader(parent, titleHeader, cleanTitle(product.title, 80));
       setIfHeader(parent, upcHeader, config.upcValue);
       setIfHeader(parent, photosHeader, photos);
-      setIfHeader(parent, conditionHeader, config.conditionId);
+      setIfHeader(parent, conditionHeader, conditionValueFor(conditionHeader, config.conditionId));
       setIfHeader(
         parent,
         descriptionHeader,
@@ -794,6 +930,7 @@
         }),
       );
       setIfHeader(parent, formatHeader, config.format);
+      applyTemplateDefaults(headers, parent, config);
 
       if (hasVariants) {
         setIfHeader(parent, relationshipDetailsHeader, buildVariationSummary(product, traitName));
@@ -814,14 +951,16 @@
         variants.forEach((variant) => {
           const child = createEmptyRow(headers);
           const optionValue = variant.option1Value || "Standard";
+          const variantImage = variant.image || product.images[0] || "";
           setIfHeader(child, skuHeader, variant.sku);
           setIfHeader(child, priceHeader, formatPrice(variant.price, config));
           setIfHeader(child, quantityHeader, config.quantity);
           setIfHeader(child, upcHeader, config.upcValue);
+          setIfHeader(child, conditionHeader, conditionValueFor(conditionHeader, config.conditionId));
           setIfHeader(child, relationshipHeader, "Variation");
           setIfHeader(child, relationshipDetailsHeader, `${traitName}=${optionValue}`);
-          if (variant.image) {
-            setIfHeader(child, photosHeader, `${optionValue}=${variant.image}`);
+          if (variantImage) {
+            setIfHeader(child, photosHeader, `${optionValue}=${variantImage}`);
           }
           rows.push(child);
         });

@@ -17,6 +17,7 @@
         <div class="actions">
           <button id="refreshBtn" type="button">Vorschau aktualisieren</button>
           <button id="downloadBtn" type="button" class="primary" disabled>CSV herunterladen</button>
+          <a class="logout-link" href="/api/logout">Logout</a>
         </div>
       </header>
 
@@ -38,8 +39,8 @@
               <input id="categoryId" type="text" inputmode="numeric" placeholder="28009 Kunstplakate" />
             </div>
             <div class="field">
-              <label for="conditionId">Condition</label>
-              <input id="conditionId" type="text" value="NEW" />
+              <label for="conditionId">Condition ID</label>
+              <input id="conditionId" type="text" value="1000" />
             </div>
           </div>
 
@@ -71,10 +72,15 @@
           <div class="field">
             <label for="listingMode">Listing-Modus</label>
             <select id="listingMode">
-              <option value="flat" selected>Eine eBay-Zeile je Größe</option>
-              <option value="variants">1 Listing mit Größenvarianten</option>
+              <option value="variants" selected>1 Listing mit Größenvarianten</option>
+              <option value="flat">Eine eBay-Zeile je Größe</option>
             </select>
           </div>
+
+          <label class="toggle">
+            <input id="verifyOnly" type="checkbox" />
+            <span>SMP-Datei nur prüfen (VerifyAdd statt Add)</span>
+          </label>
 
           <label class="toggle">
             <input id="prefixItemSpecifics" type="checkbox" checked />
@@ -265,6 +271,7 @@
         variationTraitName: document.getElementById("variationTraitName"),
         format: document.getElementById("format"),
         listingMode: document.getElementById("listingMode"),
+        verifyOnly: document.getElementById("verifyOnly"),
         prefixItemSpecifics: document.getElementById("prefixItemSpecifics"),
         priceMultiplier: document.getElementById("priceMultiplier"),
         priceAdd: document.getElementById("priceAdd"),
@@ -410,6 +417,7 @@
           variationTraitName: elements.variationTraitName.value.trim() || "Größe",
           format: elements.format.value,
           listingMode: elements.listingMode.value,
+          verifyOnly: elements.verifyOnly.checked,
           prefixItemSpecifics: elements.prefixItemSpecifics.checked,
           priceMultiplier: Number(elements.priceMultiplier.value || 1),
           priceAdd: Number(elements.priceAdd.value || 0),
@@ -595,6 +603,7 @@
         elements.variationTraitName,
         elements.format,
         elements.listingMode,
+        elements.verifyOnly,
         elements.prefixItemSpecifics,
         elements.priceMultiplier,
         elements.priceAdd,

@@ -29,7 +29,7 @@ function usage() {
     "  node cli.js --shopify products_export_1.csv --template ebay-template.csv --out ebay-drafts.csv --category 12345",
     "",
     "Optional:",
-    "  --quantity 10 --max-images 5 --condition NEW --listing-mode flat --no-c-prefix --price-multiplier 1 --price-add 0 --round-to 0",
+    "  --quantity 10 --max-images 5 --condition 1000 --listing-mode variants --verify-only --no-c-prefix --price-multiplier 1 --price-add 0 --round-to 0",
     "  --sample 5",
   ].join("\n");
 }
@@ -75,10 +75,11 @@ function main() {
   const result = converter.convert(shopifyText, {
     templateText,
     categoryId: args.category || "",
-    conditionId: args.condition || "NEW",
+    conditionId: args.condition || "1000",
     quantity: Number(args.quantity || 10),
     maxImages: Number(args["max-images"] || 5),
-    listingMode: args["listing-mode"] || "flat",
+    listingMode: args["listing-mode"] || "variants",
+    verifyOnly: !!args["verify-only"],
     variationTraitName: args["variation-name"] || "Größe",
     priceMultiplier: Number(args["price-multiplier"] || 1),
     priceAdd: Number(args["price-add"] || 0),
