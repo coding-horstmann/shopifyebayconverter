@@ -8,16 +8,16 @@ Lokales und Vercel-taugliches Tool für Shopify-Exports von Atelier Orlo. Ziel i
 
 1. Shopify-CSV bei `Shopify CSV` laden.
 2. Optional eine eBay-SMP/File-Exchange-Vorlage bei `eBay Vorlage` laden. Ohne Vorlage nutzt der Converter jetzt ebenfalls eine SMP-kompatible Header-Zeile, nicht mehr die eBay-Draft-Vorlage.
-3. `Category ID`, Bestand je Größe, Artikelzustand, MwSt., Bilderzahl und Listing-Modus setzen.
+3. `Category ID`, Bestand je Größe, Artikelzustand, MwSt., Bilderzahl, Listing-Modus und eBay Upload-Aktion setzen.
 4. Zusatzfotos global oder produkt-spezifisch per Shopify-Handle ergänzen und die Position festlegen.
 5. Im Bereich `Listing-Design` Logo, globale Texte, Farben und Icon-Blöcke für alle eBay-Beschreibungen pflegen.
 6. Herstellerdaten, eBay-Rahmenbedingungen und optionale internationale Versandspalten setzen.
 7. Automatische Merkmale aktivieren, deaktivieren oder auf eBay-Spaltennamen umbenennen.
-8. Zuerst `Nur 5 Produkte exportieren` testen, danach die komplette CSV herunterladen.
+8. Zuerst im Standardmodus `Nur prüfen - keine Angebote erstellen` testen, danach nur bewusst auf `Aktiv veröffentlichen` umstellen.
 
 ## eBay-Varianten
 
-Wichtig: Varianten bitte bei eBay als Seller-Hub-Reports `Create new listings` / `Add` Upload testen, nicht als reinen Draft-Upload. Der Draft-Import kann Parent-Zeilen als Entwürfe anlegen und Child-Zeilen als eigene fehlerhafte Entwürfe behandeln. Genau dann entstehen sichtbare Listings ohne Varianten.
+Wichtig: Der Standardexport nutzt `VerifyAdd`. eBay prüft damit die Datei, erstellt aber keine aktiven Angebote. `Add` veröffentlicht direkt aktive Angebote. `Draft` ist im Dashboard auswählbar, war bei eBay-Varianten im bisherigen Test aber unzuverlässiger als `VerifyAdd`.
 
 Der Standard ist `1 Listing mit Größenvarianten`. Der Converter gruppiert Shopify-Zeilen nach `Handle` und erzeugt:
 
@@ -31,6 +31,8 @@ Die Spalte wird konsequent als `RelationshipDetails` ohne Leerzeichen geschriebe
 Der Flat-Modus bleibt nur als Fallback erhalten und erzeugt bewusst ein eigenes eBay-Angebot pro Größe.
 
 Wenn eine eBay-Vorlage hochgeladen wird, bleibt deren erste Zeile unverändert die erste Zeile im Export. Ohne Vorlage nutzt der Converter die SMPBase-kompatible Zeile `*Action(SiteID=Germany|Country=DE|Currency=EUR|Version=941)` als erste Zeile.
+
+Wenn ein Shopify-Produkt nur eine Variante hat, erzeugt der Converter kein künstliches eBay-Variantenlisting. Die Größe wird dann als normales Artikelmerkmal, z. B. `C:Größe`, und in der HTML-Beschreibung ausgegeben.
 
 ## Fotos
 
@@ -54,7 +56,7 @@ Die MwSt. wird standardmäßig als `VATPercent=19` geschrieben.
 
 ## HTML-Beschreibung
 
-Die Beschreibung nutzt ein mobiles Ein-Spalten-Template mit Logo, CSS-Bildkarussell, Thumbnail-Vorschau mit echtem Bildverhältnis und fünf Icon-/Trust-Blöcken. Das funktioniert ohne JavaScript. Falls eBay einzelne CSS-Animationen entfernt, bleibt das erste Bild sichtbar und alle Bilder stehen weiterhin als Links/Thumbnails sowie in der eBay-Fotospalte.
+Die Beschreibung nutzt ein mobiles Ein-Spalten-Template mit Logo, CSS-Bildkarussell, Thumbnail-Vorschau mit echtem Bildverhältnis und fünf Icon-/Trust-Blöcken. Das funktioniert ohne JavaScript. Beim Klick auf ein Vorschaubild wird die CSS-Rotation gestoppt und das gewählte Bild fixiert, sofern eBay die dafür nötigen HTML-Controls nicht entfernt. Falls eBay einzelne CSS-Animationen entfernt, bleibt das erste Bild sichtbar und alle Bilder stehen weiterhin als Thumbnails sowie in der eBay-Fotospalte.
 
 Die Shopify-Beschreibung steht im Template direkt oben unter Titel und Headline. Der frühere generische Intro-Satz wird nicht mehr ausgegeben.
 
@@ -80,13 +82,14 @@ node .\cli.js `
   --category 28009 `
   --quantity 3 `
   --vat-percent 19 `
+  --action VerifyAdd `
   --shipping-profile "Kostenloser Versand" `
   --return-profile "30 Tage Rueckgabe" `
   --max-images 8
 ```
 
 Mit `--sample 5` wird nur ein Testexport für die ersten fünf Produkte gebaut.
-Mit `--verify-only` nutzt die SMP-Datei `VerifyAdd` statt `Add`, damit eBay die Datei erst prüft.
+Standard ist `--action VerifyAdd`, damit eBay die Datei erst prüft. Mit `--publish` oder `--action Add` werden aktive Angebote veröffentlicht. Mit `--draft` oder `--action Draft` wird `Draft` geschrieben.
 Mit `--listing-mode flat` wird der alte Einzel-Listing-Modus erzwungen.
 Mit `--extra-images` werden globale Zusatzbilder ergänzt.
 Mit `--product-extra-images` werden Zusatzbilder produkt-spezifisch nach Shopify-Handle ergänzt.

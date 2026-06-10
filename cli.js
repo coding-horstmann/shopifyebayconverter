@@ -29,7 +29,7 @@ function usage() {
     "  node cli.js --shopify products_export_1.csv --template ebay-template.csv --out ebay-variants-add.csv --category 12345",
     "",
     "Optional:",
-    "  --quantity 3 --max-images 8 --condition 1000 --vat-percent 19 --shipping-profile \"Kostenloser Versand\" --return-profile \"30 Tage Rueckgabe\" --listing-mode variants --verify-only --extra-images image1|image2 --product-extra-images handle=image1|image2 --extra-position after-main --no-c-prefix --price-multiplier 1 --price-add 0 --round-to 0",
+    "  --quantity 3 --max-images 8 --condition 1000 --vat-percent 19 --shipping-profile \"Kostenloser Versand\" --return-profile \"30 Tage Rueckgabe\" --listing-mode variants --action VerifyAdd --publish --draft --extra-images image1|image2 --product-extra-images handle=image1|image2 --extra-position after-main --no-c-prefix --price-multiplier 1 --price-add 0 --round-to 0",
     "  --sample 5",
   ].join("\n");
 }
@@ -72,6 +72,7 @@ function main() {
 
   const templateText = templatePath && fs.existsSync(templatePath) ? fs.readFileSync(templatePath, "utf8") : "";
   const analysis = converter.analyzeShopify(shopifyText);
+  const actionValue = args.action || (args.publish ? "Add" : args.draft ? "Draft" : "VerifyAdd");
   const result = converter.convert(shopifyText, {
     templateText,
     categoryId: args.category || "",
@@ -79,7 +80,8 @@ function main() {
     quantity: Number(args.quantity || 3),
     maxImages: Number(args["max-images"] || 8),
     listingMode: args["listing-mode"] || "variants",
-    verifyOnly: !!args["verify-only"],
+    verifyOnly: actionValue === "VerifyAdd",
+    actionValue,
     extraImageUrls: args["extra-images"] || "",
     productExtraImageUrls: args["product-extra-images"] || "",
     extraImagesPosition: args["extra-position"] || "after-main",

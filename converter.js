@@ -512,25 +512,42 @@
     }
 
     const total = galleryImages.length;
+    const galleryId = `orlo-gallery-${shortHash(`${title}-${galleryImages.join("|")}`)}`;
     const duration = Math.max(total * 4, 8);
     const visibleEnd = Math.max(6, 100 / total - 2).toFixed(2);
     const fadeEnd = Math.max(8, 100 / total).toFixed(2);
+    const inputs = galleryImages
+      .map(
+        (url, index) =>
+          `<input id="${galleryId}-${index + 1}" name="${galleryId}" type="radio" style="display:none;" aria-label="${escapeHtml(title)} Bild ${index + 1} auswÃ¤hlen">`,
+      )
+      .join("");
     const slides = galleryImages
       .map(
         (url, index) =>
-          `<img src="${escapeHtml(url)}" alt="${escapeHtml(title)} ${index + 1}" style="position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain;opacity:${index === 0 ? "1" : "0"};animation:orloFade ${duration}s infinite;animation-delay:${index * 4}s;">`,
+          `<img class="orlo-slide orlo-slide-${index + 1}" src="${escapeHtml(url)}" alt="${escapeHtml(title)} ${index + 1}" style="position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain;opacity:${index === 0 ? "1" : "0"};animation:orloFade ${duration}s infinite;animation-delay:${index * 4}s;">`,
       )
       .join("");
     const thumbs = galleryImages
       .map(
         (url, index) =>
-          `<a href="${escapeHtml(url)}" target="_blank" rel="noopener" style="display:inline-block;vertical-align:top;border:1px solid #e6ddd1;border-radius:6px;background:#fff;padding:4px;margin:0 6px 8px 0;max-width:128px;"><img src="${escapeHtml(url)}" alt="${escapeHtml(title)} Vorschau ${index + 1}" style="display:block;max-width:118px;max-height:96px;width:auto;height:auto;object-fit:contain;border-radius:4px;"></a>`,
+          `<label for="${galleryId}-${index + 1}" style="display:inline-block;vertical-align:top;border:1px solid #e6ddd1;border-radius:6px;background:#fff;padding:4px;margin:0 6px 8px 0;max-width:128px;cursor:pointer;"><img src="${escapeHtml(url)}" alt="${escapeHtml(title)} Vorschau ${index + 1}" style="display:block;max-width:118px;max-height:96px;width:auto;height:auto;object-fit:contain;border-radius:4px;"></label>`,
+      )
+      .join("");
+    const pauseAllRules = galleryImages
+      .map((_, index) => `#${galleryId}-${index + 1}:checked~.orlo-hero .orlo-slide`)
+      .join(",");
+    const selectedRules = galleryImages
+      .map(
+        (_, index) =>
+          `#${galleryId}-${index + 1}:checked~.orlo-hero .orlo-slide-${index + 1}{opacity:1!important;animation:none!important;z-index:2;}`,
       )
       .join("");
 
     return [
-      `<style>@keyframes orloFade{0%{opacity:1}${visibleEnd}%{opacity:1}${fadeEnd}%{opacity:0}100%{opacity:0}}</style>`,
+      `<style>@keyframes orloFade{0%{opacity:1}${visibleEnd}%{opacity:1}${fadeEnd}%{opacity:0}100%{opacity:0}}${pauseAllRules}{opacity:0!important;animation:none!important;}${selectedRules}</style>`,
       `<div style="margin:0 0 24px;width:100%;box-sizing:border-box;">`,
+      inputs,
       `<div class="orlo-hero" style="position:relative;width:100%;height:70vw;min-height:340px;max-height:720px;max-width:1120px;margin:0 auto;border:1px solid #e6ddd1;background:#fbfaf7;border-radius:8px;overflow:hidden;box-sizing:border-box;">${slides}</div>`,
       `<div class="orlo-thumbs" style="display:block;margin-top:12px;text-align:center;line-height:0;">${thumbs}</div>`,
       `</div>`,
@@ -1137,7 +1154,7 @@
       maxImages: 5,
       listingMode: "variants",
       variationTraitName: "Größe",
-      verifyOnly: false,
+      verifyOnly: true,
       actionValue: "",
       extraImageUrls: "",
       productExtraImageUrls: "",
@@ -1219,6 +1236,7 @@
       const variants = product.variants.length ? product.variants : [{ sku: product.handle, price: product.firstPrice }];
       const hasVariants = config.listingMode === "variants" && variants.length > 1;
       const traitName = config.variationTraitName || product.option1Name || "Größe";
+      const singleVariantValue = !hasVariants && variants[0] && variants[0].option1Value ? variants[0].option1Value : "";
       const photoUrls = buildProductImages(product, config).slice(0, Number(config.maxImages || 5));
       const photos = photoUrls.join("|");
       const specifics = config.includeSpecifics ? makeSpecifics(product, config) : {};
@@ -1290,6 +1308,7 @@
         buildDescription(product, config, {
           title: product.title,
           price: hasVariants ? "" : formatPrice(variants[0].price, config),
+          optionValue: singleVariantValue,
           images: photoUrls,
         }),
       );
@@ -1302,6 +1321,17 @@
       } else {
         setIfHeader(parent, priceHeader, formatPrice(variants[0].price, config));
         setIfHeader(parent, quantityHeader, config.quantity);
+        if (singleVariantValue) {
+          const sizeHeader = addSpecificPrefix(traitName);
+          if (!headers.includes(sizeHeader)) {
+            headers.push(sizeHeader);
+            rows.forEach((row) => {
+              row[sizeHeader] = "";
+            });
+            parent[sizeHeader] = "";
+          }
+          parent[sizeHeader] = limitSpecificValue(singleVariantValue);
+        }
       }
 
       Object.entries(specifics).forEach(([key, value]) => {

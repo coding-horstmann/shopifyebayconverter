@@ -83,10 +83,17 @@
             </select>
           </div>
 
-          <label class="toggle">
-            <input id="verifyOnly" type="checkbox" />
-            <span>SMP-Datei nur prüfen (VerifyAdd statt Add)</span>
-          </label>
+          <div class="field">
+            <label for="uploadAction">eBay Upload-Aktion</label>
+            <select id="uploadAction">
+              <option value="VerifyAdd" selected>Nur prüfen - keine Angebote erstellen</option>
+              <option value="Draft">Entwurf erstellen</option>
+              <option value="Add">Aktiv veröffentlichen</option>
+            </select>
+            <p class="hint">
+              Standard ist VerifyAdd. Add veröffentlicht direkt aktive Angebote. Draft ist bei eBay-Varianten je nach Importweg unzuverlässig.
+            </p>
+          </div>
 
           <label class="toggle">
             <input id="prefixItemSpecifics" type="checkbox" checked />
@@ -433,7 +440,7 @@
         variationTraitName: document.getElementById("variationTraitName"),
         format: document.getElementById("format"),
         listingMode: document.getElementById("listingMode"),
-        verifyOnly: document.getElementById("verifyOnly"),
+        uploadAction: document.getElementById("uploadAction"),
         prefixItemSpecifics: document.getElementById("prefixItemSpecifics"),
         priceMultiplier: document.getElementById("priceMultiplier"),
         priceAdd: document.getElementById("priceAdd"),
@@ -640,7 +647,8 @@
           variationTraitName: elements.variationTraitName.value.trim() || "Größe",
           format: elements.format.value,
           listingMode: elements.listingMode.value,
-          verifyOnly: elements.verifyOnly.checked,
+          actionValue: elements.uploadAction.value,
+          verifyOnly: elements.uploadAction.value === "VerifyAdd",
           prefixItemSpecifics: elements.prefixItemSpecifics.checked,
           priceMultiplier: Number(elements.priceMultiplier.value || 1),
           priceAdd: Number(elements.priceAdd.value || 0),
@@ -735,6 +743,17 @@
         }
       }
 
+      function updateActionLabels() {
+        const labels = {
+          VerifyAdd: ["Prüf-CSV herunterladen", "5 Produkte prüfen"],
+          Draft: ["Entwurf-CSV herunterladen", "5 Entwürfe exportieren"],
+          Add: ["Aktiv-CSV herunterladen", "5 aktive Angebote exportieren"],
+        };
+        const [downloadLabel, sampleLabel] = labels[elements.uploadAction.value] || labels.VerifyAdd;
+        elements.downloadBtn.textContent = downloadLabel;
+        elements.sampleBtn.textContent = sampleLabel;
+      }
+
       function renderPreview(analysis) {
         if (!analysis) {
           elements.previewRows.innerHTML = '<tr><td colspan="4" class="empty">Wähle deine Shopify CSV aus.</td></tr>';
@@ -761,6 +780,7 @@
       }
 
       function updateConversion() {
+        updateActionLabels();
         if (!state.shopifyText) {
           state.result = null;
           renderStats(null);
@@ -804,6 +824,14 @@
         URL.revokeObjectURL(url);
       }
 
+      function exportModeSlug() {
+        return {
+          VerifyAdd: "verify",
+          Draft: "draft",
+          Add: "add",
+        }[elements.uploadAction.value] || "verify";
+      }
+
       function createSampleCsv() {
         const config = collectConfig();
         const analysis = EbayConverter.analyzeShopify(state.shopifyText);
@@ -821,6 +849,7 @@
 
       setTemplateDefaults();
       Object.entries(EbayConverter.DEFAULT_GLOBAL_SPECIFICS).forEach(([key, value]) => makeSpecificRow(key, value));
+      updateActionLabels();
 
       elements.shopifyFile.addEventListener("change", async (event) => {
         const file = event.target.files[0];
@@ -855,7 +884,7 @@
         elements.variationTraitName,
         elements.format,
         elements.listingMode,
-        elements.verifyOnly,
+        elements.uploadAction,
         elements.prefixItemSpecifics,
         elements.priceMultiplier,
         elements.priceAdd,
@@ -927,12 +956,12 @@
       });
       elements.downloadBtn.addEventListener("click", () => {
         if (state.result) {
-          downloadCsv(state.result.csv, "atelier-orlo-ebay-variants-add.csv");
+          downloadCsv(state.result.csv, `atelier-orlo-ebay-variants-${exportModeSlug()}.csv`);
         }
       });
       elements.sampleBtn.addEventListener("click", () => {
         if (state.shopifyText) {
-          downloadCsv(createSampleCsv(), "atelier-orlo-ebay-variants-test-5.csv");
+          downloadCsv(createSampleCsv(), `atelier-orlo-ebay-variants-${exportModeSlug()}-test-5.csv`);
         }
       });
     </script>
