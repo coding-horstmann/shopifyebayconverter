@@ -57,17 +57,11 @@
     "RelationshipDetails",
   ];
 
-  const DEFAULT_GLOBAL_SPECIFICS = {
-    Marke: "Atelier Orlo",
-    Produktart: "Poster",
-    Material: "200 g/m² Papier",
-    Rahmung: "Ungerahmt",
-    Herstellungsart: "Kunstdruck",
-  };
+  const DEFAULT_GLOBAL_SPECIFICS = {};
 
   const DEFAULT_LISTING_TEMPLATE = {
     enabled: true,
-    shopName: "Atelier Orlo",
+    shopName: "",
     logoUrl: "",
     headline: "Ausgewählte Vintage-Plakatkunst als hochwertiger Kunstdruck",
     intro: "",
@@ -617,9 +611,10 @@
       return "";
     }
     const safeIcon = normalizeUrl(iconUrl);
+    const iconBoxStart = `<span style="display:flex;width:64px;height:64px;align-items:flex-end;justify-content:center;margin:0 auto 18px;">`;
     const icon = safeIcon
-      ? `<img src="${escapeHtml(safeIcon)}" alt="" style="display:block;width:54px;height:54px;object-fit:contain;margin:0 auto 18px;">`
-      : `<span style="display:flex;width:54px;height:54px;border:1px solid #d9cdbf;border-radius:50%;align-items:center;justify-content:center;margin:0 auto 18px;color:#1f4638;font-size:18px;font-weight:bold;">${String(fallbackIndex || "").padStart(2, "0")}</span>`;
+      ? `${iconBoxStart}<img src="${escapeHtml(safeIcon)}" alt="" style="display:block;width:54px;height:54px;object-fit:contain;"></span>`
+      : `${iconBoxStart}<span style="display:flex;width:54px;height:54px;border:1px solid #d9cdbf;border-radius:50%;align-items:center;justify-content:center;color:#1f4638;font-size:18px;font-weight:bold;">${String(fallbackIndex || "").padStart(2, "0")}</span></span>`;
     return `<div style="display:inline-block;width:18%;min-width:150px;box-sizing:border-box;vertical-align:top;margin:0 .6% 12px;border:1px solid #eee4d8;background:#f7f1ea;padding:22px 14px;border-radius:8px;text-align:center;min-height:220px;">${icon}<strong style="display:block;font-size:20px;color:#20201d;margin-bottom:10px;font-family:Georgia,serif;font-weight:400;">${escapeHtml(title)}</strong><span style="display:block;color:#514b44;line-height:1.6;font-size:15px;">${escapeHtml(text)}</span></div>`;
   }
 
@@ -820,7 +815,7 @@
     }
     const imageUrl = normalizeUrl(template.contactImageUrl);
     const buttonUrl = normalizeUrl(template.contactButtonUrl);
-    const heading = String(template.contactHeading || template.shopName || DEFAULT_LISTING_TEMPLATE.shopName).trim();
+    const heading = String(template.contactHeading || template.shopName || "").trim();
     const text = formalizeGermanAddress(template.contactText || DEFAULT_LISTING_TEMPLATE.contactText);
     const image = imageUrl
       ? `<div style="display:inline-block;width:42%;min-width:260px;vertical-align:middle;text-align:center;box-sizing:border-box;padding:0 0 0 28px;"><img src="${escapeHtml(imageUrl)}" alt="" style="display:block;max-width:468px;max-height:351px;width:auto;height:auto;margin:0 auto;background:transparent;"></div>`
@@ -830,7 +825,11 @@
       : "";
     const textWidth = imageUrl ? "52%" : "100%";
 
-    return `<div style="margin-top:28px;padding:34px 26px;border:1px solid #e6ddd1;background:#fbfaf7;text-align:center;box-sizing:border-box;"><div style="max-width:1040px;margin:0 auto;text-align:center;"><div style="display:inline-block;width:${textWidth};max-width:540px;min-width:280px;vertical-align:middle;text-align:left;box-sizing:border-box;padding:0 28px 0 0;"><div style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:${primary};font-weight:bold;margin-bottom:10px;">${escapeHtml(heading)}</div><p style="margin:0;color:#4b463f;font-size:17px;line-height:1.65;">${escapeHtml(text)}</p>${button}</div>${image}</div></div>`;
+    const headingBlock = heading
+      ? `<div style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:${primary};font-weight:bold;margin-bottom:10px;">${escapeHtml(heading)}</div>`
+      : "";
+
+    return `<div style="margin-top:28px;padding:34px 26px;border:1px solid #e6ddd1;background:#fbfaf7;text-align:center;box-sizing:border-box;"><div style="max-width:1040px;margin:0 auto;text-align:center;"><div style="display:inline-block;width:${textWidth};max-width:540px;min-width:280px;vertical-align:middle;text-align:left;box-sizing:border-box;padding:0 28px 0 0;">${headingBlock}<p style="margin:0;color:#4b463f;font-size:17px;line-height:1.65;">${escapeHtml(text)}</p>${button}</div>${image}</div></div>`;
   }
 
   function renderListingTemplate(product, config, details) {
@@ -839,6 +838,7 @@
     const accent = cleanColor(template.accentColor, DEFAULT_LISTING_TEMPLATE.accentColor);
     const background = cleanColor(template.backgroundColor, DEFAULT_LISTING_TEMPLATE.backgroundColor);
     const title = cleanTitle(details && details.title ? details.title : product.title, 120);
+    const shopName = String(template.shopName || "").trim();
     const description =
       formalizeGermanAddress(sanitizeInlineHtml(product.description)) ||
       `<p>${escapeHtml(formalizeGermanAddress(toPlainText(product.description)))}</p>`;
@@ -848,8 +848,10 @@
     const gallery = renderPhotoGallery(images, title, template);
     const logoUrl = normalizeUrl(template.logoUrl);
     const logoBlock = logoUrl
-      ? `<img src="${escapeHtml(logoUrl)}" alt="${escapeHtml(template.shopName)}" style="display:block;max-width:213px;max-height:100px;width:auto;height:auto;margin:0 auto;">`
-      : `<div style="font-size:20px;font-weight:bold;color:${primary};letter-spacing:.08em;text-transform:uppercase;">${escapeHtml(template.shopName)}</div>`;
+      ? `<img src="${escapeHtml(logoUrl)}" alt="${escapeHtml(shopName)}" style="display:block;max-width:213px;max-height:100px;width:auto;height:auto;margin:0 auto;">`
+      : shopName
+        ? `<div style="font-size:20px;font-weight:bold;color:${primary};letter-spacing:.08em;text-transform:uppercase;">${escapeHtml(shopName)}</div>`
+        : "";
     const highlightBlocks = [1, 2, 3, 4, 5]
       .map((index) =>
         renderHighlight(
@@ -876,12 +878,14 @@
     return [
       `<div style="width:100%;max-width:none;margin:0;background:${background};color:#20201d;font-family:Arial,Helvetica,sans-serif;line-height:1.6;box-sizing:border-box;">`,
       `<div style="padding:18px;border:1px solid #e6ddd1;background:#fff;box-sizing:border-box;">`,
-      `<div style="border-bottom:1px solid #e6ddd1;padding-bottom:18px;margin-bottom:22px;text-align:center;">`,
-      logoBlock,
-      `</div>`,
+      logoBlock
+        ? `<div style="border-bottom:1px solid #e6ddd1;padding-bottom:18px;margin-bottom:22px;text-align:center;">${logoBlock}</div>`
+        : "",
       gallery,
       `<div style="padding-top:4px;max-width:1120px;margin:0 auto 28px;">`,
-      `<div style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:${primary};font-weight:bold;margin-bottom:10px;">${escapeHtml(template.shopName)}</div>`,
+      shopName
+        ? `<div style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:${primary};font-weight:bold;margin-bottom:10px;">${escapeHtml(shopName)}</div>`
+        : "",
       `<h1 style="margin:0 0 14px;font-size:28px;line-height:1.22;color:#20201d;font-family:Georgia,serif;font-weight:400;">${escapeHtml(title)}</h1>`,
       `<p style="margin:0 0 16px;color:#5a534b;font-size:16px;line-height:1.6;">${escapeHtml(template.headline)}</p>`,
       `<div style="width:68px;height:3px;background:${accent};margin:0 0 22px;"></div>`,
