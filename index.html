@@ -276,6 +276,10 @@
             <small>Für transparente Bilder eine öffentliche HTTPS-URL zu einem PNG/WebP mit Transparenz verwenden.</small>
           </div>
           <div class="field">
+            <label for="contactHeading">Kontakt-Überschrift</label>
+            <input id="contactHeading" type="text" placeholder="Leer = Shop-Name" />
+          </div>
+          <div class="field">
             <label for="contactText">Kontakttext</label>
             <textarea id="contactText" rows="2"></textarea>
           </div>
@@ -573,6 +577,7 @@
         footerText: document.getElementById("footerText"),
         contactEnabled: document.getElementById("contactEnabled"),
         contactImageUrl: document.getElementById("contactImageUrl"),
+        contactHeading: document.getElementById("contactHeading"),
         contactText: document.getElementById("contactText"),
         contactButtonLabel: document.getElementById("contactButtonLabel"),
         contactButtonUrl: document.getElementById("contactButtonUrl"),
@@ -710,6 +715,7 @@
         elements.footerText.value = template.footerText || "";
         elements.contactEnabled.checked = template.contactEnabled === true;
         elements.contactImageUrl.value = template.contactImageUrl || "";
+        elements.contactHeading.value = template.contactHeading || "";
         elements.contactText.value = template.contactText || "";
         elements.contactButtonLabel.value = template.contactButtonLabel || "";
         elements.contactButtonUrl.value = template.contactButtonUrl || "";
@@ -747,6 +753,7 @@
           footerText: elements.footerText.value.trim(),
           contactEnabled: elements.contactEnabled.checked,
           contactImageUrl: elements.contactImageUrl.value.trim(),
+          contactHeading: elements.contactHeading.value.trim(),
           contactText: elements.contactText.value.trim(),
           contactButtonLabel: elements.contactButtonLabel.value.trim(),
           contactButtonUrl: elements.contactButtonUrl.value.trim(),
@@ -1068,6 +1075,7 @@
         elements.noteText,
         elements.footerText,
         elements.contactImageUrl,
+        elements.contactHeading,
         elements.contactText,
         elements.contactButtonLabel,
         elements.contactButtonUrl,

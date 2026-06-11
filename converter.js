@@ -97,6 +97,7 @@
     noteText: "",
     contactEnabled: false,
     contactImageUrl: "",
+    contactHeading: "",
     contactText:
       "Wenn Sie Fragen zu Motiv, Format oder Versand haben, schreiben Sie mir gern über eBay. Ich freue mich auf Ihre Nachricht und antworte zeitnah.",
     contactButtonLabel: "Nachricht über eBay senden",
@@ -780,6 +781,7 @@
     }
     const imageUrl = normalizeUrl(template.contactImageUrl);
     const buttonUrl = normalizeUrl(template.contactButtonUrl);
+    const heading = String(template.contactHeading || template.shopName || DEFAULT_LISTING_TEMPLATE.shopName).trim();
     const text = formalizeGermanAddress(template.contactText || DEFAULT_LISTING_TEMPLATE.contactText);
     const image = imageUrl
       ? `<div style="display:inline-block;width:36%;min-width:230px;vertical-align:middle;text-align:center;box-sizing:border-box;padding:0 0 0 20px;"><img src="${escapeHtml(imageUrl)}" alt="" style="display:block;max-width:360px;max-height:270px;width:auto;height:auto;margin:0 auto;background:transparent;"></div>`
@@ -789,7 +791,7 @@
       : "";
     const textWidth = imageUrl ? "60%" : "100%";
 
-    return `<div style="margin-top:28px;padding:28px 26px;border:1px solid #e6ddd1;background:#fbfaf7;text-align:center;box-sizing:border-box;"><div style="display:inline-block;width:${textWidth};min-width:280px;vertical-align:middle;text-align:left;box-sizing:border-box;padding:0 20px 0 0;"><div style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:${primary};font-weight:bold;margin-bottom:10px;">Atelier Orlo</div><p style="margin:0;color:#4b463f;font-size:17px;line-height:1.65;">${escapeHtml(text)}</p>${button}</div>${image}</div>`;
+    return `<div style="margin-top:28px;padding:28px 26px;border:1px solid #e6ddd1;background:#fbfaf7;text-align:center;box-sizing:border-box;"><div style="display:inline-block;width:${textWidth};min-width:280px;vertical-align:middle;text-align:left;box-sizing:border-box;padding:0 20px 0 0;"><div style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:${primary};font-weight:bold;margin-bottom:10px;">${escapeHtml(heading)}</div><p style="margin:0;color:#4b463f;font-size:17px;line-height:1.65;">${escapeHtml(text)}</p>${button}</div>${image}</div>`;
   }
 
   function renderListingTemplate(product, config, details) {

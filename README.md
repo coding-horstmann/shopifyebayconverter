@@ -65,7 +65,7 @@ Die Shopify-Beschreibung steht im Template direkt oben unter Titel und Headline.
 
 Der Footer-Satz unten in der Beschreibung kann im Dashboard frei geändert werden.
 
-Optional kann unten in der Beschreibung ein Kontaktbereich mit Kontaktbild, Sie-Text und Button eingeblendet werden. Der Text mit Button steht links, das Kontaktbild rechts und deutlich größer. Für das Kontaktbild muss eine öffentliche HTTPS-URL verwendet werden; ein transparentes PNG/WebP bleibt transparent, wenn die Bilddatei selbst Transparenz enthält. Für den Button ist die stabilste eBay-URL in der Regel die Verkäuferprofilseite, z. B. `https://www.ebay.de/usr/ihrNutzername`; eBay zeigt angemeldeten Käufern dort die Kontaktmöglichkeit, sofern verfügbar.
+Optional kann unten in der Beschreibung ein Kontaktbereich mit eigener Überschrift, Kontaktbild, Sie-Text und Button eingeblendet werden. Bleibt die Kontakt-Überschrift leer, verwendet der Converter den Shop-Namen. Der Text mit Button steht links, das Kontaktbild rechts und deutlich größer. Für das Kontaktbild muss eine öffentliche HTTPS-URL verwendet werden; ein transparentes PNG/WebP bleibt transparent, wenn die Bilddatei selbst Transparenz enthält. Für den Button ist die stabilste eBay-URL in der Regel die Verkäuferprofilseite, z. B. `https://www.ebay.de/usr/ihrNutzername`; eBay zeigt angemeldeten Käufern dort die Kontaktmöglichkeit, sofern verfügbar.
 
 Für Logos und Icons müssen öffentlich abrufbare HTTPS-URLs verwendet werden. Lokale Datei-Uploads bzw. `data:image/...`-Data-URLs werden nicht in die CSV eingebettet, weil eBay solche Base64-Beschreibungen wegen der Beschreibungslänge ablehnen kann.
 
