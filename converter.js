@@ -870,7 +870,7 @@
     const heading = String(template.contactHeading || template.shopName || "").trim();
     const text = formalizeGermanAddress(template.contactText || DEFAULT_LISTING_TEMPLATE.contactText);
     const image = imageUrl
-      ? `<div style="display:inline-block;width:42%;min-width:260px;vertical-align:middle;text-align:center;box-sizing:border-box;padding:0 0 0 28px;"><img src="${escapeHtml(imageUrl)}" alt="" style="display:block;max-width:506px;max-height:379px;width:auto;height:auto;margin:0 auto;background:transparent;"></div>`
+      ? `<div style="display:inline-block;width:42%;min-width:260px;vertical-align:middle;text-align:center;box-sizing:border-box;padding:0 0 0 28px;"><img src="${escapeHtml(imageUrl)}" alt="" style="display:block;max-width:430px;max-height:322px;width:auto;height:auto;margin:0 auto;background:transparent;"></div>`
       : "";
     const button = buttonUrl
       ? `<a href="${escapeHtml(buttonUrl)}" target="_blank" rel="noopener" style="display:inline-block;margin-top:14px;padding:12px 20px;background:${accent};color:#fff;text-decoration:none;border-radius:4px;font-weight:bold;font-size:15px;">${escapeHtml(template.contactButtonLabel || DEFAULT_LISTING_TEMPLATE.contactButtonLabel)}</a>`
@@ -881,7 +881,7 @@
       ? `<div style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:${primary};font-weight:bold;margin-bottom:10px;">${escapeHtml(heading)}</div>`
       : "";
 
-    return `<div style="margin-top:28px;padding:24px 26px 0;border:1px solid #e6ddd1;background:#fbfaf7;text-align:center;box-sizing:border-box;"><div style="max-width:1040px;margin:0 auto;text-align:center;"><div style="display:inline-block;width:${textWidth};max-width:540px;min-width:280px;vertical-align:middle;text-align:left;box-sizing:border-box;padding:0 28px 24px 0;">${headingBlock}<p style="margin:0;color:#4b463f;font-size:17px;line-height:1.65;">${escapeHtml(text)}</p>${button}</div>${image}</div></div>`;
+    return `<div style="margin-top:28px;padding:20px 26px 0;border:1px solid #e6ddd1;background:#fbfaf7;text-align:center;box-sizing:border-box;"><div style="max-width:1040px;margin:0 auto;text-align:center;"><div style="display:inline-block;width:${textWidth};max-width:540px;min-width:280px;vertical-align:middle;text-align:left;box-sizing:border-box;padding:0 28px 20px 0;">${headingBlock}<p style="margin:0;color:#4b463f;font-size:17px;line-height:1.65;">${escapeHtml(text)}</p>${button}</div>${image}</div></div>`;
   }
 
   function renderListingTemplate(product, config, details) {
