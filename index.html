@@ -189,7 +189,8 @@
             </div>
             <div class="field">
               <label for="logoFile">Logo-Datei</label>
-              <input id="logoFile" type="file" accept="image/*" />
+              <input id="logoFile" type="file" accept="image/*" disabled />
+              <small>FÃ¼r eBay bitte eine Ã¶ffentliche HTTPS-Logo-URL nutzen. Lokale Dateien werden nicht in die CSV eingebettet.</small>
             </div>
           </div>
 
@@ -683,7 +684,7 @@
           enabled: elements.templateEnabled.checked,
           showHeroImage: elements.showHeroImage.checked,
           shopName: elements.shopName.value.trim(),
-          logoUrl: state.logoDataUrl || elements.logoUrl.value.trim(),
+          logoUrl: elements.logoUrl.value.trim(),
           headline: elements.listingHeadline.value.trim(),
           intro: elements.listingIntro.value.trim(),
           primaryColor: elements.primaryColor.value,
@@ -888,12 +889,20 @@
             state.needsTagRender = false;
           }
           const result = EbayConverter.convert(state.shopifyText, collectConfig());
+          const hasMissingReviseItemIds = result.warnings.some((warning) => warning.includes("keine ItemID fÃ¼r Revise"));
           state.result = result;
           renderStats(result.summary);
-          renderWarnings(result.warnings);
+          renderWarnings(
+            hasMissingReviseItemIds
+              ? [
+                  "Revise-Download blockiert: Es fehlen eBay-ItemIDs. Lade zuerst die eBay-Ergebnisdatei oder einen Active-Listings-Export im Feld \"eBay Ergebnisdatei / aktive Angebote\" hoch.",
+                  ...result.warnings,
+                ]
+              : result.warnings,
+          );
           renderPreview(result.analysis);
-          elements.downloadBtn.disabled = false;
-          elements.sampleBtn.disabled = false;
+          elements.downloadBtn.disabled = hasMissingReviseItemIds;
+          elements.sampleBtn.disabled = hasMissingReviseItemIds;
         } catch (error) {
           state.result = null;
           renderWarnings([error.message || String(error)]);
@@ -965,8 +974,8 @@
       });
 
       elements.logoFile.addEventListener("change", async (event) => {
-        const file = event.target.files[0];
-        state.logoDataUrl = file ? await readDataUrl(file) : "";
+        event.target.value = "";
+        state.logoDataUrl = "";
         updateConversion();
       });
 

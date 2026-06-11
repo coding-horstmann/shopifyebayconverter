@@ -20,7 +20,7 @@ Lokales und Vercel-taugliches Tool für Shopify-Exports von Atelier Orlo. Ziel i
 
 Wichtig: Der Standardexport nutzt `VerifyAdd`. eBay prüft damit die Datei, erstellt aber keine aktiven Angebote. `Add` veröffentlicht direkt aktive Angebote. `Draft` ist im Dashboard auswählbar, war bei eBay-Varianten im bisherigen Test aber unzuverlässiger als `VerifyAdd`.
 
-Für bereits veröffentlichte Angebote kann der Converter `Revise` schreiben. Dafür braucht er eine Datei mit den eBay-`ItemID`s, am einfachsten die eBay-Ergebnisdatei des erfolgreichen Uploads. Bei Varianten steht `Revise` und `ItemID` nur auf der Parent-Zeile; die Child-Zeilen bleiben in `Action` und `ItemID` leer.
+Für bereits veröffentlichte Angebote kann der Converter `Revise` schreiben. Dafür braucht er eine Datei mit den eBay-`ItemID`s, am einfachsten die eBay-Ergebnisdatei des erfolgreichen Uploads oder einen Active-Listings-Export. Bei Varianten steht `Revise` und `ItemID` nur auf der Parent-Zeile; die Child-Zeilen bleiben in `Action` und `ItemID` leer. In der Oberfläche wird der Revise-Download blockiert, wenn für mindestens ein Parent-Listing keine `ItemID` gefunden wurde.
 
 Der Standard ist `1 Listing mit Größenvarianten`. Der Converter gruppiert Shopify-Zeilen nach `Handle` und erzeugt:
 
@@ -63,7 +63,7 @@ Die Beschreibung nutzt ein mobiles Ein-Spalten-Template mit Logo, CSS-Bildkaruss
 
 Die Shopify-Beschreibung steht im Template direkt oben unter Titel und Headline. Der frühere generische Intro-Satz wird nicht mehr ausgegeben.
 
-Für Logos und Icons sind öffentlich abrufbare HTTPS-URLs am zuverlässigsten. Datei-Uploads im Dashboard werden als Data-URL eingebettet, können aber je nach eBay-HTML-Filter weniger robust sein.
+Für Logos und Icons müssen öffentlich abrufbare HTTPS-URLs verwendet werden. Lokale Datei-Uploads bzw. `data:image/...`-Data-URLs werden nicht in die CSV eingebettet, weil eBay solche Base64-Beschreibungen wegen der Beschreibungslänge ablehnen kann.
 
 ## Hersteller und EU-Versand
 

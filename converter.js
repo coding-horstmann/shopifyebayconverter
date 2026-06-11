@@ -374,7 +374,33 @@
   }
 
   function normalizeUrl(value) {
-    return String(value || "").trim().replace(/\s/g, "%20");
+    const url = String(value || "").trim();
+    if (!url || /^data:/i.test(url) || !/^https?:\/\//i.test(url)) {
+      return "";
+    }
+    return url.replace(/\s/g, "%20");
+  }
+
+  function hasEmbeddedImageData(value) {
+    return /data:image\//i.test(String(value || ""));
+  }
+
+  function embeddedAssetWarning(config) {
+    const template = { ...DEFAULT_LISTING_TEMPLATE, ...(config.listingTemplate || {}) };
+    const values = [
+      template.logoUrl,
+      template.highlight1IconUrl,
+      template.highlight2IconUrl,
+      template.highlight3IconUrl,
+      template.highlight4IconUrl,
+      template.highlight5IconUrl,
+      config.extraImageUrls,
+      config.productExtraImageUrls,
+    ];
+    if (!values.some(hasEmbeddedImageData)) {
+      return "";
+    }
+    return "Eingebettete Datei-Uploads/Data-URLs wurden nicht in die eBay-Beschreibung exportiert. eBay lehnt zu große Base64-Beschreibungen ab; nutze für Logo und Icons öffentliche HTTPS-URLs.";
   }
 
   function slugPart(value) {
@@ -1566,6 +1592,10 @@
     const gpsrResponsiblePersonWarning = gpsrResponsiblePersonRequiredWarning(config);
     if (gpsrResponsiblePersonWarning) {
       warnings.push(gpsrResponsiblePersonWarning);
+    }
+    const assetWarning = embeddedAssetWarning(config);
+    if (assetWarning) {
+      warnings.push(assetWarning);
     }
     let productsWithVariants = 0;
     let productsWithoutImages = 0;
