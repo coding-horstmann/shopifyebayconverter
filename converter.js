@@ -657,7 +657,7 @@
     const slides = galleryImages
       .map(
         (url, index) =>
-          `<img class="orlo-slide orlo-slide-${index + 1}" src="${escapeHtml(url)}" alt="${escapeHtml(title)} ${index + 1}" style="grid-area:1/1;display:block;width:100%;max-width:1120px;height:auto;margin:0 auto;border:1px solid #e6ddd1;border-radius:8px;box-sizing:border-box;opacity:${index === 0 ? "1" : "0"};animation:orloFade ${duration}s infinite;animation-delay:${index * 4}s;">`,
+          `<img class="orlo-slide orlo-slide-${index + 1}" src="${escapeHtml(url)}" alt="${escapeHtml(title)} ${index + 1}" style="grid-area:1/1;display:block;max-width:100%;width:auto;height:auto;max-height:720px;margin:0 auto;border:1px solid #e6ddd1;border-radius:8px;box-sizing:border-box;opacity:${index === 0 ? "1" : "0"};animation:orloFade ${duration}s infinite;animation-delay:${index * 4}s;">`,
       )
       .join("");
     const thumbs = galleryImages
@@ -680,7 +680,7 @@
       `<style>@keyframes orloFade{0%{opacity:1}${visibleEnd}%{opacity:1}${fadeEnd}%{opacity:0}100%{opacity:0}}${pauseAllRules}{opacity:0!important;animation:none!important;}${selectedRules}</style>`,
       `<div style="margin:0 0 24px;width:100%;box-sizing:border-box;">`,
       inputs,
-      `<div class="orlo-hero" style="display:grid;grid-template-columns:1fr;align-items:start;justify-items:center;width:100%;max-width:1120px;margin:0 auto;background:transparent;box-sizing:border-box;">${slides}</div>`,
+      `<div class="orlo-hero" style="display:grid;grid-template-columns:1fr;align-items:start;justify-items:center;width:100%;max-width:900px;margin:0 auto;background:transparent;box-sizing:border-box;">${slides}</div>`,
       `<div class="orlo-thumbs" style="display:block;margin-top:12px;text-align:center;line-height:0;">${thumbs}</div>`,
       `</div>`,
     ].join("");
@@ -782,13 +782,14 @@
     const buttonUrl = normalizeUrl(template.contactButtonUrl);
     const text = formalizeGermanAddress(template.contactText || DEFAULT_LISTING_TEMPLATE.contactText);
     const image = imageUrl
-      ? `<img src="${escapeHtml(imageUrl)}" alt="" style="display:block;max-width:220px;max-height:160px;width:auto;height:auto;margin:0 auto 16px;background:transparent;">`
+      ? `<div style="display:inline-block;width:36%;min-width:230px;vertical-align:middle;text-align:center;box-sizing:border-box;padding:0 0 0 20px;"><img src="${escapeHtml(imageUrl)}" alt="" style="display:block;max-width:360px;max-height:270px;width:auto;height:auto;margin:0 auto;background:transparent;"></div>`
       : "";
     const button = buttonUrl
       ? `<a href="${escapeHtml(buttonUrl)}" target="_blank" rel="noopener" style="display:inline-block;margin-top:14px;padding:12px 20px;background:${accent};color:#fff;text-decoration:none;border-radius:4px;font-weight:bold;font-size:15px;">${escapeHtml(template.contactButtonLabel || DEFAULT_LISTING_TEMPLATE.contactButtonLabel)}</a>`
       : "";
+    const textWidth = imageUrl ? "60%" : "100%";
 
-    return `<div style="margin-top:28px;padding:24px 18px;border:1px solid #e6ddd1;background:#fbfaf7;text-align:center;box-sizing:border-box;">${image}<div style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:${primary};font-weight:bold;margin-bottom:8px;">Atelier Orlo</div><p style="max-width:620px;margin:0 auto;color:#4b463f;font-size:16px;line-height:1.65;">${escapeHtml(text)}</p>${button}</div>`;
+    return `<div style="margin-top:28px;padding:28px 26px;border:1px solid #e6ddd1;background:#fbfaf7;text-align:center;box-sizing:border-box;"><div style="display:inline-block;width:${textWidth};min-width:280px;vertical-align:middle;text-align:left;box-sizing:border-box;padding:0 20px 0 0;"><div style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:${primary};font-weight:bold;margin-bottom:10px;">Atelier Orlo</div><p style="margin:0;color:#4b463f;font-size:17px;line-height:1.65;">${escapeHtml(text)}</p>${button}</div>${image}</div>`;
   }
 
   function renderListingTemplate(product, config, details) {
