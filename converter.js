@@ -223,6 +223,10 @@
     };
   }
 
+  function findObjectKey(record, patterns) {
+    return Object.keys(record || {}).find((key) => patterns.some((pattern) => pattern.test(key))) || "";
+  }
+
   function parseShopify(text) {
     const delimiter = detectDelimiter(text);
     const rows = parseCsvRows(text, delimiter);
@@ -257,6 +261,69 @@
       delimiter,
       infoRows,
       headers: headers.length ? headers : DEFAULT_HEADERS.slice(),
+    };
+  }
+
+  function parseItemIdMappings(text) {
+    if (!text) {
+      return {
+        lineOrder: [],
+        bySku: {},
+        byTitle: {},
+      };
+    }
+
+    const delimiter = detectDelimiter(text);
+    const rows = parseCsvRows(text, delimiter);
+    const headerIndex = rows.findIndex((row) =>
+      row.some((cell) => /^(Line Number|ItemID|Item ID|SellerInventoryID|CustomLabel|Custom label|Title)$/i.test(String(cell || "").trim())),
+    );
+    if (headerIndex < 0) {
+      return {
+        lineOrder: [],
+        bySku: {},
+        byTitle: {},
+      };
+    }
+
+    const parsed = rowsToObjects(rows, headerIndex);
+    const entries = [];
+    parsed.rows.forEach((record, index) => {
+      const itemKey = findObjectKey(record, [/^ItemID$/i, /^Item ID$/i, /^eBay item number$/i, /^eBay item ID$/i]);
+      const lineKey = findObjectKey(record, [/^Line Number$/i, /^Line$/i]);
+      const skuKey = findObjectKey(record, [/^SellerInventoryID$/i, /^CustomLabel$/i, /^Custom label/i, /^Custom label \(SKU\)$/i, /^SKU$/i]);
+      const titleKey = findObjectKey(record, [/^\*?Title$/i]);
+      const itemId = String(record[itemKey] || "").trim();
+      if (!itemId) {
+        return;
+      }
+      entries.push({
+        itemId,
+        lineNumber: Number(record[lineKey]) || 0,
+        sku: String(record[skuKey] || "").trim(),
+        title: String(record[titleKey] || "").trim(),
+        index,
+      });
+    });
+
+    const sorted = entries
+      .slice()
+      .sort((left, right) => (left.lineNumber || 999999 + left.index) - (right.lineNumber || 999999 + right.index));
+    const bySku = {};
+    const byTitle = {};
+    entries.forEach((entry) => {
+      if (entry.sku && !bySku[entry.sku]) {
+        bySku[entry.sku] = entry.itemId;
+      }
+      if (entry.title && !byTitle[entry.title]) {
+        byTitle[entry.title] = entry.itemId;
+      }
+    });
+
+    return {
+      lineOrder: sorted.map((entry) => entry.itemId),
+      bySku,
+      byTitle,
     };
   }
 
@@ -1130,6 +1197,29 @@
     return "RelationshipDetails";
   }
 
+  function isReviseAction(actionValue) {
+    return /^Revise/i.test(String(actionValue || "").trim());
+  }
+
+  function findReviseItemId(map, product, variants, parentIndex) {
+    const ordered = map.lineOrder[parentIndex];
+    if (ordered) {
+      return ordered;
+    }
+    const handleSku = makeSku(product.handle);
+    if (map.bySku[handleSku]) {
+      return map.bySku[handleSku];
+    }
+    const firstVariantSku = variants && variants[0] && variants[0].sku;
+    if (firstVariantSku && map.bySku[firstVariantSku]) {
+      return map.bySku[firstVariantSku];
+    }
+    if (product.title && map.byTitle[product.title]) {
+      return map.byTitle[product.title];
+    }
+    return "";
+  }
+
   function buildDescription(product, config, details) {
     const template = { ...DEFAULT_LISTING_TEMPLATE, ...(config.listingTemplate || {}) };
     if (template.enabled !== false) {
@@ -1159,6 +1249,7 @@
       extraImageUrls: "",
       productExtraImageUrls: "",
       extraImagesPosition: "after-main",
+      itemIdMapText: "",
       upcValue: "",
       priceMultiplier: 1,
       priceAdd: 0,
@@ -1206,6 +1297,9 @@
       ? normalizeRelationshipDetailsHeader(headers)
       : findHeader(headers, "relationshipDetails") || ensureHeader(headers, defaultRelationshipDetailsHeader(actionHeader));
     const actionValue = pickActionValue(actionHeader, config);
+    const reviseMode = isReviseAction(actionValue);
+    const itemIdHeader = reviseMode ? ensureHeader(headers, "ItemID") : findExactHeader(headers, ["ItemID", "Item ID"]);
+    const itemIdMap = reviseMode ? parseItemIdMappings(config.itemIdMapText) : { lineOrder: [], bySku: {}, byTitle: {} };
 
     const addSpecificPrefix = (key) => {
       const clean = String(key || "").trim();
@@ -1231,6 +1325,7 @@
     let productsWithVariants = 0;
     let productsWithoutImages = 0;
     let usedImages = 0;
+    let reviseParentIndex = 0;
 
     analysis.products.forEach((product) => {
       const variants = product.variants.length ? product.variants : [{ sku: product.handle, price: product.firstPrice }];
@@ -1295,6 +1390,15 @@
       }
 
       setIfHeader(parent, actionHeader, actionValue);
+      if (reviseMode) {
+        const itemId = findReviseItemId(itemIdMap, product, variants, reviseParentIndex);
+        if (itemId) {
+          setIfHeader(parent, itemIdHeader, itemId);
+        } else {
+          warnings.push(`${product.handle}: keine ItemID für Revise gefunden. Lade die eBay-Ergebnisdatei oder einen Active-Listings-Export mit ItemID hoch.`);
+        }
+        reviseParentIndex += 1;
+      }
       setIfHeader(parent, skuHeader, hasVariants ? "" : makeSku(product.handle));
       setIfHeader(parent, productNameHeader, cleanTitle(product.title, 80));
       setIfHeader(parent, categoryHeader, config.categoryId);

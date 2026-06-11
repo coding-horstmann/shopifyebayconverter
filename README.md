@@ -8,16 +8,19 @@ Lokales und Vercel-taugliches Tool für Shopify-Exports von Atelier Orlo. Ziel i
 
 1. Shopify-CSV bei `Shopify CSV` laden.
 2. Optional eine eBay-SMP/File-Exchange-Vorlage bei `eBay Vorlage` laden. Ohne Vorlage nutzt der Converter jetzt ebenfalls eine SMP-kompatible Header-Zeile, nicht mehr die eBay-Draft-Vorlage.
-3. `Category ID`, Bestand je Größe, Artikelzustand, MwSt., Bilderzahl, Listing-Modus und eBay Upload-Aktion setzen.
+3. Für bestehende aktive Angebote optional die eBay-Ergebnisdatei oder einen Active-Listings-Export mit `ItemID` bei `eBay Ergebnisdatei / aktive Angebote` laden.
+4. `Category ID`, Bestand je Größe, Artikelzustand, MwSt., Bilderzahl, Listing-Modus und eBay Upload-Aktion setzen.
 4. Zusatzfotos global oder produkt-spezifisch per Shopify-Handle ergänzen und die Position festlegen.
 5. Im Bereich `Listing-Design` Logo, globale Texte, Farben und Icon-Blöcke für alle eBay-Beschreibungen pflegen.
 6. Herstellerdaten, eBay-Rahmenbedingungen und optionale internationale Versandspalten setzen.
 7. Automatische Merkmale aktivieren, deaktivieren oder auf eBay-Spaltennamen umbenennen.
-8. Zuerst im Standardmodus `Nur prüfen - keine Angebote erstellen` testen, danach nur bewusst auf `Aktiv veröffentlichen` umstellen.
+8. Zuerst im Standardmodus `Nur prüfen - keine Angebote erstellen` testen, danach nur bewusst auf `Aktiv veröffentlichen` oder `Bestehende aktive Angebote bearbeiten` umstellen.
 
 ## eBay-Varianten
 
 Wichtig: Der Standardexport nutzt `VerifyAdd`. eBay prüft damit die Datei, erstellt aber keine aktiven Angebote. `Add` veröffentlicht direkt aktive Angebote. `Draft` ist im Dashboard auswählbar, war bei eBay-Varianten im bisherigen Test aber unzuverlässiger als `VerifyAdd`.
+
+Für bereits veröffentlichte Angebote kann der Converter `Revise` schreiben. Dafür braucht er eine Datei mit den eBay-`ItemID`s, am einfachsten die eBay-Ergebnisdatei des erfolgreichen Uploads. Bei Varianten steht `Revise` und `ItemID` nur auf der Parent-Zeile; die Child-Zeilen bleiben in `Action` und `ItemID` leer.
 
 Der Standard ist `1 Listing mit Größenvarianten`. Der Converter gruppiert Shopify-Zeilen nach `Handle` und erzeugt:
 
@@ -90,6 +93,7 @@ node .\cli.js `
 
 Mit `--sample 5` wird nur ein Testexport für die ersten fünf Produkte gebaut.
 Standard ist `--action VerifyAdd`, damit eBay die Datei erst prüft. Mit `--publish` oder `--action Add` werden aktive Angebote veröffentlicht. Mit `--draft` oder `--action Draft` wird `Draft` geschrieben.
+Mit `--revise --item-id-map "eBay-Ergebnisdatei.csv"` wird eine Revise-Datei für bestehende aktive Angebote erzeugt.
 Mit `--listing-mode flat` wird der alte Einzel-Listing-Modus erzwungen.
 Mit `--extra-images` werden globale Zusatzbilder ergänzt.
 Mit `--product-extra-images` werden Zusatzbilder produkt-spezifisch nach Shopify-Handle ergänzt.

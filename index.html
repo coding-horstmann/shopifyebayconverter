@@ -33,6 +33,14 @@
             <input id="templateFile" type="file" accept=".csv,text/csv" />
           </div>
 
+          <div class="field">
+            <label for="itemIdMapFile">eBay Ergebnisdatei / aktive Angebote</label>
+            <input id="itemIdMapFile" type="file" accept=".csv,text/csv" />
+            <p class="hint">
+              Für Revise: eBay-Ergebnis-CSV mit ItemID hochladen, damit bestehende aktive Angebote überschrieben werden.
+            </p>
+          </div>
+
           <div class="grid two">
             <div class="field">
               <label for="categoryId">Category ID</label>
@@ -88,10 +96,11 @@
             <select id="uploadAction">
               <option value="VerifyAdd" selected>Nur prüfen - keine Angebote erstellen</option>
               <option value="Draft">Entwurf erstellen</option>
+              <option value="Revise">Bestehende aktive Angebote bearbeiten</option>
               <option value="Add">Aktiv veröffentlichen</option>
             </select>
             <p class="hint">
-              Standard ist VerifyAdd. Add veröffentlicht direkt aktive Angebote. Draft ist bei eBay-Varianten je nach Importweg unzuverlässig.
+              Standard ist VerifyAdd. Add veröffentlicht direkt aktive Angebote. Revise benötigt eine eBay-Ergebnisdatei mit ItemID.
             </p>
           </div>
 
@@ -418,6 +427,7 @@
       const state = {
         shopifyText: "",
         templateText: "",
+        itemIdMapText: "",
         analysis: null,
         result: null,
         tagSelections: new Set(),
@@ -430,6 +440,7 @@
       const elements = {
         shopifyFile: document.getElementById("shopifyFile"),
         templateFile: document.getElementById("templateFile"),
+        itemIdMapFile: document.getElementById("itemIdMapFile"),
         categoryId: document.getElementById("categoryId"),
         conditionId: document.getElementById("conditionId"),
         quantity: document.getElementById("quantity"),
@@ -644,6 +655,7 @@
           extraImageUrls: elements.extraImageUrls.value,
           productExtraImageUrls: elements.productExtraImageUrls.value,
           extraImagesPosition: elements.extraImagesPosition.value,
+          itemIdMapText: state.itemIdMapText,
           variationTraitName: elements.variationTraitName.value.trim() || "Größe",
           format: elements.format.value,
           listingMode: elements.listingMode.value,
@@ -747,6 +759,7 @@
         const labels = {
           VerifyAdd: ["Prüf-CSV herunterladen", "5 Produkte prüfen"],
           Draft: ["Entwurf-CSV herunterladen", "5 Entwürfe exportieren"],
+          Revise: ["Revise-CSV herunterladen", "5 Angebote bearbeiten"],
           Add: ["Aktiv-CSV herunterladen", "5 aktive Angebote exportieren"],
         };
         const [downloadLabel, sampleLabel] = labels[elements.uploadAction.value] || labels.VerifyAdd;
@@ -828,6 +841,7 @@
         return {
           VerifyAdd: "verify",
           Draft: "draft",
+          Revise: "revise",
           Add: "add",
         }[elements.uploadAction.value] || "verify";
       }
@@ -864,6 +878,12 @@
       elements.templateFile.addEventListener("change", async (event) => {
         const file = event.target.files[0];
         state.templateText = file ? await readFile(file) : "";
+        updateConversion();
+      });
+
+      elements.itemIdMapFile.addEventListener("change", async (event) => {
+        const file = event.target.files[0];
+        state.itemIdMapText = file ? await readFile(file) : "";
         updateConversion();
       });
 
