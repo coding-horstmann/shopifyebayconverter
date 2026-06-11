@@ -248,16 +248,6 @@
           </div>
 
           <div class="field">
-            <label for="qualityText">Material und Druck</label>
-            <textarea id="qualityText" rows="3"></textarea>
-          </div>
-
-          <div class="field">
-            <label for="shippingText">Produktion und Versand</label>
-            <textarea id="shippingText" rows="3"></textarea>
-          </div>
-
-          <div class="field">
             <label for="noteText">Hinweis</label>
             <textarea id="noteText" rows="3"></textarea>
           </div>
@@ -267,7 +257,7 @@
           </div>
           <p class="hint">
             eBay-GPSR-Spalten werden nur geschrieben, wenn Name, Straße, Ort, PLZ und Land vollständig sind.
-            Unvollständige Angaben erscheinen nur in der Beschreibung.
+            Unvollständige Angaben werden nicht exportiert, weil eBay den Upload sonst ablehnen kann.
           </p>
 
           <div class="grid two">
@@ -539,8 +529,6 @@
         highlight5IconUrl: document.getElementById("highlight5IconUrl"),
         highlight5Title: document.getElementById("highlight5Title"),
         highlight5Text: document.getElementById("highlight5Text"),
-        qualityText: document.getElementById("qualityText"),
-        shippingText: document.getElementById("shippingText"),
         noteText: document.getElementById("noteText"),
         manufacturerName: document.getElementById("manufacturerName"),
         manufacturerCountry: document.getElementById("manufacturerCountry"),
@@ -672,8 +660,6 @@
         elements.highlight5IconUrl.value = template.highlight5IconUrl || "";
         elements.highlight5Title.value = template.highlight5Title || "";
         elements.highlight5Text.value = template.highlight5Text || "";
-        elements.qualityText.value = template.qualityText || "";
-        elements.shippingText.value = template.shippingText || "";
         elements.noteText.value = template.noteText || "";
       }
 
@@ -705,8 +691,6 @@
           highlight5IconUrl: elements.highlight5IconUrl.value.trim(),
           highlight5Title: elements.highlight5Title.value.trim(),
           highlight5Text: elements.highlight5Text.value.trim(),
-          qualityText: elements.qualityText.value.trim(),
-          shippingText: elements.shippingText.value.trim(),
           noteText: elements.noteText.value.trim(),
         };
       }
@@ -1021,8 +1005,6 @@
         elements.highlight5IconUrl,
         elements.highlight5Title,
         elements.highlight5Text,
-        elements.qualityText,
-        elements.shippingText,
         elements.noteText,
         elements.manufacturerName,
         elements.manufacturerCountry,

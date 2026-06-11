@@ -35,7 +35,7 @@ Der Flat-Modus bleibt nur als Fallback erhalten und erzeugt bewusst ein eigenes 
 
 Wenn eine eBay-Vorlage hochgeladen wird, bleibt deren erste Zeile unverändert die erste Zeile im Export. Ohne Vorlage nutzt der Converter die SMPBase-kompatible Zeile `*Action(SiteID=Germany|Country=DE|Currency=EUR|Version=941)` als erste Zeile.
 
-Wenn ein Shopify-Produkt nur eine Variante hat, erzeugt der Converter kein künstliches eBay-Variantenlisting. Die Größe wird dann als normales Artikelmerkmal, z. B. `C:Größe`, und in der HTML-Beschreibung ausgegeben.
+Wenn ein Shopify-Produkt nur eine Variante hat, erzeugt der Converter kein künstliches eBay-Variantenlisting. Die Größe wird dann als normales Artikelmerkmal, z. B. `C:Größe`, und zusätzlich sichtbar oben in der HTML-Beschreibung ausgegeben. Das gilt für neue Listings (`Add`/`VerifyAdd`) und für bestehende Listings (`Revise`).
 
 ## Fotos
 
@@ -61,13 +61,13 @@ Die MwSt. wird standardmäßig als `VATPercent=19` geschrieben.
 
 Die Beschreibung nutzt ein mobiles Ein-Spalten-Template mit Logo, CSS-Bildkarussell, Thumbnail-Vorschau mit echtem Bildverhältnis und fünf Icon-/Trust-Blöcken. Das funktioniert ohne JavaScript. Beim Klick auf ein Vorschaubild wird die CSS-Rotation gestoppt und das gewählte Bild fixiert, sofern eBay die dafür nötigen HTML-Controls nicht entfernt. Falls eBay einzelne CSS-Animationen entfernt, bleibt das erste Bild sichtbar und alle Bilder stehen weiterhin als Thumbnails sowie in der eBay-Fotospalte.
 
-Die Shopify-Beschreibung steht im Template direkt oben unter Titel und Headline. Der frühere generische Intro-Satz wird nicht mehr ausgegeben.
+Die Shopify-Beschreibung steht im Template direkt oben unter Titel und Headline. Der frühere generische Intro-Satz wird nicht mehr ausgegeben. `Material und Druck` sowie `Produktion und Versand` werden nicht mehr als eigene Textblöcke erzeugt. `Hinweis` erscheint nur, wenn im Dashboard ein Hinweistext eingetragen wurde.
 
 Für Logos und Icons müssen öffentlich abrufbare HTTPS-URLs verwendet werden. Lokale Datei-Uploads bzw. `data:image/...`-Data-URLs werden nicht in die CSV eingebettet, weil eBay solche Base64-Beschreibungen wegen der Beschreibungslänge ablehnen kann.
 
 ## Hersteller und EU-Versand
 
-Herstellerdaten werden als GPSR-kompatible Spalten ergänzt, z. B. `Manufacturer Name`, `Manufacturer AddressLine1`, `Manufacturer City`, `Manufacturer Country`, `Manufacturer PostalCode`, `Manufacturer StateOrProvince`, `Manufacturer Phone`, `Manufacturer Email` und `Manufacturer ContactUrl`. Der Converter schreibt diese eBay-Spalten nur, wenn mindestens Name, Straße, Ort, PLZ und Land vollständig ausgefüllt sind. Unvollständige Herstellerdaten werden nicht als eBay-GPSR-Spalten exportiert, weil eBay sonst den gesamten Upload ablehnt. Zusätzlich erscheinen ausgefüllte Herstellerdaten unten in der HTML-Beschreibung in einem aufklappbaren Bereich.
+Herstellerdaten werden als GPSR-kompatible Spalten ergänzt, z. B. `Manufacturer Name`, `Manufacturer AddressLine1`, `Manufacturer City`, `Manufacturer Country`, `Manufacturer PostalCode`, `Manufacturer StateOrProvince`, `Manufacturer Phone`, `Manufacturer Email` und `Manufacturer ContactUrl`. Der Converter schreibt diese eBay-Spalten nur, wenn mindestens Name, Straße, Ort, PLZ und Land vollständig ausgefüllt sind. Unvollständige Herstellerdaten werden nicht als eBay-GPSR-Spalten exportiert, weil eBay sonst den gesamten Upload ablehnt. Herstellerdaten werden nicht zusätzlich in der HTML-Beschreibung wiederholt, weil eBay sie separat im Bereich Produktsicherheit anzeigt.
 
 `Manufacturer Country` und `ResponsiblePerson Country` werden als zweistellige ISO-Codes geschrieben. Gängige Eingaben wie `NOR`, `Norwegen` oder `Norway` werden zu `NO`; `Deutschland` wird zu `DE`. Wenn der Hersteller außerhalb EU/Nordirland sitzt, z. B. Gelato ASA in Norwegen, kann eBay zusätzlich eine `ResponsiblePerson` in EU/Nordirland verlangen. Dafür gibt es im Dashboard den Block `EU-verantwortliche Person`; bei vollständiger Eingabe exportiert der Converter u. a. `ResponsiblePerson CompanyName`, `ResponsiblePerson Country`, `ResponsiblePerson Email` und `ResponsiblePerson Types=EUResponsiblePerson`.
 

@@ -89,15 +89,12 @@
     highlight5IconUrl: "",
     highlight5Title: "Ohne Rahmen",
     highlight5Text: "Alle Poster werden ungerahmt geliefert. So wählst du den Rahmen passend zu deinem Raum.",
-    qualityTitle: "Material und Druck",
-    qualityText:
-      "Gedruckt auf FSC-Premiumpapier oder gleichwertigem Papier mit matter Oberfläche. Die Farben wirken klar, ruhig und wohnlich.",
-    shippingTitle: "Produktion und Versand",
-    shippingText:
-      "Jeder Kunstdruck wird nach Bestellung produziert und sicher verpackt verschickt. Die Lieferzeit kann je nach Zielland leicht variieren.",
+    qualityTitle: "",
+    qualityText: "",
+    shippingTitle: "",
+    shippingText: "",
     noteTitle: "Hinweis",
-    noteText:
-      "Farben können je nach Bildschirm leicht abweichen. Rahmen, Passepartout und Dekoration sind nicht Teil des Angebots.",
+    noteText: "",
     footerText: "Atelier Orlo - Vintage Poster, Plakatkunst und Kunstdrucke für besondere Räume.",
   };
 
@@ -746,7 +743,6 @@
     const suffix = String(config.descriptionSuffix || "").trim();
     const images = details && details.images ? details.images : buildProductImages(product, config);
     const gallery = renderPhotoGallery(images, title, template);
-    const manufacturerBlock = renderManufacturerDisclosure(config, primary);
     const logoUrl = normalizeUrl(template.logoUrl);
     const logoBlock = logoUrl
       ? `<img src="${escapeHtml(logoUrl)}" alt="${escapeHtml(template.shopName)}" style="display:block;max-width:170px;max-height:80px;height:auto;">`
@@ -765,6 +761,13 @@
     const suffixBlock = suffix
       ? `<div style="margin-top:22px;padding:16px;border-left:4px solid ${accent};background:#fff7ef;color:#4b4038;line-height:1.6;">${escapeHtml(suffix).replace(/\n/g, "<br>")}</div>`
       : "";
+    const optionLabel = cleanSpecificLabel(config.variationTraitName || product.option1Name || "Größe");
+    const singleVariantBlock = details && details.optionValue
+      ? `<div style="margin:0 0 22px;padding:13px 16px;border:1px solid #e6ddd1;background:#fbfaf7;border-radius:8px;box-sizing:border-box;"><span style="display:block;color:#6b6258;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">${escapeHtml(optionLabel)}</span><strong style="display:block;color:#20201d;font-size:16px;line-height:1.4;">${escapeHtml(details.optionValue)}</strong></div>`
+      : "";
+    const noteBlock = String(template.noteText || "").trim()
+      ? `<h2 style="margin:0 0 10px;font-size:20px;color:${primary};">${escapeHtml(template.noteTitle || "Hinweis")}</h2><p style="margin:0 0 18px;color:#4b463f;">${escapeHtml(template.noteText)}</p>`
+      : "";
 
     return [
       `<div style="width:100%;max-width:none;margin:0;background:${background};color:#20201d;font-family:Arial,Helvetica,sans-serif;line-height:1.6;box-sizing:border-box;">`,
@@ -782,18 +785,13 @@
       topDescription
         ? `<div style="margin:0 0 20px;color:#39342f;font-size:16px;line-height:1.75;">${topDescription}</div>`
         : "",
+      singleVariantBlock,
       `</div>`,
       `<div style="margin:26px 0 24px;text-align:center;">${highlightBlocks}</div>`,
       `<div style="border-top:1px solid #e6ddd1;padding-top:26px;margin-top:8px;">`,
       `<div style="margin-top:24px;">`,
-      `<h2 style="margin:0 0 10px;font-size:20px;color:${primary};">${escapeHtml(template.qualityTitle)}</h2>`,
-      `<p style="margin:0 0 18px;color:#4b463f;">${escapeHtml(template.qualityText)}</p>`,
-      `<h2 style="margin:0 0 10px;font-size:20px;color:${primary};">${escapeHtml(template.shippingTitle)}</h2>`,
-      `<p style="margin:0 0 18px;color:#4b463f;">${escapeHtml(template.shippingText)}</p>`,
-      `<h2 style="margin:0 0 10px;font-size:20px;color:${primary};">${escapeHtml(template.noteTitle)}</h2>`,
-      `<p style="margin:0;color:#4b463f;">${escapeHtml(template.noteText)}</p>`,
+      noteBlock,
       suffixBlock,
-      manufacturerBlock,
       `</div>`,
       `</div>`,
       `<div style="margin-top:26px;padding-top:16px;border-top:1px solid #e6ddd1;color:#6b6258;font-size:13px;">${escapeHtml(template.footerText)}</div>`,
