@@ -317,6 +317,61 @@
           </div>
 
           <div class="section-title">
+            <h2>EU-verantwortliche Person</h2>
+          </div>
+          <p class="hint">
+            Falls der Hersteller nicht in EU oder Nordirland sitzt, kann eBay diese GPSR-Angaben verlangen.
+            Auch hier Land bitte als zweistelligen Code, z. B. DE.
+          </p>
+
+          <div class="grid two">
+            <div class="field">
+              <label for="responsiblePersonName">Name/Firma</label>
+              <input id="responsiblePersonName" type="text" />
+            </div>
+            <div class="field">
+              <label for="responsiblePersonCountry">Land/Region</label>
+              <input id="responsiblePersonCountry" type="text" placeholder="DE" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="responsiblePersonAddressLine1">Straße und Hausnummer</label>
+            <input id="responsiblePersonAddressLine1" type="text" />
+          </div>
+          <div class="field">
+            <label for="responsiblePersonAddressLine2">Adresszusatz</label>
+            <input id="responsiblePersonAddressLine2" type="text" />
+          </div>
+          <div class="grid two">
+            <div class="field">
+              <label for="responsiblePersonCity">Ort</label>
+              <input id="responsiblePersonCity" type="text" />
+            </div>
+            <div class="field">
+              <label for="responsiblePersonPostalCode">PLZ</label>
+              <input id="responsiblePersonPostalCode" type="text" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="responsiblePersonStateOrProvince">Bundesland/Provinz</label>
+            <input id="responsiblePersonStateOrProvince" type="text" />
+          </div>
+          <div class="grid two">
+            <div class="field">
+              <label for="responsiblePersonPhone">Telefon</label>
+              <input id="responsiblePersonPhone" type="text" />
+            </div>
+            <div class="field">
+              <label for="responsiblePersonEmail">E-Mail</label>
+              <input id="responsiblePersonEmail" type="email" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="responsiblePersonContactUrl">Kontakt-URL</label>
+            <input id="responsiblePersonContactUrl" type="url" placeholder="https://..." />
+          </div>
+
+          <div class="section-title">
             <h2>Internationaler Versand</h2>
           </div>
 
@@ -496,6 +551,16 @@
         manufacturerPhone: document.getElementById("manufacturerPhone"),
         manufacturerEmail: document.getElementById("manufacturerEmail"),
         manufacturerContactUrl: document.getElementById("manufacturerContactUrl"),
+        responsiblePersonName: document.getElementById("responsiblePersonName"),
+        responsiblePersonCountry: document.getElementById("responsiblePersonCountry"),
+        responsiblePersonAddressLine1: document.getElementById("responsiblePersonAddressLine1"),
+        responsiblePersonAddressLine2: document.getElementById("responsiblePersonAddressLine2"),
+        responsiblePersonCity: document.getElementById("responsiblePersonCity"),
+        responsiblePersonPostalCode: document.getElementById("responsiblePersonPostalCode"),
+        responsiblePersonStateOrProvince: document.getElementById("responsiblePersonStateOrProvince"),
+        responsiblePersonPhone: document.getElementById("responsiblePersonPhone"),
+        responsiblePersonEmail: document.getElementById("responsiblePersonEmail"),
+        responsiblePersonContactUrl: document.getElementById("responsiblePersonContactUrl"),
         shippingProfileName: document.getElementById("shippingProfileName"),
         returnProfileName: document.getElementById("returnProfileName"),
         paymentProfileName: document.getElementById("paymentProfileName"),
@@ -681,6 +746,18 @@
             phone: elements.manufacturerPhone.value.trim(),
             email: elements.manufacturerEmail.value.trim(),
             contactUrl: elements.manufacturerContactUrl.value.trim(),
+          },
+          responsiblePerson: {
+            name: elements.responsiblePersonName.value.trim(),
+            country: elements.responsiblePersonCountry.value.trim(),
+            addressLine1: elements.responsiblePersonAddressLine1.value.trim(),
+            addressLine2: elements.responsiblePersonAddressLine2.value.trim(),
+            city: elements.responsiblePersonCity.value.trim(),
+            postalCode: elements.responsiblePersonPostalCode.value.trim(),
+            stateOrProvince: elements.responsiblePersonStateOrProvince.value.trim(),
+            phone: elements.responsiblePersonPhone.value.trim(),
+            email: elements.responsiblePersonEmail.value.trim(),
+            contactUrl: elements.responsiblePersonContactUrl.value.trim(),
           },
           enableInternationalShipping: elements.enableInternationalShipping.checked,
           internationalShippingService: elements.internationalShippingService.value.trim(),
@@ -948,6 +1025,16 @@
         elements.manufacturerPhone,
         elements.manufacturerEmail,
         elements.manufacturerContactUrl,
+        elements.responsiblePersonName,
+        elements.responsiblePersonCountry,
+        elements.responsiblePersonAddressLine1,
+        elements.responsiblePersonAddressLine2,
+        elements.responsiblePersonCity,
+        elements.responsiblePersonPostalCode,
+        elements.responsiblePersonStateOrProvince,
+        elements.responsiblePersonPhone,
+        elements.responsiblePersonEmail,
+        elements.responsiblePersonContactUrl,
         elements.shippingProfileName,
         elements.returnProfileName,
         elements.paymentProfileName,

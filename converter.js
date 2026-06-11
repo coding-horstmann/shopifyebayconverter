@@ -1001,6 +1001,182 @@
     setIfPresent(headers, row, ["Product:ReturnSearchResultsOnDuplicates"], "0");
   }
 
+  const COUNTRY_CODE_ALIASES = {
+    DEUTSCHLAND: "DE",
+    GERMANY: "DE",
+    DEU: "DE",
+    DE: "DE",
+    SCHWEIZ: "CH",
+    SWITZERLAND: "CH",
+    CHE: "CH",
+    CH: "CH",
+    NORWEGEN: "NO",
+    NORWAY: "NO",
+    NOR: "NO",
+    NO: "NO",
+    "UNITED STATES": "US",
+    USA: "US",
+    US: "US",
+    "UNITED KINGDOM": "GB",
+    UK: "GB",
+    GBR: "GB",
+    GB: "GB",
+    AUSTRIA: "AT",
+    OSTERREICH: "AT",
+    OESTERREICH: "AT",
+    AUT: "AT",
+    AT: "AT",
+    FRANCE: "FR",
+    FRANKREICH: "FR",
+    FRA: "FR",
+    FR: "FR",
+    ITALY: "IT",
+    ITALIEN: "IT",
+    ITA: "IT",
+    IT: "IT",
+    SPAIN: "ES",
+    SPANIEN: "ES",
+    ESP: "ES",
+    ES: "ES",
+    NETHERLANDS: "NL",
+    NIEDERLANDE: "NL",
+    NLD: "NL",
+    NL: "NL",
+    POLAND: "PL",
+    POLEN: "PL",
+    POL: "PL",
+    PL: "PL",
+    SWEDEN: "SE",
+    SCHWEDEN: "SE",
+    SWE: "SE",
+    SE: "SE",
+    DENMARK: "DK",
+    DAENEMARK: "DK",
+    DNK: "DK",
+    DK: "DK",
+    BELGIUM: "BE",
+    BELGIEN: "BE",
+    BEL: "BE",
+    BE: "BE",
+    IRELAND: "IE",
+    IRLAND: "IE",
+    IRL: "IE",
+    IE: "IE",
+    FINLAND: "FI",
+    FINNLAND: "FI",
+    FIN: "FI",
+    FI: "FI",
+    PORTUGAL: "PT",
+    PRT: "PT",
+    PT: "PT",
+    GREECE: "GR",
+    GRIECHENLAND: "GR",
+    GRC: "GR",
+    GR: "GR",
+    LUXEMBOURG: "LU",
+    LUXEMBURG: "LU",
+    LUX: "LU",
+    LU: "LU",
+    CZECHIA: "CZ",
+    "CZECH REPUBLIC": "CZ",
+    TSCHECHIEN: "CZ",
+    CZE: "CZ",
+    CZ: "CZ",
+    SLOVAKIA: "SK",
+    SLOWAKEI: "SK",
+    SVK: "SK",
+    SK: "SK",
+    SLOVENIA: "SI",
+    SLOWENIEN: "SI",
+    SVN: "SI",
+    SI: "SI",
+    CROATIA: "HR",
+    KROATIEN: "HR",
+    HRV: "HR",
+    HR: "HR",
+    HUNGARY: "HU",
+    UNGARN: "HU",
+    HUN: "HU",
+    HU: "HU",
+    ROMANIA: "RO",
+    RUMAENIEN: "RO",
+    RUMANIEN: "RO",
+    ROU: "RO",
+    RO: "RO",
+    BULGARIA: "BG",
+    BULGARIEN: "BG",
+    BGR: "BG",
+    BG: "BG",
+    ESTONIA: "EE",
+    ESTLAND: "EE",
+    EST: "EE",
+    EE: "EE",
+    LATVIA: "LV",
+    LETTLAND: "LV",
+    LVA: "LV",
+    LV: "LV",
+    LITHUANIA: "LT",
+    LITAUEN: "LT",
+    LTU: "LT",
+    LT: "LT",
+    MALTA: "MT",
+    MLT: "MT",
+    MT: "MT",
+    CYPRUS: "CY",
+    ZYPERN: "CY",
+    CYP: "CY",
+    CY: "CY",
+  };
+
+  const EU_OR_NI_COUNTRY_CODES = new Set([
+    "AT",
+    "BE",
+    "BG",
+    "CY",
+    "CZ",
+    "DE",
+    "DK",
+    "EE",
+    "ES",
+    "FI",
+    "FR",
+    "GR",
+    "HR",
+    "HU",
+    "IE",
+    "IT",
+    "LT",
+    "LU",
+    "LV",
+    "MT",
+    "NL",
+    "PL",
+    "PT",
+    "RO",
+    "SE",
+    "SI",
+    "SK",
+    "GB",
+  ]);
+
+  function normalizeCountryCode(value) {
+    const raw = String(value || "").trim();
+    if (!raw) {
+      return "";
+    }
+    const key = raw
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toUpperCase()
+      .replace(/\./g, "")
+      .replace(/\s+/g, " ");
+    if (/^[A-Z]{2}$/.test(key)) {
+      return key;
+    }
+    const mapped = COUNTRY_CODE_ALIASES[key] || "";
+    return /^[A-Z]{2}$/.test(mapped) ? mapped : "";
+  }
+
   function manufacturerEntries(config) {
     const manufacturer = config.manufacturer || {};
     if (!hasCompleteManufacturerAddress(manufacturer)) {
@@ -1011,7 +1187,7 @@
       ["Manufacturer AddressLine1", manufacturer.addressLine1],
       ["Manufacturer AddressLine2", manufacturer.addressLine2],
       ["Manufacturer City", manufacturer.city],
-      ["Manufacturer Country", manufacturer.country],
+      ["Manufacturer Country", normalizeCountryCode(manufacturer.country)],
       ["Manufacturer PostalCode", manufacturer.postalCode],
       ["Manufacturer StateOrProvince", manufacturer.stateOrProvince],
       ["Manufacturer Phone", manufacturer.phone],
@@ -1030,7 +1206,7 @@
       manufacturer && manufacturer.addressLine1,
       manufacturer && manufacturer.city,
       manufacturer && manufacturer.postalCode,
-      manufacturer && manufacturer.country,
+      manufacturer && normalizeCountryCode(manufacturer.country),
     ];
     return required.every((value) => String(value || "").trim());
   }
@@ -1040,7 +1216,61 @@
     if (!hasAnyManufacturerValue(manufacturer) || hasCompleteManufacturerAddress(manufacturer)) {
       return "";
     }
-    return "Herstellerdaten wurden nicht als eBay-GPSR-Spalten exportiert, weil Name, Straße, Ort, PLZ und Land nicht vollständig ausgefüllt sind. Sie erscheinen nur in der HTML-Beschreibung.";
+    return "Herstellerdaten wurden nicht als eBay-GPSR-Spalten exportiert, weil Name, Straße, Ort, PLZ und Land nicht vollständig ausgefüllt sind. Das Land muss ein zweistelliger ISO-Code sein, z. B. DE oder NO. Sie erscheinen nur in der HTML-Beschreibung.";
+  }
+
+  function responsiblePersonEntries(config) {
+    const responsiblePerson = config.responsiblePerson || {};
+    if (!hasCompleteResponsiblePersonAddress(responsiblePerson)) {
+      return [];
+    }
+    return [
+      ["ResponsiblePerson CompanyName", responsiblePerson.name],
+      ["ResponsiblePerson AddressLine1", responsiblePerson.addressLine1],
+      ["ResponsiblePerson AddressLine2", responsiblePerson.addressLine2],
+      ["ResponsiblePerson City", responsiblePerson.city],
+      ["ResponsiblePerson Country", normalizeCountryCode(responsiblePerson.country)],
+      ["ResponsiblePerson PostalCode", responsiblePerson.postalCode],
+      ["ResponsiblePerson StateOrProvince", responsiblePerson.stateOrProvince],
+      ["ResponsiblePerson Phone", responsiblePerson.phone],
+      ["ResponsiblePerson Email", responsiblePerson.email],
+      ["ResponsiblePerson ContactUrl", responsiblePerson.contactUrl],
+      ["ResponsiblePerson Types", "EUResponsiblePerson"],
+    ].filter(([, value]) => String(value || "").trim());
+  }
+
+  function hasAnyResponsiblePersonValue(responsiblePerson) {
+    return Object.values(responsiblePerson || {}).some((value) => String(value || "").trim());
+  }
+
+  function hasCompleteResponsiblePersonAddress(responsiblePerson) {
+    const required = [
+      responsiblePerson && responsiblePerson.name,
+      responsiblePerson && responsiblePerson.addressLine1,
+      responsiblePerson && responsiblePerson.city,
+      responsiblePerson && responsiblePerson.postalCode,
+      responsiblePerson && normalizeCountryCode(responsiblePerson.country),
+    ];
+    return required.every((value) => String(value || "").trim());
+  }
+
+  function responsiblePersonExportWarning(config) {
+    const responsiblePerson = config.responsiblePerson || {};
+    if (!hasAnyResponsiblePersonValue(responsiblePerson) || hasCompleteResponsiblePersonAddress(responsiblePerson)) {
+      return "";
+    }
+    return "EU-verantwortliche Person wurde nicht als eBay-GPSR-Spalten exportiert, weil Name, Straße, Ort, PLZ und Land nicht vollständig ausgefüllt sind. Das Land muss ein zweistelliger ISO-Code sein, z. B. DE.";
+  }
+
+  function gpsrResponsiblePersonRequiredWarning(config) {
+    const manufacturerCountry = normalizeCountryCode(config.manufacturer && config.manufacturer.country);
+    if (!manufacturerCountry || EU_OR_NI_COUNTRY_CODES.has(manufacturerCountry)) {
+      return "";
+    }
+    if (hasCompleteResponsiblePersonAddress(config.responsiblePerson || {})) {
+      return "";
+    }
+    return `Herstellerland ${manufacturerCountry} liegt nicht in EU/Nordirland. eBay kann deshalb zusätzlich eine EU-verantwortliche Person verlangen. Fülle die Felder "EU-verantwortliche Person" aus, falls der Upload mit GPSR-Hinweis fehlschlägt.`;
   }
 
   function internationalShippingEntries(config) {
@@ -1062,15 +1292,21 @@
   }
 
   function mergeOperationalHeaders(headers, config) {
-    [...vatEntries(config), ...manufacturerEntries(config), ...internationalShippingEntries(config)].forEach(([header]) =>
-      ensureHeader(headers, header),
-    );
+    [
+      ...vatEntries(config),
+      ...manufacturerEntries(config),
+      ...responsiblePersonEntries(config),
+      ...internationalShippingEntries(config),
+    ].forEach(([header]) => ensureHeader(headers, header));
   }
 
   function applyOperationalFields(row, config) {
-    [...vatEntries(config), ...manufacturerEntries(config), ...internationalShippingEntries(config)].forEach(([header, value]) =>
-      setIfHeader(row, header, value),
-    );
+    [
+      ...vatEntries(config),
+      ...manufacturerEntries(config),
+      ...responsiblePersonEntries(config),
+      ...internationalShippingEntries(config),
+    ].forEach(([header, value]) => setIfHeader(row, header, value));
   }
 
   function makeSpecifics(product, config) {
@@ -1259,6 +1495,7 @@
       returnProfileName: "",
       paymentProfileName: "",
       manufacturer: {},
+      responsiblePerson: {},
       enableInternationalShipping: false,
       shippingType: "Flat",
       internationalShippingService: "",
@@ -1321,6 +1558,14 @@
     const manufacturerWarning = manufacturerExportWarning(config);
     if (manufacturerWarning) {
       warnings.push(manufacturerWarning);
+    }
+    const responsiblePersonWarning = responsiblePersonExportWarning(config);
+    if (responsiblePersonWarning) {
+      warnings.push(responsiblePersonWarning);
+    }
+    const gpsrResponsiblePersonWarning = gpsrResponsiblePersonRequiredWarning(config);
+    if (gpsrResponsiblePersonWarning) {
+      warnings.push(gpsrResponsiblePersonWarning);
     }
     let productsWithVariants = 0;
     let productsWithoutImages = 0;
