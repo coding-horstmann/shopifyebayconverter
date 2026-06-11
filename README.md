@@ -57,6 +57,10 @@ Die Artikelmerkmale werden als echte eBay-Merkmale geschrieben. Die HTML-Beschre
 
 Die MwSt. wird standardmäßig als `VATPercent=19` geschrieben.
 
+## Titel-Zusatz
+
+Mit `Titel-Zusatz` kann ein globaler Keyword-Zusatz wie `Poster Wandkunst` an alle eBay-Titel angehängt werden. Der Converter fügt automatisch ein Leerzeichen ein, verhindert eine direkte Dopplung am Titelende und hält die eBay-Titel bei maximal 80 Zeichen. Wenn ein Titel durch den Zusatz zu lang wird, wird der ursprüngliche Titel gekürzt, damit der Zusatz erhalten bleibt.
+
 ## HTML-Beschreibung
 
 Die Beschreibung nutzt ein mobiles Ein-Spalten-Template mit Logo, CSS-Bildkarussell, Thumbnail-Vorschau mit echtem Bildverhältnis und fünf Icon-/Trust-Blöcken. Das große Beschreibungsbild behält sein eigenes Seitenverhältnis und ist in der Maximalgröße begrenzt; quadratische Bilder werden quadratisch angezeigt und nicht in einen Breitformatrahmen gezwängt. Das funktioniert ohne JavaScript. Beim Klick auf ein Vorschaubild wird die CSS-Rotation gestoppt und das gewählte Bild fixiert, sofern eBay die dafür nötigen HTML-Controls nicht entfernt. Falls eBay einzelne CSS-Animationen entfernt, bleibt das erste Bild sichtbar und alle Bilder stehen weiterhin als Thumbnails sowie in der eBay-Fotospalte.

@@ -159,6 +159,12 @@
           </div>
 
           <div class="field">
+            <label for="titleSuffix">Titel-Zusatz</label>
+            <input id="titleSuffix" type="text" placeholder="z. B. Poster Wandkunst" />
+            <small>Wird mit Leerzeichen an jeden eBay-Titel angehängt. Der Export bleibt auf 80 Zeichen begrenzt.</small>
+          </div>
+
+          <div class="field">
             <label for="descriptionSuffix">Beschreibung Zusatz</label>
             <textarea id="descriptionSuffix" rows="4" placeholder="Optionaler Text für alle Listings"></textarea>
           </div>
@@ -547,6 +553,7 @@
         priceAdd: document.getElementById("priceAdd"),
         roundTo: document.getElementById("roundTo"),
         vatPercent: document.getElementById("vatPercent"),
+        titleSuffix: document.getElementById("titleSuffix"),
         descriptionSuffix: document.getElementById("descriptionSuffix"),
         templateEnabled: document.getElementById("templateEnabled"),
         showHeroImage: document.getElementById("showHeroImage"),
@@ -782,6 +789,7 @@
           priceAdd: Number(elements.priceAdd.value || 0),
           roundTo: Number(elements.roundTo.value || 0),
           vatPercent: elements.vatPercent.value.trim() || "19",
+          titleSuffix: elements.titleSuffix.value.trim(),
           shippingProfileName: elements.shippingProfileName.value.trim(),
           returnProfileName: elements.returnProfileName.value.trim(),
           paymentProfileName: elements.paymentProfileName.value.trim(),
@@ -1047,6 +1055,7 @@
         elements.priceAdd,
         elements.roundTo,
         elements.vatPercent,
+        elements.titleSuffix,
         elements.descriptionSuffix,
         elements.templateEnabled,
         elements.showHeroImage,

@@ -445,6 +445,30 @@
     return compact.length > maxLength ? compact.slice(0, maxLength).trim() : compact;
   }
 
+  function buildListingTitle(baseTitle, suffix, maxLength) {
+    const cleanBase = cleanTitle(baseTitle, 500);
+    const cleanSuffix = cleanTitle(suffix, maxLength).replace(/^[\s,;:|/-]+/g, "").trim();
+    if (!cleanSuffix) {
+      return cleanTitle(cleanBase, maxLength);
+    }
+    if (cleanBase.toLowerCase().endsWith(cleanSuffix.toLowerCase())) {
+      return cleanTitle(cleanBase, maxLength);
+    }
+
+    const suffixPart = ` ${cleanSuffix}`;
+    const combined = `${cleanBase}${suffixPart}`;
+    if (combined.length <= maxLength) {
+      return combined;
+    }
+    if (suffixPart.length >= maxLength) {
+      return cleanTitle(combined, maxLength);
+    }
+
+    const baseLimit = maxLength - suffixPart.length;
+    const trimmedBase = cleanBase.slice(0, baseLimit).trim().replace(/[\s,;:|/-]+$/g, "");
+    return cleanTitle(`${trimmedBase}${suffixPart}`, maxLength);
+  }
+
   function asciiFold(value) {
     return String(value || "")
       .replace(/Ä/g, "Ae")
@@ -1581,6 +1605,7 @@
       priceAdd: 0,
       roundTo: 0,
       vatPercent: "19",
+      titleSuffix: "",
       shippingProfileName: "",
       returnProfileName: "",
       paymentProfileName: "",
@@ -1671,6 +1696,7 @@
       const hasVariants = config.listingMode === "variants" && variants.length > 1;
       const traitName = config.variationTraitName || product.option1Name || "Größe";
       const singleVariantValue = !hasVariants && variants[0] && variants[0].option1Value ? variants[0].option1Value : "";
+      const listingTitle = buildListingTitle(product.title, config.titleSuffix, 80);
       const photoUrls = buildProductImages(product, config).slice(0, Number(config.maxImages || 5));
       const photos = photoUrls.join("|");
       const specifics = config.includeSpecifics ? makeSpecifics(product, config) : {};
@@ -1689,11 +1715,12 @@
         variants.forEach((variant) => {
           const flat = createEmptyRow(headers);
           const optionValue = variant.option1Value || "Standard";
+          const flatTitle = buildListingTitle(`${product.title} - ${optionValue}`, config.titleSuffix, 80);
           setIfHeader(flat, actionHeader, actionValue);
           setIfHeader(flat, skuHeader, variant.sku);
-          setIfHeader(flat, productNameHeader, cleanTitle(`${product.title} - ${optionValue}`, 80));
+          setIfHeader(flat, productNameHeader, flatTitle);
           setIfHeader(flat, categoryHeader, config.categoryId);
-          setIfHeader(flat, titleHeader, cleanTitle(`${product.title} - ${optionValue}`, 80));
+          setIfHeader(flat, titleHeader, flatTitle);
           setIfHeader(flat, upcHeader, config.upcValue);
           setIfHeader(flat, priceHeader, formatPrice(variant.price, config));
           setIfHeader(flat, quantityHeader, config.quantity);
@@ -1703,7 +1730,7 @@
             flat,
             descriptionHeader,
             buildDescription(product, config, {
-              title: `${product.title} - ${optionValue}`,
+              title: flatTitle,
               optionValue,
               price: formatPrice(variant.price, config),
               images: photoUrls,
@@ -1739,9 +1766,9 @@
         reviseParentIndex += 1;
       }
       setIfHeader(parent, skuHeader, hasVariants ? "" : makeSku(product.handle));
-      setIfHeader(parent, productNameHeader, cleanTitle(product.title, 80));
+      setIfHeader(parent, productNameHeader, listingTitle);
       setIfHeader(parent, categoryHeader, config.categoryId);
-      setIfHeader(parent, titleHeader, cleanTitle(product.title, 80));
+      setIfHeader(parent, titleHeader, listingTitle);
       setIfHeader(parent, upcHeader, hasVariants ? "" : config.upcValue);
       setIfHeader(parent, photosHeader, photos);
       setIfHeader(parent, conditionHeader, conditionValueFor(conditionHeader, config.conditionId));
@@ -1749,7 +1776,7 @@
         parent,
         descriptionHeader,
         buildDescription(product, config, {
-          title: product.title,
+          title: listingTitle,
           price: hasVariants ? "" : formatPrice(variants[0].price, config),
           optionValue: singleVariantValue,
           images: photoUrls,
