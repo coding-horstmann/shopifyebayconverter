@@ -202,12 +202,20 @@
   }
 
   function detectDelimiter(text) {
-    const lines = String(text || "").split(/\r?\n/).filter(Boolean).slice(0, 12);
     const candidates = [",", ";", "\t"];
-    const scores = candidates.map((delimiter) => ({
-      delimiter,
-      score: lines.reduce((sum, line) => sum + countDelimiter(line, delimiter), 0),
-    }));
+    const sample = String(text || "").slice(0, 200000);
+    const scores = candidates.map((delimiter) => {
+      const rows = parseCsvRows(sample, delimiter)
+        .filter((row) => row.some((cell) => String(cell || "").trim()))
+        .slice(0, 12);
+      const counts = rows.map((row) => row.length).filter((count) => count > 1);
+      const maxColumns = counts.length ? Math.max(...counts) : 0;
+      const consistency = counts.filter((count) => count === maxColumns).length;
+      return {
+        delimiter,
+        score: maxColumns * 100 + consistency * 10 + counts.length,
+      };
+    });
     scores.sort((a, b) => b.score - a.score);
     return scores[0].score > 0 ? scores[0].delimiter : ",";
   }
@@ -344,12 +352,19 @@
     return stringValue;
   }
 
+  function normalizeCsvCell(value) {
+    if (value == null) {
+      return "";
+    }
+    return String(value).replace(/[\r\n]+/g, " ").replace(/\s{2,}/g, " ").trim();
+  }
+
   function objectsToCsv(headers, rows, delimiter, infoRows) {
     const lines = [];
     (infoRows || []).forEach((line) => lines.push(line));
     lines.push(headers.map((header) => csvEscape(header, delimiter)).join(delimiter));
     rows.forEach((row) => {
-      lines.push(headers.map((header) => csvEscape(row[header], delimiter)).join(delimiter));
+      lines.push(headers.map((header) => csvEscape(normalizeCsvCell(row[header]), delimiter)).join(delimiter));
     });
     return `\ufeff${lines.join("\r\n")}\r\n`;
   }
