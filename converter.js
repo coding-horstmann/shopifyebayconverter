@@ -82,20 +82,26 @@
     highlight2Text: "Gedruckt auf mattem 200 g/m² Papier mit ruhiger Oberfläche. FSC-zertifiziert oder gleichwertig.",
     highlight3IconUrl: "",
     highlight3Title: "30 Tage Widerrufsrecht",
-    highlight3Text: "Du kannst dein Poster nach Erhalt zurückgeben. Die Rücksendekosten trägst du.",
+    highlight3Text: "Sie können Ihr Poster nach Erhalt zurückgeben. Die Rücksendekosten tragen Sie.",
     highlight4IconUrl: "",
     highlight4Title: "Kostenloser Versand",
     highlight4Text: "Der Versand ist im Preis enthalten. Zustellung in der Regel innerhalb von 3 bis 5 Werktagen.",
     highlight5IconUrl: "",
     highlight5Title: "Ohne Rahmen",
-    highlight5Text: "Alle Poster werden ungerahmt geliefert. So wählst du den Rahmen passend zu deinem Raum.",
+    highlight5Text: "Alle Poster werden ungerahmt geliefert. So wählen Sie den Rahmen passend zu Ihrem Raum.",
     qualityTitle: "",
     qualityText: "",
     shippingTitle: "",
     shippingText: "",
     noteTitle: "Hinweis",
     noteText: "",
-    footerText: "Atelier Orlo - Vintage Poster, Plakatkunst und Kunstdrucke für besondere Räume.",
+    contactEnabled: false,
+    contactImageUrl: "",
+    contactText:
+      "Wenn Sie Fragen zu Motiv, Format oder Versand haben, schreiben Sie mir gern über eBay. Ich freue mich auf Ihre Nachricht und antworte zeitnah.",
+    contactButtonLabel: "Nachricht über eBay senden",
+    contactButtonUrl: "",
+    footerText: "Atelier Orlo - Vintage Poster, Plakatkunst und Kunstdrucke.",
   };
 
   const FIELD_ALIASES = {
@@ -391,6 +397,7 @@
       template.highlight3IconUrl,
       template.highlight4IconUrl,
       template.highlight5IconUrl,
+      template.contactImageUrl,
       config.extraImageUrls,
       config.productExtraImageUrls,
     ];
@@ -498,6 +505,36 @@
       .trim();
   }
 
+  function formalizeGermanAddress(value) {
+    return String(value || "")
+      .replace(/\bDu erhältst\b/g, "Sie erhalten")
+      .replace(/\bdu erhältst\b/g, "Sie erhalten")
+      .replace(/\bDu bekommst\b/g, "Sie erhalten")
+      .replace(/\bdu bekommst\b/g, "Sie erhalten")
+      .replace(/\bDu kannst\b/g, "Sie können")
+      .replace(/\bdu kannst\b/g, "Sie können")
+      .replace(/\bDu\b/g, "Sie")
+      .replace(/\bdu\b/g, "Sie")
+      .replace(/\bDein\b/g, "Ihr")
+      .replace(/\bdein\b/g, "Ihr")
+      .replace(/\bDeine\b/g, "Ihre")
+      .replace(/\bdeine\b/g, "Ihre")
+      .replace(/\bDeinen\b/g, "Ihren")
+      .replace(/\bdeinen\b/g, "Ihren")
+      .replace(/\bDeinem\b/g, "Ihrem")
+      .replace(/\bdeinem\b/g, "Ihrem")
+      .replace(/\bDeiner\b/g, "Ihrer")
+      .replace(/\bdeiner\b/g, "Ihrer")
+      .replace(/\bDeines\b/g, "Ihres")
+      .replace(/\bdeines\b/g, "Ihres")
+      .replace(/\bDir\b/g, "Ihnen")
+      .replace(/\bdir\b/g, "Ihnen")
+      .replace(/\bDich\b/g, "Sie")
+      .replace(/\bdich\b/g, "Sie")
+      .replace(/\bwählst Sie\b/g, "wählen Sie")
+      .replace(/\bträgst Sie\b/g, "tragen Sie");
+  }
+
   function toPlainText(html) {
     return stripScripts(html)
       .replace(/<br\s*\/?>/gi, "\n")
@@ -582,9 +619,14 @@
     const productExtras = productExtrasMap[String(product.handle || "").toLowerCase()] || [];
     const extras = unique([...parseUrlList(config.extraImageUrls), ...productExtras]);
     const position = config.extraImagesPosition || "after-main";
+    const explicitPosition = Number.parseInt(config.extraImagesPositionIndex, 10);
 
     if (!extras.length) {
       return unique(shopifyImages);
+    }
+    if (Number.isFinite(explicitPosition) && explicitPosition > 0) {
+      const insertIndex = Math.min(Math.max(explicitPosition - 1, 0), shopifyImages.length);
+      return unique([...shopifyImages.slice(0, insertIndex), ...extras, ...shopifyImages.slice(insertIndex)]);
     }
     if (position === "before") {
       return unique([...extras, ...shopifyImages]);
@@ -609,13 +651,13 @@
     const inputs = galleryImages
       .map(
         (url, index) =>
-          `<input id="${galleryId}-${index + 1}" name="${galleryId}" type="radio" style="display:none;" aria-label="${escapeHtml(title)} Bild ${index + 1} auswÃ¤hlen">`,
+          `<input id="${galleryId}-${index + 1}" name="${galleryId}" type="radio" style="display:none;" aria-label="${escapeHtml(title)} Bild ${index + 1} auswählen">`,
       )
       .join("");
     const slides = galleryImages
       .map(
         (url, index) =>
-          `<img class="orlo-slide orlo-slide-${index + 1}" src="${escapeHtml(url)}" alt="${escapeHtml(title)} ${index + 1}" style="position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain;opacity:${index === 0 ? "1" : "0"};animation:orloFade ${duration}s infinite;animation-delay:${index * 4}s;">`,
+          `<img class="orlo-slide orlo-slide-${index + 1}" src="${escapeHtml(url)}" alt="${escapeHtml(title)} ${index + 1}" style="position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;opacity:${index === 0 ? "1" : "0"};animation:orloFade ${duration}s infinite;animation-delay:${index * 4}s;">`,
       )
       .join("");
     const thumbs = galleryImages
@@ -638,7 +680,7 @@
       `<style>@keyframes orloFade{0%{opacity:1}${visibleEnd}%{opacity:1}${fadeEnd}%{opacity:0}100%{opacity:0}}${pauseAllRules}{opacity:0!important;animation:none!important;}${selectedRules}</style>`,
       `<div style="margin:0 0 24px;width:100%;box-sizing:border-box;">`,
       inputs,
-      `<div class="orlo-hero" style="position:relative;width:100%;height:70vw;min-height:340px;max-height:720px;max-width:1120px;margin:0 auto;border:1px solid #e6ddd1;background:#fbfaf7;border-radius:8px;overflow:hidden;box-sizing:border-box;">${slides}</div>`,
+      `<div class="orlo-hero" style="position:relative;width:100%;height:70vw;min-height:340px;max-height:720px;max-width:1120px;margin:0 auto;border:1px solid #e6ddd1;background:#fff;border-radius:8px;overflow:hidden;box-sizing:border-box;">${slides}</div>`,
       `<div class="orlo-thumbs" style="display:block;margin-top:12px;text-align:center;line-height:0;">${thumbs}</div>`,
       `</div>`,
     ].join("");
@@ -732,13 +774,32 @@
     return `<details style="margin-top:24px;border:1px solid #e6ddd1;background:#fbfaf7;border-radius:8px;padding:14px 16px;"><summary style="cursor:pointer;color:${primary};font-weight:bold;font-size:16px;">Produkthersteller</summary><div style="margin-top:14px;">${content}</div></details>`;
   }
 
+  function renderContactBlock(template, primary, accent) {
+    if (!template.contactEnabled) {
+      return "";
+    }
+    const imageUrl = normalizeUrl(template.contactImageUrl);
+    const buttonUrl = normalizeUrl(template.contactButtonUrl);
+    const text = formalizeGermanAddress(template.contactText || DEFAULT_LISTING_TEMPLATE.contactText);
+    const image = imageUrl
+      ? `<img src="${escapeHtml(imageUrl)}" alt="" style="display:block;max-width:220px;max-height:160px;width:auto;height:auto;margin:0 auto 16px;background:transparent;">`
+      : "";
+    const button = buttonUrl
+      ? `<a href="${escapeHtml(buttonUrl)}" target="_blank" rel="noopener" style="display:inline-block;margin-top:14px;padding:12px 20px;background:${accent};color:#fff;text-decoration:none;border-radius:4px;font-weight:bold;font-size:15px;">${escapeHtml(template.contactButtonLabel || DEFAULT_LISTING_TEMPLATE.contactButtonLabel)}</a>`
+      : "";
+
+    return `<div style="margin-top:28px;padding:24px 18px;border:1px solid #e6ddd1;background:#fbfaf7;text-align:center;box-sizing:border-box;">${image}<div style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:${primary};font-weight:bold;margin-bottom:8px;">Atelier Orlo</div><p style="max-width:620px;margin:0 auto;color:#4b463f;font-size:16px;line-height:1.65;">${escapeHtml(text)}</p>${button}</div>`;
+  }
+
   function renderListingTemplate(product, config, details) {
     const template = { ...DEFAULT_LISTING_TEMPLATE, ...(config.listingTemplate || {}) };
     const primary = cleanColor(template.primaryColor, DEFAULT_LISTING_TEMPLATE.primaryColor);
     const accent = cleanColor(template.accentColor, DEFAULT_LISTING_TEMPLATE.accentColor);
     const background = cleanColor(template.backgroundColor, DEFAULT_LISTING_TEMPLATE.backgroundColor);
     const title = cleanTitle(details && details.title ? details.title : product.title, 120);
-    const description = sanitizeInlineHtml(product.description) || `<p>${escapeHtml(toPlainText(product.description))}</p>`;
+    const description =
+      formalizeGermanAddress(sanitizeInlineHtml(product.description)) ||
+      `<p>${escapeHtml(formalizeGermanAddress(toPlainText(product.description)))}</p>`;
     const topDescription = description || (template.intro ? `<p>${escapeHtml(template.intro)}</p>` : "");
     const suffix = String(config.descriptionSuffix || "").trim();
     const images = details && details.images ? details.images : buildProductImages(product, config);
@@ -759,15 +820,16 @@
       .join("");
 
     const suffixBlock = suffix
-      ? `<div style="margin-top:22px;padding:16px;border-left:4px solid ${accent};background:#fff7ef;color:#4b4038;line-height:1.6;">${escapeHtml(suffix).replace(/\n/g, "<br>")}</div>`
+      ? `<div style="margin-top:22px;padding:16px;border-left:4px solid ${accent};background:#fff7ef;color:#4b4038;line-height:1.6;">${escapeHtml(formalizeGermanAddress(suffix)).replace(/\n/g, "<br>")}</div>`
       : "";
     const optionLabel = cleanSpecificLabel(config.variationTraitName || product.option1Name || "Größe");
     const singleVariantBlock = details && details.optionValue
-      ? `<div style="margin:0 0 22px;padding:13px 16px;border:1px solid #e6ddd1;background:#fbfaf7;border-radius:8px;box-sizing:border-box;"><span style="display:block;color:#6b6258;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">${escapeHtml(optionLabel)}</span><strong style="display:block;color:#20201d;font-size:16px;line-height:1.4;">${escapeHtml(details.optionValue)}</strong></div>`
+      ? `<div style="margin:0 0 22px;padding:13px 16px;border:1px solid #e6ddd1;background:#fbfaf7;border-radius:8px;box-sizing:border-box;text-align:center;"><span style="display:block;color:#6b6258;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">${escapeHtml(optionLabel)}</span><strong style="display:block;color:#20201d;font-size:16px;line-height:1.4;">${escapeHtml(details.optionValue)}</strong></div>`
       : "";
     const noteBlock = String(template.noteText || "").trim()
-      ? `<h2 style="margin:0 0 10px;font-size:20px;color:${primary};">${escapeHtml(template.noteTitle || "Hinweis")}</h2><p style="margin:0 0 18px;color:#4b463f;">${escapeHtml(template.noteText)}</p>`
+      ? `<h2 style="margin:0 0 10px;font-size:20px;color:${primary};">${escapeHtml(template.noteTitle || "Hinweis")}</h2><p style="margin:0 0 18px;color:#4b463f;">${escapeHtml(formalizeGermanAddress(template.noteText))}</p>`
       : "";
+    const contactBlock = renderContactBlock(template, primary, accent);
 
     return [
       `<div style="width:100%;max-width:none;margin:0;background:${background};color:#20201d;font-family:Arial,Helvetica,sans-serif;line-height:1.6;box-sizing:border-box;">`,
@@ -795,6 +857,7 @@
       `</div>`,
       `</div>`,
       `<div style="margin-top:26px;padding-top:16px;border-top:1px solid #e6ddd1;color:#6b6258;font-size:13px;">${escapeHtml(template.footerText)}</div>`,
+      contactBlock,
       `</div>`,
       `</div>`,
     ].join("");
@@ -1294,7 +1357,7 @@
     if (hasCompleteResponsiblePersonAddress(config.responsiblePerson || {})) {
       return "";
     }
-    return `Herstellerland ${manufacturerCountry} liegt nicht in EU/Nordirland. eBay kann deshalb zusätzlich eine EU-verantwortliche Person verlangen. Fülle die Felder "EU-verantwortliche Person" aus, falls der Upload mit GPSR-Hinweis fehlschlägt.`;
+    return `Herstellerland ${manufacturerCountry} liegt nicht in EU/Nordirland. eBay kann deshalb zusätzlich eine EU-verantwortliche Person verlangen. Füllen Sie die Felder "EU-verantwortliche Person" aus, falls der Upload mit GPSR-Hinweis fehlschlägt.`;
   }
 
   function internationalShippingEntries(config) {
@@ -1509,6 +1572,7 @@
       extraImageUrls: "",
       productExtraImageUrls: "",
       extraImagesPosition: "after-main",
+      extraImagesPositionIndex: "",
       itemIdMapText: "",
       upcValue: "",
       priceMultiplier: 1,

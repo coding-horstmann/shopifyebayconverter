@@ -132,6 +132,12 @@
             </select>
           </div>
 
+          <div class="field">
+            <label for="extraImagesPositionIndex">Exakte Position der Zusatzfotos</label>
+            <input id="extraImagesPositionIndex" type="number" min="1" step="1" placeholder="z. B. 4" />
+            <small>Optional. 1 = ganz vorne, 2 = nach dem Hauptfoto, 4 = an vierter Stelle.</small>
+          </div>
+
           <div class="grid three">
             <div class="field">
               <label for="priceMultiplier">Preisfaktor</label>
@@ -190,7 +196,7 @@
             <div class="field">
               <label for="logoFile">Logo-Datei</label>
               <input id="logoFile" type="file" accept="image/*" disabled />
-              <small>FÃ¼r eBay bitte eine Ã¶ffentliche HTTPS-Logo-URL nutzen. Lokale Dateien werden nicht in die CSV eingebettet.</small>
+              <small>Für eBay bitte eine öffentliche HTTPS-Logo-URL nutzen. Lokale Dateien werden nicht in die CSV eingebettet.</small>
             </div>
           </div>
 
@@ -250,6 +256,33 @@
           <div class="field">
             <label for="noteText">Hinweis</label>
             <textarea id="noteText" rows="3"></textarea>
+          </div>
+
+          <div class="section-title">
+            <h2>Kontaktbereich unten</h2>
+          </div>
+          <label class="toggle">
+            <input id="contactEnabled" type="checkbox" />
+            <span>Kontaktbereich in der Beschreibung anzeigen</span>
+          </label>
+          <div class="field">
+            <label for="contactImageUrl">Kontaktbild-URL</label>
+            <input id="contactImageUrl" type="url" placeholder="https://.../kontakt.png" />
+            <small>Für transparente Bilder eine öffentliche HTTPS-URL zu einem PNG/WebP mit Transparenz verwenden.</small>
+          </div>
+          <div class="field">
+            <label for="contactText">Kontakttext</label>
+            <textarea id="contactText" rows="2"></textarea>
+          </div>
+          <div class="grid two">
+            <div class="field">
+              <label for="contactButtonLabel">Button-Text</label>
+              <input id="contactButtonLabel" type="text" />
+            </div>
+            <div class="field">
+              <label for="contactButtonUrl">eBay Kontakt-URL</label>
+              <input id="contactButtonUrl" type="url" placeholder="https://www.ebay.de/..." />
+            </div>
           </div>
 
           <div class="section-title">
@@ -459,7 +492,7 @@
               </thead>
               <tbody id="previewRows">
                 <tr>
-                  <td colspan="4" class="empty">Wähle deine Shopify CSV aus.</td>
+                  <td colspan="4" class="empty">Wählen Sie Ihre Shopify CSV aus.</td>
                 </tr>
               </tbody>
             </table>
@@ -494,6 +527,7 @@
         extraImageUrls: document.getElementById("extraImageUrls"),
         productExtraImageUrls: document.getElementById("productExtraImageUrls"),
         extraImagesPosition: document.getElementById("extraImagesPosition"),
+        extraImagesPositionIndex: document.getElementById("extraImagesPositionIndex"),
         variationTraitName: document.getElementById("variationTraitName"),
         format: document.getElementById("format"),
         listingMode: document.getElementById("listingMode"),
@@ -530,6 +564,11 @@
         highlight5Title: document.getElementById("highlight5Title"),
         highlight5Text: document.getElementById("highlight5Text"),
         noteText: document.getElementById("noteText"),
+        contactEnabled: document.getElementById("contactEnabled"),
+        contactImageUrl: document.getElementById("contactImageUrl"),
+        contactText: document.getElementById("contactText"),
+        contactButtonLabel: document.getElementById("contactButtonLabel"),
+        contactButtonUrl: document.getElementById("contactButtonUrl"),
         manufacturerName: document.getElementById("manufacturerName"),
         manufacturerCountry: document.getElementById("manufacturerCountry"),
         manufacturerAddressLine1: document.getElementById("manufacturerAddressLine1"),
@@ -661,6 +700,11 @@
         elements.highlight5Title.value = template.highlight5Title || "";
         elements.highlight5Text.value = template.highlight5Text || "";
         elements.noteText.value = template.noteText || "";
+        elements.contactEnabled.checked = template.contactEnabled === true;
+        elements.contactImageUrl.value = template.contactImageUrl || "";
+        elements.contactText.value = template.contactText || "";
+        elements.contactButtonLabel.value = template.contactButtonLabel || "";
+        elements.contactButtonUrl.value = template.contactButtonUrl || "";
       }
 
       function collectListingTemplate() {
@@ -692,6 +736,11 @@
           highlight5Title: elements.highlight5Title.value.trim(),
           highlight5Text: elements.highlight5Text.value.trim(),
           noteText: elements.noteText.value.trim(),
+          contactEnabled: elements.contactEnabled.checked,
+          contactImageUrl: elements.contactImageUrl.value.trim(),
+          contactText: elements.contactText.value.trim(),
+          contactButtonLabel: elements.contactButtonLabel.value.trim(),
+          contactButtonUrl: elements.contactButtonUrl.value.trim(),
         };
       }
 
@@ -705,6 +754,7 @@
           extraImageUrls: elements.extraImageUrls.value,
           productExtraImageUrls: elements.productExtraImageUrls.value,
           extraImagesPosition: elements.extraImagesPosition.value,
+          extraImagesPositionIndex: elements.extraImagesPositionIndex.value.trim(),
           itemIdMapText: state.itemIdMapText,
           variationTraitName: elements.variationTraitName.value.trim() || "Größe",
           format: elements.format.value,
@@ -831,7 +881,7 @@
 
       function renderPreview(analysis) {
         if (!analysis) {
-          elements.previewRows.innerHTML = '<tr><td colspan="4" class="empty">Wähle deine Shopify CSV aus.</td></tr>';
+          elements.previewRows.innerHTML = '<tr><td colspan="4" class="empty">Wählen Sie Ihre Shopify CSV aus.</td></tr>';
           return;
         }
 
@@ -873,7 +923,7 @@
             state.needsTagRender = false;
           }
           const result = EbayConverter.convert(state.shopifyText, collectConfig());
-          const hasMissingReviseItemIds = result.warnings.some((warning) => warning.includes("keine ItemID fÃ¼r Revise"));
+          const hasMissingReviseItemIds = result.warnings.some((warning) => warning.includes("keine ItemID für Revise"));
           state.result = result;
           renderStats(result.summary);
           renderWarnings(
@@ -971,6 +1021,7 @@
         elements.extraImageUrls,
         elements.productExtraImageUrls,
         elements.extraImagesPosition,
+        elements.extraImagesPositionIndex,
         elements.variationTraitName,
         elements.format,
         elements.listingMode,
@@ -1006,6 +1057,10 @@
         elements.highlight5Title,
         elements.highlight5Text,
         elements.noteText,
+        elements.contactImageUrl,
+        elements.contactText,
+        elements.contactButtonLabel,
+        elements.contactButtonUrl,
         elements.manufacturerName,
         elements.manufacturerCountry,
         elements.manufacturerAddressLine1,
@@ -1034,7 +1089,7 @@
         elements.internationalShippingCost,
         elements.internationalShippingLocations,
       ].forEach((input) => input.addEventListener("input", updateConversion));
-      [elements.templateEnabled, elements.showHeroImage, elements.enableInternationalShipping].forEach((input) =>
+      [elements.templateEnabled, elements.showHeroImage, elements.contactEnabled, elements.enableInternationalShipping].forEach((input) =>
         input.addEventListener("change", updateConversion),
       );
 

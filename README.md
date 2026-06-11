@@ -47,7 +47,7 @@ Zusatzfotos können global für alle Produkte oder produkt-spezifisch ergänzt w
 shopify-handle=https://bild-1.jpg|https://bild-2.jpg
 ```
 
-Die Zusatzfotos können vor allen Shopify-Bildern, nach dem Hauptbild oder am Ende einsortiert werden.
+Die Zusatzfotos können vor allen Shopify-Bildern, nach dem Hauptbild, am Ende oder per exakter 1-basierter Position einsortiert werden. Position `4` bedeutet: Das Zusatzfoto beginnt an vierter Stelle der finalen Fotoreihenfolge.
 
 ## Artikelmerkmale
 
@@ -59,9 +59,11 @@ Die MwSt. wird standardmäßig als `VATPercent=19` geschrieben.
 
 ## HTML-Beschreibung
 
-Die Beschreibung nutzt ein mobiles Ein-Spalten-Template mit Logo, CSS-Bildkarussell, Thumbnail-Vorschau mit echtem Bildverhältnis und fünf Icon-/Trust-Blöcken. Das funktioniert ohne JavaScript. Beim Klick auf ein Vorschaubild wird die CSS-Rotation gestoppt und das gewählte Bild fixiert, sofern eBay die dafür nötigen HTML-Controls nicht entfernt. Falls eBay einzelne CSS-Animationen entfernt, bleibt das erste Bild sichtbar und alle Bilder stehen weiterhin als Thumbnails sowie in der eBay-Fotospalte.
+Die Beschreibung nutzt ein mobiles Ein-Spalten-Template mit Logo, CSS-Bildkarussell, Thumbnail-Vorschau mit echtem Bildverhältnis und fünf Icon-/Trust-Blöcken. Das große Beschreibungsbild füllt den Rahmen ohne seitliche Leerflächen. Das funktioniert ohne JavaScript. Beim Klick auf ein Vorschaubild wird die CSS-Rotation gestoppt und das gewählte Bild fixiert, sofern eBay die dafür nötigen HTML-Controls nicht entfernt. Falls eBay einzelne CSS-Animationen entfernt, bleibt das erste Bild sichtbar und alle Bilder stehen weiterhin als Thumbnails sowie in der eBay-Fotospalte.
 
 Die Shopify-Beschreibung steht im Template direkt oben unter Titel und Headline. Der frühere generische Intro-Satz wird nicht mehr ausgegeben. `Material und Druck` sowie `Produktion und Versand` werden nicht mehr als eigene Textblöcke erzeugt. `Hinweis` erscheint nur, wenn im Dashboard ein Hinweistext eingetragen wurde.
+
+Optional kann unten in der Beschreibung ein Kontaktbereich mit Kontaktbild, Sie-Text und Button eingeblendet werden. Für das Kontaktbild muss eine öffentliche HTTPS-URL verwendet werden; ein transparentes PNG/WebP bleibt transparent, wenn die Bilddatei selbst Transparenz enthält.
 
 Für Logos und Icons müssen öffentlich abrufbare HTTPS-URLs verwendet werden. Lokale Datei-Uploads bzw. `data:image/...`-Data-URLs werden nicht in die CSV eingebettet, weil eBay solche Base64-Beschreibungen wegen der Beschreibungslänge ablehnen kann.
 
@@ -75,7 +77,7 @@ Artikelmerkmale werden auf eBay-taugliche Längen begrenzt. Wenn Shopify mehrere
 
 Versand-, Rücknahme- und Zahlungsbedingungen können über die Felder `Versandprofil`, `Rücknahmeprofil` und `Zahlungsprofil` gesetzt werden. Der Wert muss exakt dem Namen der eBay Business Policy entsprechen, z. B. `Kostenloser Versand`. eBay erkennt diese Namen nur, wenn die jeweiligen Policies im Verkäuferkonto existieren.
 
-Optional können internationale Versandspalten ergänzt werden: `IntlShippingService-1:Option`, `IntlShippingService-1:Cost`, `IntlShippingService-1:Priority` und `IntlShippingService-1:Locations`. Der Versandservice-Code muss zu deinem eBay-Konto bzw. deiner Vorlage passen.
+Optional können internationale Versandspalten ergänzt werden: `IntlShippingService-1:Option`, `IntlShippingService-1:Cost`, `IntlShippingService-1:Priority` und `IntlShippingService-1:Locations`. Der Versandservice-Code muss zu Ihrem eBay-Konto bzw. Ihrer Vorlage passen.
 
 ## Kommandozeile
 
