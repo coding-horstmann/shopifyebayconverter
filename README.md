@@ -59,11 +59,13 @@ Die MwSt. wird standardmäßig als `VATPercent=19` geschrieben.
 
 ## HTML-Beschreibung
 
-Die Beschreibung nutzt ein mobiles Ein-Spalten-Template mit Logo, CSS-Bildkarussell, Thumbnail-Vorschau mit echtem Bildverhältnis und fünf Icon-/Trust-Blöcken. Das große Beschreibungsbild füllt den Rahmen ohne seitliche Leerflächen. Das funktioniert ohne JavaScript. Beim Klick auf ein Vorschaubild wird die CSS-Rotation gestoppt und das gewählte Bild fixiert, sofern eBay die dafür nötigen HTML-Controls nicht entfernt. Falls eBay einzelne CSS-Animationen entfernt, bleibt das erste Bild sichtbar und alle Bilder stehen weiterhin als Thumbnails sowie in der eBay-Fotospalte.
+Die Beschreibung nutzt ein mobiles Ein-Spalten-Template mit Logo, CSS-Bildkarussell, Thumbnail-Vorschau mit echtem Bildverhältnis und fünf Icon-/Trust-Blöcken. Das große Beschreibungsbild behält sein eigenes Seitenverhältnis; quadratische Bilder werden quadratisch angezeigt und nicht in einen Breitformatrahmen gezwängt. Das funktioniert ohne JavaScript. Beim Klick auf ein Vorschaubild wird die CSS-Rotation gestoppt und das gewählte Bild fixiert, sofern eBay die dafür nötigen HTML-Controls nicht entfernt. Falls eBay einzelne CSS-Animationen entfernt, bleibt das erste Bild sichtbar und alle Bilder stehen weiterhin als Thumbnails sowie in der eBay-Fotospalte.
 
 Die Shopify-Beschreibung steht im Template direkt oben unter Titel und Headline. Der frühere generische Intro-Satz wird nicht mehr ausgegeben. `Material und Druck` sowie `Produktion und Versand` werden nicht mehr als eigene Textblöcke erzeugt. `Hinweis` erscheint nur, wenn im Dashboard ein Hinweistext eingetragen wurde.
 
-Optional kann unten in der Beschreibung ein Kontaktbereich mit Kontaktbild, Sie-Text und Button eingeblendet werden. Für das Kontaktbild muss eine öffentliche HTTPS-URL verwendet werden; ein transparentes PNG/WebP bleibt transparent, wenn die Bilddatei selbst Transparenz enthält.
+Der Footer-Satz unten in der Beschreibung kann im Dashboard frei geändert werden.
+
+Optional kann unten in der Beschreibung ein Kontaktbereich mit Kontaktbild, Sie-Text und Button eingeblendet werden. Für das Kontaktbild muss eine öffentliche HTTPS-URL verwendet werden; ein transparentes PNG/WebP bleibt transparent, wenn die Bilddatei selbst Transparenz enthält. Für den Button ist die stabilste eBay-URL in der Regel die Verkäuferprofilseite, z. B. `https://www.ebay.de/usr/ihrNutzername`; eBay zeigt angemeldeten Käufern dort die Kontaktmöglichkeit, sofern verfügbar.
 
 Für Logos und Icons müssen öffentlich abrufbare HTTPS-URLs verwendet werden. Lokale Datei-Uploads bzw. `data:image/...`-Data-URLs werden nicht in die CSV eingebettet, weil eBay solche Base64-Beschreibungen wegen der Beschreibungslänge ablehnen kann.
 

@@ -657,7 +657,7 @@
     const slides = galleryImages
       .map(
         (url, index) =>
-          `<img class="orlo-slide orlo-slide-${index + 1}" src="${escapeHtml(url)}" alt="${escapeHtml(title)} ${index + 1}" style="position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;opacity:${index === 0 ? "1" : "0"};animation:orloFade ${duration}s infinite;animation-delay:${index * 4}s;">`,
+          `<img class="orlo-slide orlo-slide-${index + 1}" src="${escapeHtml(url)}" alt="${escapeHtml(title)} ${index + 1}" style="grid-area:1/1;display:block;width:100%;max-width:1120px;height:auto;margin:0 auto;border:1px solid #e6ddd1;border-radius:8px;box-sizing:border-box;opacity:${index === 0 ? "1" : "0"};animation:orloFade ${duration}s infinite;animation-delay:${index * 4}s;">`,
       )
       .join("");
     const thumbs = galleryImages
@@ -680,7 +680,7 @@
       `<style>@keyframes orloFade{0%{opacity:1}${visibleEnd}%{opacity:1}${fadeEnd}%{opacity:0}100%{opacity:0}}${pauseAllRules}{opacity:0!important;animation:none!important;}${selectedRules}</style>`,
       `<div style="margin:0 0 24px;width:100%;box-sizing:border-box;">`,
       inputs,
-      `<div class="orlo-hero" style="position:relative;width:100%;height:70vw;min-height:340px;max-height:720px;max-width:1120px;margin:0 auto;border:1px solid #e6ddd1;background:#fff;border-radius:8px;overflow:hidden;box-sizing:border-box;">${slides}</div>`,
+      `<div class="orlo-hero" style="display:grid;grid-template-columns:1fr;align-items:start;justify-items:center;width:100%;max-width:1120px;margin:0 auto;background:transparent;box-sizing:border-box;">${slides}</div>`,
       `<div class="orlo-thumbs" style="display:block;margin-top:12px;text-align:center;line-height:0;">${thumbs}</div>`,
       `</div>`,
     ].join("");
@@ -806,7 +806,7 @@
     const gallery = renderPhotoGallery(images, title, template);
     const logoUrl = normalizeUrl(template.logoUrl);
     const logoBlock = logoUrl
-      ? `<img src="${escapeHtml(logoUrl)}" alt="${escapeHtml(template.shopName)}" style="display:block;max-width:170px;max-height:80px;height:auto;">`
+      ? `<img src="${escapeHtml(logoUrl)}" alt="${escapeHtml(template.shopName)}" style="display:block;max-width:213px;max-height:100px;width:auto;height:auto;margin:0 auto;">`
       : `<div style="font-size:20px;font-weight:bold;color:${primary};letter-spacing:.08em;text-transform:uppercase;">${escapeHtml(template.shopName)}</div>`;
     const highlightBlocks = [1, 2, 3, 4, 5]
       .map((index) =>
@@ -834,9 +834,8 @@
     return [
       `<div style="width:100%;max-width:none;margin:0;background:${background};color:#20201d;font-family:Arial,Helvetica,sans-serif;line-height:1.6;box-sizing:border-box;">`,
       `<div style="padding:18px;border:1px solid #e6ddd1;background:#fff;box-sizing:border-box;">`,
-      `<div style="border-bottom:1px solid #e6ddd1;padding-bottom:16px;margin-bottom:22px;">`,
+      `<div style="border-bottom:1px solid #e6ddd1;padding-bottom:18px;margin-bottom:22px;text-align:center;">`,
       logoBlock,
-      `<div style="margin-top:12px;font-size:14px;color:#5a534b;">Schneller Versand nach Zahlungseingang<br>Kuratiertes Motiv, hochwertig gedruckt</div>`,
       `</div>`,
       gallery,
       `<div style="padding-top:4px;max-width:1120px;margin:0 auto 28px;">`,
@@ -849,7 +848,7 @@
         : "",
       singleVariantBlock,
       `</div>`,
-      `<div style="margin:26px 0 24px;text-align:center;">${highlightBlocks}</div>`,
+      `<div style="margin:44px 0 28px;text-align:center;">${highlightBlocks}</div>`,
       `<div style="border-top:1px solid #e6ddd1;padding-top:26px;margin-top:8px;">`,
       `<div style="margin-top:24px;">`,
       noteBlock,

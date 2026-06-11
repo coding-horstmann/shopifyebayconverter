@@ -258,6 +258,11 @@
             <textarea id="noteText" rows="3"></textarea>
           </div>
 
+          <div class="field">
+            <label for="footerText">Footer-Satz</label>
+            <input id="footerText" type="text" />
+          </div>
+
           <div class="section-title">
             <h2>Kontaktbereich unten</h2>
           </div>
@@ -280,8 +285,9 @@
               <input id="contactButtonLabel" type="text" />
             </div>
             <div class="field">
-              <label for="contactButtonUrl">eBay Kontakt-URL</label>
-              <input id="contactButtonUrl" type="url" placeholder="https://www.ebay.de/..." />
+              <label for="contactButtonUrl">eBay Profil-/Kontakt-URL</label>
+              <input id="contactButtonUrl" type="url" placeholder="https://www.ebay.de/usr/ihrNutzername" />
+              <small>Am stabilsten ist die eBay-Profilseite. eBay zeigt dort angemeldeten Käufern die Kontaktmöglichkeit, sofern verfügbar.</small>
             </div>
           </div>
 
@@ -564,6 +570,7 @@
         highlight5Title: document.getElementById("highlight5Title"),
         highlight5Text: document.getElementById("highlight5Text"),
         noteText: document.getElementById("noteText"),
+        footerText: document.getElementById("footerText"),
         contactEnabled: document.getElementById("contactEnabled"),
         contactImageUrl: document.getElementById("contactImageUrl"),
         contactText: document.getElementById("contactText"),
@@ -700,6 +707,7 @@
         elements.highlight5Title.value = template.highlight5Title || "";
         elements.highlight5Text.value = template.highlight5Text || "";
         elements.noteText.value = template.noteText || "";
+        elements.footerText.value = template.footerText || "";
         elements.contactEnabled.checked = template.contactEnabled === true;
         elements.contactImageUrl.value = template.contactImageUrl || "";
         elements.contactText.value = template.contactText || "";
@@ -736,6 +744,7 @@
           highlight5Title: elements.highlight5Title.value.trim(),
           highlight5Text: elements.highlight5Text.value.trim(),
           noteText: elements.noteText.value.trim(),
+          footerText: elements.footerText.value.trim(),
           contactEnabled: elements.contactEnabled.checked,
           contactImageUrl: elements.contactImageUrl.value.trim(),
           contactText: elements.contactText.value.trim(),
@@ -1057,6 +1066,7 @@
         elements.highlight5Title,
         elements.highlight5Text,
         elements.noteText,
+        elements.footerText,
         elements.contactImageUrl,
         elements.contactText,
         elements.contactButtonLabel,
