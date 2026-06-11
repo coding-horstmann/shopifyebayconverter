@@ -460,23 +460,69 @@
     return compact.length > maxLength ? compact.slice(0, maxLength).trim() : compact;
   }
 
-  function buildListingTitle(baseTitle, suffix, maxLength) {
-    const cleanBase = cleanTitle(baseTitle, 500);
-    const cleanSuffix = cleanTitle(suffix, maxLength).replace(/^[\s,;:|/-]+/g, "").trim();
-    if (!cleanSuffix) {
-      return cleanTitle(cleanBase, maxLength);
+  function formatTitleDimension(value) {
+    return String(value || "")
+      .replace(",", ".")
+      .replace(/\.0+\b/g, "")
+      .trim();
+  }
+
+  function extractTitleCmSize(value) {
+    const match = String(value || "").match(/(\d+(?:[.,]\d+)?)\s*[x×]\s*(\d+(?:[.,]\d+)?)\s*cm/i);
+    if (!match) {
+      return "";
     }
-    if (cleanBase.toLowerCase().endsWith(cleanSuffix.toLowerCase())) {
-      return cleanTitle(cleanBase, maxLength);
+    return `${formatTitleDimension(match[1])}x${formatTitleDimension(match[2])} cm`;
+  }
+
+  function normalizedTitleSize(value) {
+    return asciiFold(value)
+      .toLowerCase()
+      .replace(/×/g, "x")
+      .replace(/\s+/g, "");
+  }
+
+  function titleAlreadyContainsSize(title, size) {
+    return Boolean(size) && normalizedTitleSize(title).includes(normalizedTitleSize(size));
+  }
+
+  function buildListingTitle(baseTitle, suffix, maxLength, middleParts) {
+    const cleanBase = cleanTitle(baseTitle, 500);
+    const middle = unique(middleParts || [])
+      .map((part) => cleanTitle(part, 80))
+      .filter((part) => part && !titleAlreadyContainsSize(cleanBase, part))
+      .map((part) => ` - ${part}`)
+      .join("");
+    const cleanSuffix = cleanTitle(suffix, maxLength).replace(/^[\s,;:|/-]+/g, "").trim();
+    const baseWithMiddle = `${cleanBase}${middle}`;
+    if (!cleanSuffix) {
+      if (baseWithMiddle.length <= maxLength) {
+        return baseWithMiddle;
+      }
+      if (middle && middle.length < maxLength) {
+        const baseLimit = maxLength - middle.length;
+        const trimmedBase = cleanBase.slice(0, baseLimit).trim().replace(/[\s,;:|/-]+$/g, "");
+        return cleanTitle(`${trimmedBase}${middle}`, maxLength);
+      }
+      return cleanTitle(baseWithMiddle, maxLength);
+    }
+    if (baseWithMiddle.toLowerCase().endsWith(cleanSuffix.toLowerCase())) {
+      return cleanTitle(baseWithMiddle, maxLength);
     }
 
     const suffixPart = ` ${cleanSuffix}`;
-    const combined = `${cleanBase}${suffixPart}`;
+    const combined = `${baseWithMiddle}${suffixPart}`;
     if (combined.length <= maxLength) {
       return combined;
     }
     if (suffixPart.length >= maxLength) {
       return cleanTitle(combined, maxLength);
+    }
+
+    if (middle && middle.length + suffixPart.length < maxLength) {
+      const baseLimit = maxLength - middle.length - suffixPart.length;
+      const trimmedBase = cleanBase.slice(0, baseLimit).trim().replace(/[\s,;:|/-]+$/g, "");
+      return cleanTitle(`${trimmedBase}${middle}${suffixPart}`, maxLength);
     }
 
     const baseLimit = maxLength - suffixPart.length;
@@ -1721,7 +1767,8 @@
       const hasVariants = config.listingMode === "variants" && variants.length > 1;
       const traitName = config.variationTraitName || product.option1Name || "Größe";
       const singleVariantValue = !hasVariants && variants[0] && variants[0].option1Value ? variants[0].option1Value : "";
-      const listingTitle = buildListingTitle(product.title, config.titleSuffix, 80);
+      const singleVariantTitleSize = extractTitleCmSize(singleVariantValue);
+      const listingTitle = buildListingTitle(product.title, config.titleSuffix, 80, singleVariantTitleSize ? [singleVariantTitleSize] : []);
       const photoUrls = buildProductImages(product, config).slice(0, Number(config.maxImages || 5));
       const photos = photoUrls.join("|");
       const specifics = config.includeSpecifics ? makeSpecifics(product, config) : {};
