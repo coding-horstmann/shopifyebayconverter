@@ -667,7 +667,7 @@
     const icon = safeIcon
       ? `${iconBoxStart}<img src="${escapeHtml(safeIcon)}" alt="" style="display:block;width:54px;height:54px;object-fit:contain;"></span>`
       : `${iconBoxStart}<span style="display:flex;width:54px;height:54px;border:1px solid #d9cdbf;border-radius:50%;align-items:center;justify-content:center;color:#1f4638;font-size:18px;font-weight:bold;">${String(fallbackIndex || "").padStart(2, "0")}</span></span>`;
-    return `<div style="display:inline-block;width:18%;min-width:150px;box-sizing:border-box;vertical-align:top;margin:0 .6% 12px;border:1px solid #eee4d8;background:#f7f1ea;padding:22px 14px;border-radius:8px;text-align:center;min-height:220px;">${icon}<strong style="display:block;font-size:20px;color:#20201d;margin-bottom:10px;font-family:Georgia,serif;font-weight:400;">${escapeHtml(title)}</strong><span style="display:block;color:#514b44;line-height:1.6;font-size:15px;">${escapeHtml(text)}</span></div>`;
+    return `<div style="display:inline-block;width:18%;min-width:150px;height:242px;min-height:242px;box-sizing:border-box;vertical-align:top;margin:0 .6% 12px;border:1px solid #eee4d8;background:#f7f1ea;padding:22px 14px;border-radius:8px;text-align:center;">${icon}<strong style="display:block;font-size:20px;color:#20201d;margin-bottom:10px;font-family:Georgia,serif;font-weight:400;">${escapeHtml(title)}</strong><span style="display:block;color:#514b44;line-height:1.6;font-size:15px;">${escapeHtml(text)}</span></div>`;
   }
 
   function parseUrlList(value) {
@@ -881,7 +881,7 @@
       ? `<div style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:${primary};font-weight:bold;margin-bottom:10px;">${escapeHtml(heading)}</div>`
       : "";
 
-    return `<div style="margin-top:28px;padding:20px 26px 0;border:1px solid #e6ddd1;background:#fbfaf7;text-align:center;box-sizing:border-box;"><div style="max-width:1040px;margin:0 auto;text-align:center;"><div style="display:inline-block;width:${textWidth};max-width:540px;min-width:280px;vertical-align:middle;text-align:left;box-sizing:border-box;padding:0 28px 20px 0;">${headingBlock}<p style="margin:0;color:#4b463f;font-size:17px;line-height:1.65;">${escapeHtml(text)}</p>${button}</div>${image}</div></div>`;
+    return `<div style="width:96%;max-width:100%;margin:28px auto 0;padding:20px 26px 0;border:1px solid #e6ddd1;background:#fbfaf7;text-align:center;box-sizing:border-box;"><div style="max-width:1040px;margin:0 auto;text-align:center;"><div style="display:inline-block;width:${textWidth};max-width:540px;min-width:280px;vertical-align:middle;text-align:left;box-sizing:border-box;padding:0 28px 20px 0;">${headingBlock}<p style="margin:0;color:#4b463f;font-size:17px;line-height:1.65;">${escapeHtml(text)}</p>${button}</div>${image}</div></div>`;
   }
 
   function renderListingTemplate(product, config, details) {
