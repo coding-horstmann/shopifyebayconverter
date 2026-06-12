@@ -953,7 +953,7 @@
       suffixBlock,
       `</div>`,
       `</div>`,
-      `<div style="width:96%;max-width:100%;margin:26px auto 0;padding-top:16px;border-top:1px solid #e6ddd1;color:#6b6258;font-size:13px;box-sizing:border-box;">${escapeHtml(template.footerText)}</div>`,
+      `<div style="max-width:1120px;margin:26px auto 0;padding-top:16px;border-top:1px solid #e6ddd1;color:#6b6258;font-size:13px;box-sizing:border-box;">${escapeHtml(template.footerText)}</div>`,
       contactBlock,
       `</div>`,
       `</div>`,
