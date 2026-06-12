@@ -1001,6 +1001,95 @@
       .trim();
   }
 
+  function taxonomyValueId(value) {
+    const match = String(value || "").match(/TaxonomyValue\/(\d+)/i);
+    return match ? match[1] : "";
+  }
+
+  function parseMetafieldList(value) {
+    const raw = String(value || "").trim();
+    if (!raw) {
+      return [];
+    }
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed.map((item) => String(item || "").trim()).filter(Boolean);
+      }
+    } catch (error) {
+      // Not JSON; fall back to the separators used in the Shopify exports.
+    }
+    return raw
+      .split(/[|;]/)
+      .map((part) => part.trim())
+      .filter(Boolean);
+  }
+
+  function normalizeSpecificText(target, value) {
+    const label = cleanSpecificLabel(target).toLowerCase();
+    const raw = String(value || "").trim();
+    if (!raw || /^gid:\/\/shopify\//i.test(raw)) {
+      return "";
+    }
+    if (label === "authentizität" || label === "authentizitaet") {
+      if (/reproduktion/i.test(raw)) {
+        return "Reproduktion";
+      }
+    }
+    if (label === "material" && /papier|paper/i.test(raw)) {
+      return "Papier";
+    }
+    return raw.replace(/\s*&\s*/g, " und ");
+  }
+
+  function applySpecificIfPresent(tags, target, value) {
+    const normalized = normalizeSpecificText(target, value);
+    if (normalized && !tags[target]) {
+      tags[target] = normalized;
+    }
+  }
+
+  function applyFirstTextMetafield(records, tags, sources, target) {
+    for (const source of sources) {
+      const value = firstValue(records, source);
+      if (value) {
+        applySpecificIfPresent(tags, target, value);
+        if (tags[target]) {
+          return;
+        }
+      }
+    }
+  }
+
+  function applyFirstListMetafield(records, tags, sources, target) {
+    for (const source of sources) {
+      const values = parseMetafieldList(firstValue(records, source))
+        .map((value) => normalizeSpecificText(target, value))
+        .filter(Boolean);
+      if (values.length && !tags[target]) {
+        tags[target] = unique(values).join("; ");
+        return;
+      }
+    }
+  }
+
+  function applyKnownTaxonomyMetafields(records, tags) {
+    const materialId =
+      taxonomyValueId(firstValue(records, "taxonomy.material_id (product.metafields.taxonomy.material_id)")) ||
+      taxonomyValueId(firstValue(records, "Material (product.metafields.shopify.material)"));
+    if (materialId === "548" && !tags.Material) {
+      tags.Material = "Papier";
+    }
+
+    const authenticityId =
+      taxonomyValueId(firstValue(records, "taxonomy.authenticity_id (product.metafields.taxonomy.authenticity_id)")) ||
+      taxonomyValueId(firstValue(records, "Authentizität des Kunstwerks (product.metafields.shopify.artwork-authenticity)")) ||
+      taxonomyValueId(firstValue(records, "authenticity_id (product.metafields.taxonomy_backup.authenticity_id)"));
+    if (authenticityId === "26299" && !tags["Authentizität"]) {
+      tags["Authentizität"] = "Reproduktion";
+    }
+  }
+
   function applyShopifyMetafields(records, tags) {
     const fieldMap = [
       ["Kunststil (product.metafields.shopify.art-style)", "Kunststil"],
@@ -1016,11 +1105,28 @@
     ];
 
     fieldMap.forEach(([source, target]) => {
-      const value = humanizeValue(firstValue(records, source));
-      if (value && !tags[target]) {
-        tags[target] = value;
-      }
+      const rawValue = firstValue(records, source);
+      applySpecificIfPresent(tags, target, /^gid:\/\/shopify/i.test(rawValue) ? "" : humanizeValue(rawValue));
     });
+
+    applyFirstTextMetafield(
+      records,
+      tags,
+      [
+        "material_info (product.metafields.taxonomy_backup.material_info)",
+        "taxonomy.material_text (product.metafields.taxonomy.material_text)",
+      ],
+      "Materialinfo",
+    );
+    applyFirstTextMetafield(records, tags, ["authenticity_id (product.metafields.taxonomy_backup.authenticity_id)"], "Authentizität");
+    applyFirstTextMetafield(records, tags, ["art_style_id (product.metafields.taxonomy_backup.art_style_id)"], "Stil");
+    applyFirstTextMetafield(records, tags, ["theme_id (product.metafields.taxonomy_backup.theme_id)"], "Thema");
+    applyFirstListMetafield(records, tags, ["filter_epoch (product.metafields.custom.filter_epoch)"], "Epoche");
+    applyFirstListMetafield(records, tags, ["filter_artist (product.metafields.custom.filter_artist)"], "Künstler");
+    applyFirstListMetafield(records, tags, ["filter_origin (product.metafields.custom.filter_origin)"], "Herkunft");
+    applyFirstListMetafield(records, tags, ["filter_styles (product.metafields.custom.filter_styles)"], "Stil");
+    applyFirstListMetafield(records, tags, ["filter_themes (product.metafields.custom.filter_themes)"], "Thema");
+    applyKnownTaxonomyMetafields(records, tags);
   }
 
   function groupShopifyProducts(shopifyRows) {
@@ -1036,7 +1142,6 @@
     return Array.from(groups.entries()).map(([handle, records]) => {
       const option1Name = firstValue(records, "Option1 Name") || "Größe";
       const tags = parseTags(firstValue(records, "Tags"));
-      const materialText = firstValue(records, "taxonomy.material_text (product.metafields.taxonomy.material_text)");
       const images = unique(records.map((row) => normalizeUrl(row["Image Src"]))).slice(0, 24);
       const variants = [];
       const seenVariants = new Set();
@@ -1068,9 +1173,6 @@
         });
       });
 
-      if (materialText && !tags.Material) {
-        tags.Material = materialText;
-      }
       applyShopifyMetafields(records, tags);
 
       return {
@@ -1510,6 +1612,12 @@
       const label = cleanSpecificLabel(key).toLowerCase();
       const raw = String(value || "").trim();
       const lower = raw.toLowerCase();
+      if (label === "material" && /papier|paper/i.test(raw)) {
+        return "Papier";
+      }
+      if ((label === "authentizität" || label === "authentizitaet") && /reproduktion/i.test(raw)) {
+        return "Reproduktion";
+      }
       const replacements = {
         material: { papier: "Papier" },
         "authentizität": { reproduktion: "Reproduktion" },
