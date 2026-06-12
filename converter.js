@@ -1603,14 +1603,15 @@
 
   function pickActionValue(actionHeader, config) {
     if (config.actionValue) {
-      return config.actionValue;
+      const requestedAction = String(config.actionValue || "").trim();
+      return /^Draft$/i.test(requestedAction) ? "VerifyAdd" : requestedAction;
     }
 
     const header = String(actionHeader || "");
     if (/^\*?Action/i.test(header) || /Version=/i.test(header)) {
       return config.verifyOnly ? "VerifyAdd" : "Add";
     }
-    return "Draft";
+    return "VerifyAdd";
   }
 
   function defaultRelationshipDetailsHeader(actionHeader) {
@@ -1719,6 +1720,7 @@
     const relationshipDetailsHeader = hasVariantMode
       ? normalizeRelationshipDetailsHeader(headers)
       : findHeader(headers, "relationshipDetails") || ensureHeader(headers, defaultRelationshipDetailsHeader(actionHeader));
+    const requestedActionValue = String(config.actionValue || "").trim();
     const actionValue = pickActionValue(actionHeader, config);
     const reviseMode = isReviseAction(actionValue);
     const itemIdHeader = reviseMode ? ensureHeader(headers, "ItemID") : findExactHeader(headers, ["ItemID", "Item ID"]);
@@ -1741,6 +1743,9 @@
 
     const rows = [];
     const warnings = [];
+    if (/^Draft$/i.test(requestedActionValue)) {
+      warnings.push("Draft wird für Varianten nicht mehr exportiert, weil eBay diese Datei nicht zuverlässig als Vorlage erkennt. Der Export wurde stattdessen als VerifyAdd-Prüfdatei erzeugt.");
+    }
     const manufacturerWarning = manufacturerExportWarning(config);
     if (manufacturerWarning) {
       warnings.push(manufacturerWarning);

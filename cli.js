@@ -29,7 +29,7 @@ function usage() {
     "  node cli.js --shopify products_export_1.csv --template ebay-template.csv --out ebay-variants-add.csv --category 12345",
     "",
     "Optional:",
-    "  --quantity 3 --max-images 8 --condition 1000 --vat-percent 19 --shipping-profile \"Kostenloser Versand\" --return-profile \"30 Tage Rueckgabe\" --listing-mode variants --action VerifyAdd --publish --draft --revise --item-id-map ebay-result.csv --extra-images image1|image2 --product-extra-images handle=image1|image2 --extra-position after-main --no-c-prefix --price-multiplier 1 --price-add 0 --round-to 0",
+    "  --quantity 3 --max-images 8 --condition 1000 --vat-percent 19 --shipping-profile \"Kostenloser Versand\" --return-profile \"30 Tage Rueckgabe\" --listing-mode variants --action VerifyAdd|Add|Revise --publish --revise --item-id-map ebay-result.csv --extra-images image1|image2 --product-extra-images handle=image1|image2 --extra-position after-main --no-c-prefix --price-multiplier 1 --price-add 0 --round-to 0",
     "  --sample 5",
   ].join("\n");
 }
@@ -74,7 +74,11 @@ function main() {
   const templateText = templatePath && fs.existsSync(templatePath) ? fs.readFileSync(templatePath, "utf8") : "";
   const itemIdMapText = itemIdMapPath && fs.existsSync(itemIdMapPath) ? fs.readFileSync(itemIdMapPath, "utf8") : "";
   const analysis = converter.analyzeShopify(shopifyText);
-  const actionValue = args.action || (args.publish ? "Add" : args.draft ? "Draft" : args.revise ? "Revise" : "VerifyAdd");
+  let actionValue = args.action || (args.publish ? "Add" : args.revise ? "Revise" : "VerifyAdd");
+  if (args.draft || /^Draft$/i.test(String(actionValue || ""))) {
+    console.warn("Draft exports are not supported for variant listings. Using VerifyAdd instead.");
+    actionValue = "VerifyAdd";
+  }
   const result = converter.convert(shopifyText, {
     templateText,
     itemIdMapText,

@@ -2,7 +2,7 @@
   "name": "shopify-ebay-converter",
   "version": "1.0.0",
   "private": true,
-  "description": "Local Shopify CSV to eBay Draft CSV converter for Atelier Orlo.",
+  "description": "Local Shopify CSV to eBay variants CSV converter for Atelier Orlo.",
   "dependencies": {
     "@vercel/functions": "^3.6.3"
   },

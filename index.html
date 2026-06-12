@@ -95,12 +95,11 @@
             <label for="uploadAction">eBay Upload-Aktion</label>
             <select id="uploadAction">
               <option value="VerifyAdd" selected>Nur prüfen - keine Angebote erstellen</option>
-              <option value="Draft">Entwurf erstellen</option>
               <option value="Revise">Bestehende aktive Angebote bearbeiten</option>
               <option value="Add">Aktiv veröffentlichen</option>
             </select>
             <p class="hint">
-              Standard ist VerifyAdd. Add veröffentlicht direkt aktive Angebote. Revise benötigt eine eBay-Ergebnisdatei mit ItemID.
+              Standard ist VerifyAdd. Diese Datei wird bei eBay hochgeladen und nur geprüft. Add veröffentlicht direkt aktive Angebote. Revise benötigt eine eBay-Ergebnisdatei mit ItemID.
             </p>
           </div>
 
@@ -894,7 +893,6 @@
       function updateActionLabels() {
         const labels = {
           VerifyAdd: ["Prüf-CSV herunterladen", "5 Produkte prüfen"],
-          Draft: ["Entwurf-CSV herunterladen", "5 Entwürfe exportieren"],
           Revise: ["Revise-CSV herunterladen", "5 Angebote bearbeiten"],
           Add: ["Aktiv-CSV herunterladen", "5 aktive Angebote exportieren"],
         };
@@ -984,7 +982,6 @@
       function exportModeSlug() {
         return {
           VerifyAdd: "verify",
-          Draft: "draft",
           Revise: "revise",
           Add: "add",
         }[elements.uploadAction.value] || "verify";

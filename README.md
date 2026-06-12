@@ -18,7 +18,7 @@ Lokales und Vercel-taugliches Tool für Shopify-Exports von Atelier Orlo. Ziel i
 
 ## eBay-Varianten
 
-Wichtig: Der Standardexport nutzt `VerifyAdd`. eBay prüft damit die Datei, erstellt aber keine aktiven Angebote. `Add` veröffentlicht direkt aktive Angebote. `Draft` ist im Dashboard auswählbar, war bei eBay-Varianten im bisherigen Test aber unzuverlässiger als `VerifyAdd`.
+Wichtig: Der Standardexport nutzt `VerifyAdd`. eBay prüft damit die Datei, erstellt aber keine aktiven Angebote. `Add` veröffentlicht direkt aktive Angebote. `Draft` wird für Varianten bewusst nicht mehr angeboten, weil eBay Varianten-Dateien mit `Draft` nicht zuverlässig als gültige Vorlage erkennt. Der sichere Testablauf ist deshalb: erst `VerifyAdd` bei eBay hochladen, den eBay-Bericht prüfen, danach dieselben Daten mit `Add` exportieren und hochladen.
 
 Für bereits veröffentlichte Angebote kann der Converter `Revise` schreiben. Dafür braucht er eine Datei mit den eBay-`ItemID`s, am einfachsten die eBay-Ergebnisdatei des erfolgreichen Uploads oder einen Active-Listings-Export. Bei Varianten steht `Revise` und `ItemID` nur auf der Parent-Zeile; die Child-Zeilen bleiben in `Action` und `ItemID` leer. In der Oberfläche wird der Revise-Download blockiert, wenn für mindestens ein Parent-Listing keine `ItemID` gefunden wurde.
 
@@ -102,7 +102,7 @@ node .\cli.js `
 ```
 
 Mit `--sample 5` wird nur ein Testexport für die ersten fünf Produkte gebaut.
-Standard ist `--action VerifyAdd`, damit eBay die Datei erst prüft. Mit `--publish` oder `--action Add` werden aktive Angebote veröffentlicht. Mit `--draft` oder `--action Draft` wird `Draft` geschrieben.
+Standard ist `--action VerifyAdd`, damit eBay die Datei erst prüft. Mit `--publish` oder `--action Add` werden aktive Angebote veröffentlicht. `--draft` oder `--action Draft` wird aus Sicherheitsgründen als `VerifyAdd` behandelt, weil eBay Varianten-Dateien mit `Draft` nicht zuverlässig akzeptiert.
 Mit `--revise --item-id-map "eBay-Ergebnisdatei.csv"` wird eine Revise-Datei für bestehende aktive Angebote erzeugt.
 Mit `--listing-mode flat` wird der alte Einzel-Listing-Modus erzwungen.
 Mit `--extra-images` werden globale Zusatzbilder ergänzt.
