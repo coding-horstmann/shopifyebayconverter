@@ -881,7 +881,7 @@
       ? `<div style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:${primary};font-weight:bold;margin-bottom:10px;">${escapeHtml(heading)}</div>`
       : "";
 
-    return `<div style="width:96%;max-width:100%;margin:28px auto 0;padding:20px 26px 0;border:1px solid #e6ddd1;background:#fbfaf7;text-align:center;box-sizing:border-box;"><div style="max-width:1040px;margin:0 auto;text-align:center;"><div style="display:inline-block;width:${textWidth};max-width:540px;min-width:280px;vertical-align:middle;text-align:left;box-sizing:border-box;padding:0 28px 20px 0;">${headingBlock}<p style="margin:0;color:#4b463f;font-size:17px;line-height:1.65;">${escapeHtml(text)}</p>${button}</div>${image}</div></div>`;
+    return `<div style="width:96%;max-width:100%;margin:28px auto 0;padding:20px 26px 0;border:1px solid #e6ddd1;background:#fbfaf7;text-align:center;box-sizing:border-box;"><div style="max-width:1120px;margin:0 auto;text-align:left;"><div style="display:inline-block;width:${textWidth};max-width:540px;min-width:280px;vertical-align:middle;text-align:left;box-sizing:border-box;padding:0 28px 20px 0;">${headingBlock}<p style="margin:0;color:#4b463f;font-size:17px;line-height:1.65;">${escapeHtml(text)}</p>${button}</div>${image}</div></div>`;
   }
 
   function renderListingTemplate(product, config, details) {
