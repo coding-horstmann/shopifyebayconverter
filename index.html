@@ -17,6 +17,7 @@
         <div class="actions">
           <button id="refreshBtn" type="button">Vorschau aktualisieren</button>
           <button id="downloadBtn" type="button" class="primary" disabled>CSV herunterladen</button>
+          <button id="downloadAmazonBtn" type="button" disabled>Amazon TSV herunterladen</button>
           <a class="logout-link" href="/api/logout">Logout</a>
         </div>
       </header>
@@ -32,6 +33,35 @@
             <label for="templateFile">eBay Vorlage</label>
             <input id="templateFile" type="file" accept=".csv,text/csv" />
           </div>
+
+          <div class="section-title">
+            <h2>Amazon Export</h2>
+          </div>
+
+          <div class="grid two">
+            <div class="field">
+              <label for="amazonBrand">Amazon Marke</label>
+              <input id="amazonBrand" type="text" value="Atelier Orlo" />
+            </div>
+            <div class="field">
+              <label for="amazonProductType">Amazon Produkttyp</label>
+              <input id="amazonProductType" type="text" value="wall_art" />
+            </div>
+          </div>
+
+          <div class="grid two">
+            <div class="field">
+              <label for="amazonConditionType">Amazon Zustand</label>
+              <input id="amazonConditionType" type="text" value="new_new" />
+            </div>
+            <div class="field">
+              <label for="amazonProductTaxCode">Amazon Steuer-Code</label>
+              <input id="amazonProductTaxCode" type="text" value="A_GEN_STANDARD" />
+            </div>
+          </div>
+          <p class="hint">
+            Beta: erzeugt eine TSV-Datei fuer Amazon Custom Upload. Fuer neue ASINs brauchst du voraussichtlich GTIN-Freistellung und Professional Selling Plan.
+          </p>
 
           <div class="field">
             <label for="itemIdMapFile">eBay Ergebnisdatei / aktive Angebote</label>
@@ -534,6 +564,10 @@
       const elements = {
         shopifyFile: document.getElementById("shopifyFile"),
         templateFile: document.getElementById("templateFile"),
+        amazonBrand: document.getElementById("amazonBrand"),
+        amazonProductType: document.getElementById("amazonProductType"),
+        amazonConditionType: document.getElementById("amazonConditionType"),
+        amazonProductTaxCode: document.getElementById("amazonProductTaxCode"),
         itemIdMapFile: document.getElementById("itemIdMapFile"),
         categoryId: document.getElementById("categoryId"),
         conditionId: document.getElementById("conditionId"),
@@ -620,6 +654,7 @@
         warnings: document.getElementById("warnings"),
         stats: document.getElementById("stats"),
         downloadBtn: document.getElementById("downloadBtn"),
+        downloadAmazonBtn: document.getElementById("downloadAmazonBtn"),
         refreshBtn: document.getElementById("refreshBtn"),
         addSpecificBtn: document.getElementById("addSpecificBtn"),
         selectAllTags: document.getElementById("selectAllTags"),
@@ -829,6 +864,25 @@
         };
       }
 
+      function collectAmazonConfig() {
+        return {
+          quantity: Number(elements.quantity.value || 3),
+          maxImages: Math.min(24, Math.max(1, Number(elements.maxImages.value || 8))),
+          extraImageUrls: elements.extraImageUrls.value,
+          productExtraImageUrls: elements.productExtraImageUrls.value,
+          extraImagesPosition: elements.extraImagesPosition.value,
+          extraImagesPositionIndex: elements.extraImagesPositionIndex.value.trim(),
+          priceMultiplier: Number(elements.priceMultiplier.value || 1),
+          priceAdd: Number(elements.priceAdd.value || 0),
+          roundTo: Number(elements.roundTo.value || 0),
+          amazonBrand: elements.amazonBrand.value.trim() || "Atelier Orlo",
+          amazonManufacturer: elements.amazonBrand.value.trim() || "Atelier Orlo",
+          amazonProductType: elements.amazonProductType.value.trim() || "wall_art",
+          amazonConditionType: elements.amazonConditionType.value.trim() || "new_new",
+          amazonProductTaxCode: elements.amazonProductTaxCode.value.trim() || "A_GEN_STANDARD",
+        };
+      }
+
       function renderTags() {
         if (!state.analysis || !state.analysis.specificKeys.length) {
           elements.tagSpecifics.className = "tag-grid empty";
@@ -934,6 +988,7 @@
           renderWarnings([]);
           renderPreview(null);
           elements.downloadBtn.disabled = true;
+          elements.downloadAmazonBtn.disabled = true;
           elements.sampleBtn.disabled = true;
           return;
         }
@@ -958,17 +1013,31 @@
           );
           renderPreview(result.analysis);
           elements.downloadBtn.disabled = hasMissingReviseItemIds;
+          elements.downloadAmazonBtn.disabled = false;
           elements.sampleBtn.disabled = hasMissingReviseItemIds;
         } catch (error) {
           state.result = null;
           renderWarnings([error.message || String(error)]);
           elements.downloadBtn.disabled = true;
+          elements.downloadAmazonBtn.disabled = true;
           elements.sampleBtn.disabled = true;
         }
       }
 
       function downloadCsv(csv, filename) {
         const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      function downloadTsv(tsv, filename) {
+        const blob = new Blob([tsv], { type: "text/tab-separated-values;charset=utf-8" });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
@@ -1036,6 +1105,10 @@
 
       [
         elements.categoryId,
+        elements.amazonBrand,
+        elements.amazonProductType,
+        elements.amazonConditionType,
+        elements.amazonProductTaxCode,
         elements.conditionId,
         elements.quantity,
         elements.maxImages,
@@ -1134,6 +1207,12 @@
       elements.downloadBtn.addEventListener("click", () => {
         if (state.result) {
           downloadCsv(state.result.csv, `atelier-orlo-ebay-variants-${exportModeSlug()}.csv`);
+        }
+      });
+      elements.downloadAmazonBtn.addEventListener("click", () => {
+        if (state.shopifyText) {
+          const result = EbayConverter.convertAmazonCustom(state.shopifyText, collectAmazonConfig());
+          downloadTsv(result.tsv, "atelier-orlo-amazon-custom.tsv");
         }
       });
       elements.sampleBtn.addEventListener("click", () => {

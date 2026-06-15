@@ -113,6 +113,10 @@ Mit `--no-c-prefix` werden Merkmale ohne `C:` geschrieben, wenn eine eBay-Katego
 
 Auf Vercel schützt `APP_PASSWORD` die App über eine Login-Seite. Der Standard-Benutzername ist `atelier`; optional kann er über `APP_USERNAME` geändert werden.
 
-## Hinweis
+## Amazon Custom TSV Beta
 
-Amazon-Export ist noch nicht umgesetzt. Der aktuelle Fokus ist eBay, weil die eBay-Variantenstruktur zuerst zuverlässig funktionieren muss.
+Die App kann zusätzlich eine `atelier-orlo-amazon-custom.tsv` erzeugen. Diese Datei ist bewusst tab-getrennt, weil Amazon an der gezeigten Upload-Stelle Excel oder TSV erwartet. Ein direkter Shopify-CSV-Upload wird als falsche Header-Zeile verarbeitet.
+
+Der Amazon-Export erzeugt Parent-/Child-Zeilen fuer Groessenvarianten mit `parent_child`, `parent_sku`, `relationship_type=variation`, `variation_theme=Size`, Bildern, Beschreibung, Bulletpoints, Preis und Bestand. Fuer GTIN-Freistellung bleiben `external_product_id` und `external_product_id_type` leer.
+
+Einschraenkung: Fuer neue Amazon-ASINs brauchst du voraussichtlich weiterhin Professional Selling Plan, eine passende Kategorie-/Produkttyp-Freigabe und eine GTIN-Freistellung pro Store/Kategorie oder echte GS1-EANs. Die Custom-TSV ist ein sinnvoller Upload-Test, ersetzt aber nicht die finale Amazon-Kategorievorlage.

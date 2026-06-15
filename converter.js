@@ -65,6 +65,46 @@
     Herstellungsart: "Kunstdruck",
   };
 
+  const AMAZON_CUSTOM_HEADERS = [
+    "item_sku",
+    "parent_sku",
+    "parent_child",
+    "relationship_type",
+    "variation_theme",
+    "product_type",
+    "item_name",
+    "brand_name",
+    "manufacturer",
+    "external_product_id",
+    "external_product_id_type",
+    "product_description",
+    "bullet_point1",
+    "bullet_point2",
+    "bullet_point3",
+    "bullet_point4",
+    "bullet_point5",
+    "standard_price",
+    "quantity",
+    "condition_type",
+    "main_image_url",
+    "other_image_url1",
+    "other_image_url2",
+    "other_image_url3",
+    "other_image_url4",
+    "other_image_url5",
+    "size_name",
+    "color_name",
+    "material_type",
+    "style_name",
+    "theme",
+    "artist",
+    "era",
+    "country_of_origin",
+    "update_delete",
+    "product_tax_code",
+    "merchant_shipping_group_name",
+  ];
+
   const DEFAULT_LISTING_TEMPLATE = {
     enabled: true,
     shopName: "",
@@ -649,6 +689,189 @@
       price = Math.ceil(price / roundTo) * roundTo;
     }
     return price.toFixed(2);
+  }
+
+  function cleanAmazonText(value, maxLength) {
+    const clean = String(value || "")
+      .replace(/\t/g, " ")
+      .replace(/\r?\n/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    return maxLength && clean.length > maxLength ? clean.slice(0, maxLength).trim() : clean;
+  }
+
+  function amazonSizeName(value, fallback) {
+    return cleanAmazonText(value || fallback || "Standard", 80);
+  }
+
+  function amazonParentSku(product) {
+    return makeSku(`${product.handle}-parent`);
+  }
+
+  function amazonBullets(product, config) {
+    const tags = product.tags || {};
+    const material = tags.Materialinfo || tags.Material || "Mattes 200 g/m² Papier";
+    const artist = tags["Künstler"] ? `Motiv/Künstler: ${tags["Künstler"]}.` : "Kuratiertes Vintage-Postermotiv.";
+    const theme = tags.Thema ? `Thema: ${tags.Thema}.` : "Dekorative Wandkunst für Wohnräume, Büro und Galerie-Wände.";
+    const sizeText = "Mehrere Größenvarianten verfügbar.";
+    const frameText = tags.Rahmung || tags.Rahmenstil ? `Rahmung: ${tags.Rahmung || tags.Rahmenstil}.` : "Lieferung ohne Rahmen.";
+    const printText = `Hochwertiger Kunstdruck auf ${material}.`;
+    return [printText, artist, theme, sizeText, frameText].map((bullet) => cleanAmazonText(bullet, config.amazonBulletLength || 500));
+  }
+
+  function amazonProductDescription(product, config) {
+    const plain = toPlainText(product.description);
+    const fallback = "Moderne Reproduktion eines ausgewählten Vintage-Poster-Motivs. Gedruckt auf mattem Papier. Rahmen und Dekoration sind nicht enthalten.";
+    return cleanAmazonText(plain || fallback, config.amazonDescriptionLength || 1900);
+  }
+
+  function amazonRow(headers, values) {
+    const row = {};
+    headers.forEach((header) => {
+      row[header] = values[header] == null ? "" : values[header];
+    });
+    return row;
+  }
+
+  function amazonRowsForProduct(product, config) {
+    const variants = product.variants.length ? product.variants : [{ sku: product.handle, price: product.firstPrice, option1Value: "" }];
+    const hasVariants = config.amazonUseVariations !== false && variants.length > 1;
+    const parentSku = amazonParentSku(product);
+    const images = buildProductImages(product, config).slice(0, Number(config.maxImages || 8));
+    const bullets = amazonBullets(product, config);
+    const tags = product.tags || {};
+    const brand = cleanAmazonText(config.amazonBrand || product.vendor || "Atelier Orlo", 50);
+    const productType = cleanAmazonText(config.amazonProductType || "wall_art", 80);
+    const condition = cleanAmazonText(config.amazonConditionType || "new_new", 40);
+    const taxCode = cleanAmazonText(config.amazonProductTaxCode || "A_GEN_STANDARD", 40);
+    const shippingGroup = cleanAmazonText(config.amazonShippingGroup || "", 80);
+    const title = cleanAmazonText(product.title, 200);
+    const description = amazonProductDescription(product, config);
+    const base = {
+      product_type: productType,
+      item_name: title,
+      brand_name: brand,
+      manufacturer: cleanAmazonText(config.amazonManufacturer || brand, 80),
+      product_description: description,
+      bullet_point1: bullets[0],
+      bullet_point2: bullets[1],
+      bullet_point3: bullets[2],
+      bullet_point4: bullets[3],
+      bullet_point5: bullets[4],
+      condition_type: condition,
+      main_image_url: images[0] || "",
+      other_image_url1: images[1] || "",
+      other_image_url2: images[2] || "",
+      other_image_url3: images[3] || "",
+      other_image_url4: images[4] || "",
+      other_image_url5: images[5] || "",
+      color_name: cleanAmazonText(tags.Farbe || "", 80),
+      material_type: cleanAmazonText(tags.Material || "Papier", 80),
+      style_name: cleanAmazonText(tags.Kunststil || tags.Stil || "Vintage", 80),
+      theme: cleanAmazonText(tags.Thema || "", 120),
+      artist: cleanAmazonText(tags["Künstler"] || "", 120),
+      era: cleanAmazonText(tags.Epoche || "", 80),
+      country_of_origin: cleanAmazonText(tags.Herkunft || "", 80),
+      update_delete: "Update",
+      product_tax_code: taxCode,
+      merchant_shipping_group_name: shippingGroup,
+    };
+
+    if (!hasVariants) {
+      const variant = variants[0];
+      return [
+        {
+          ...base,
+          item_sku: variant.sku || makeSku(product.handle),
+          parent_child: "",
+          relationship_type: "",
+          variation_theme: "",
+          standard_price: formatPrice(variant.price || product.firstPrice, config),
+          quantity: config.quantity,
+          size_name: amazonSizeName(variant.option1Value, ""),
+        },
+      ];
+    }
+
+    const rows = [
+      {
+        ...base,
+        item_sku: parentSku,
+        parent_child: "parent",
+        relationship_type: "",
+        variation_theme: "Size",
+        standard_price: "",
+        quantity: "",
+        size_name: "",
+      },
+    ];
+
+    variants.forEach((variant) => {
+      rows.push({
+        ...base,
+        item_sku: variant.sku || makeSku(`${product.handle}-${variant.option1Value || "default"}`),
+        parent_sku: parentSku,
+        parent_child: "child",
+        relationship_type: "variation",
+        variation_theme: "Size",
+        standard_price: formatPrice(variant.price || product.firstPrice, config),
+        quantity: config.quantity,
+        size_name: amazonSizeName(variant.option1Value, "Standard"),
+      });
+    });
+    return rows;
+  }
+
+  function convertAmazonCustom(shopifyText, options) {
+    const config = {
+      quantity: 3,
+      maxImages: 8,
+      priceMultiplier: 1,
+      priceAdd: 0,
+      roundTo: 0,
+      amazonBrand: "Atelier Orlo",
+      amazonManufacturer: "Atelier Orlo",
+      amazonProductType: "wall_art",
+      amazonConditionType: "new_new",
+      amazonProductTaxCode: "A_GEN_STANDARD",
+      amazonShippingGroup: "",
+      amazonUseVariations: true,
+      extraImageUrls: "",
+      productExtraImageUrls: "",
+      extraImagesPosition: "after-main",
+      ...options,
+    };
+    const analysis = analyzeShopify(shopifyText);
+    const headers = AMAZON_CUSTOM_HEADERS.slice();
+    const rows = [];
+    let productsWithVariants = 0;
+    let usedImages = 0;
+
+    analysis.products.forEach((product) => {
+      if (product.variants.length > 1) {
+        productsWithVariants += 1;
+      }
+      usedImages += buildProductImages(product, config).slice(0, Number(config.maxImages || 8)).length;
+      amazonRowsForProduct(product, config).forEach((row) => rows.push(amazonRow(headers, row)));
+    });
+
+    return {
+      tsv: objectsToCsv(headers, rows, "\t", []),
+      headers,
+      rows,
+      warnings: [
+        "Amazon-Custom-TSV: Fuer neue ASINs ist in der Regel Professional Selling Plan plus passende Kategorievorlage/GTIN-Freistellung noetig.",
+        "Bei GTIN-Freistellung bleiben external_product_id und external_product_id_type bewusst leer.",
+      ],
+      analysis,
+      summary: {
+        products: analysis.productCount,
+        sourceRows: analysis.rowCount,
+        outputRows: rows.length,
+        productsWithVariants,
+        usedImages,
+      },
+    };
   }
 
   function renderFact(label, value) {
@@ -2043,6 +2266,7 @@
     DEFAULT_LISTING_TEMPLATE,
     analyzeShopify,
     convert,
+    convertAmazonCustom,
     detectDelimiter,
     parseCsvRows,
     parseEbayTemplate,
