@@ -1180,8 +1180,8 @@
       [amazonAttr.countryOfOrigin]: amazonOriginCountry(config),
       [amazonAttr.batteriesRequired]: "Nein",
       [amazonAttr.batteriesIncluded]: "Nein",
-      [amazonAttr.containsBatteryOrCell]: "Nein",
-      [amazonAttr.hasMultipleBatteryPoweredComponents]: "Nein",
+      [amazonAttr.containsBatteryOrCell]: "",
+      [amazonAttr.hasMultipleBatteryPoweredComponents]: "",
     };
 
     const rowForVariant = (variant, index, parentage) => {
@@ -1269,7 +1269,7 @@
       condition_type: condition,
       batteries_required: "Nein",
       batteries_included: "Nein",
-      contains_battery_or_cell: "Nein",
+      contains_battery_or_cell: "",
       main_image_url: images[0] || "",
       other_image_url1: images[1] || "",
       other_image_url2: images[2] || "",
