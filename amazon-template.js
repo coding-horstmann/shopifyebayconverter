@@ -18,6 +18,12 @@ function escapeXml(value) {
     .replace(/"/g, "&quot;");
 }
 
+function sharedStringTextXml(value) {
+  const text = String(value == null ? "" : value);
+  const preserveSpace = /^\s|\s$|\r|\n| {2,}/.test(text) ? ' xml:space="preserve"' : "";
+  return `<si><t${preserveSpace}>${escapeXml(text)}</t></si>`;
+}
+
 function attrValue(xml, name) {
   const match = new RegExp(`\\b${name}="([^"]*)"`).exec(xml);
   return match ? decodeXml(match[1]) : "";
@@ -50,6 +56,66 @@ function parseSharedStrings(xml) {
     const textParts = Array.from(match[1].matchAll(/<t\b[^>]*>([\s\S]*?)<\/t>/g)).map((part) => decodeXml(part[1]));
     return textParts.join("");
   });
+}
+
+class SharedStringWriter {
+  constructor(xml) {
+    this.originalXml = xml || "";
+    this.strings = parseSharedStrings(xml);
+    this.indexByValue = new Map();
+    this.addedXml = [];
+    const countMatch = this.originalXml.match(/<sst\b([^>]*)>/);
+    const count = countMatch ? Number(attrValue(countMatch[1], "count")) : NaN;
+    this.count = Number.isFinite(count) && count > 0 ? count : this.strings.length;
+
+    this.strings.forEach((value, index) => {
+      if (!this.indexByValue.has(value)) {
+        this.indexByValue.set(value, index);
+      }
+    });
+  }
+
+  index(value) {
+    const text = String(value == null ? "" : value);
+    this.count += 1;
+    if (this.indexByValue.has(text)) {
+      return this.indexByValue.get(text);
+    }
+
+    const index = this.strings.length;
+    this.strings.push(text);
+    this.indexByValue.set(text, index);
+    this.addedXml.push(sharedStringTextXml(text));
+    return index;
+  }
+
+  toXml() {
+    if (!this.originalXml) {
+      return [
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
+        `<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="${this.count}" uniqueCount="${this.strings.length}">`,
+        this.strings.map(sharedStringTextXml).join(""),
+        "</sst>",
+      ].join("");
+    }
+
+    let xml = this.originalXml.replace(/<\/sst>\s*$/, `${this.addedXml.join("")}</sst>`);
+    xml = xml.replace(/<sst\b([^>]*)>/, (match, attrs) => {
+      let nextAttrs = attrs;
+      if (/\bcount="/.test(nextAttrs)) {
+        nextAttrs = nextAttrs.replace(/\bcount="[^"]*"/, `count="${this.count}"`);
+      } else {
+        nextAttrs += ` count="${this.count}"`;
+      }
+      if (/\buniqueCount="/.test(nextAttrs)) {
+        nextAttrs = nextAttrs.replace(/\buniqueCount="[^"]*"/, `uniqueCount="${this.strings.length}"`);
+      } else {
+        nextAttrs += ` uniqueCount="${this.strings.length}"`;
+      }
+      return `<sst${nextAttrs}>`;
+    });
+    return xml;
+  }
 }
 
 function cellText(cellXml, sharedStrings) {
@@ -120,7 +186,22 @@ function findAttributeRow(rows) {
   return row;
 }
 
-function valueForAttribute(row, attr) {
+function normalizeMarketplaceAttribute(attr) {
+  return String(attr || "").replace(/\[marketplace_id=[^\]]+\]/g, "");
+}
+
+function normalizedRowValues(row) {
+  const values = new Map();
+  Object.entries(row).forEach(([key, value]) => {
+    const normalized = normalizeMarketplaceAttribute(key);
+    if (!values.has(normalized)) {
+      values.set(normalized, value);
+    }
+  });
+  return values;
+}
+
+function valueForAttribute(row, normalizedRow, attr) {
   if (!attr) {
     return "";
   }
@@ -130,6 +211,10 @@ function valueForAttribute(row, attr) {
   if (attr === "record_action#1.value") {
     return row["::record_action"] || "";
   }
+  const normalizedAttr = normalizeMarketplaceAttribute(attr);
+  if (normalizedRow.has(normalizedAttr)) {
+    return normalizedRow.get(normalizedAttr);
+  }
   return "";
 }
 
@@ -137,17 +222,17 @@ function isNumericAttribute(attr) {
   return [
     "fulfillment_availability#1.quantity",
     "fulfillment_availability#1.lead_time_to_ship_max_days",
-    "list_price[marketplace_id=A1PA6795UKMFR9]#1.value_with_tax",
-    "purchasable_offer[marketplace_id=A1PA6795UKMFR9][audience=ALL]#1.our_price#1.schedule#1.value_with_tax",
-    "number_of_items[marketplace_id=A1PA6795UKMFR9]#1.value",
-    "item_package_quantity[marketplace_id=A1PA6795UKMFR9]#1.value",
-    "unit_count[marketplace_id=A1PA6795UKMFR9]#1.value",
-    "item_length_width[marketplace_id=A1PA6795UKMFR9]#1.length.value",
-    "item_length_width[marketplace_id=A1PA6795UKMFR9]#1.width.value",
-  ].includes(attr);
+    "list_price#1.value_with_tax",
+    "purchasable_offer[audience=ALL]#1.our_price#1.schedule#1.value_with_tax",
+    "number_of_items#1.value",
+    "item_package_quantity#1.value",
+    "unit_count#1.value",
+    "item_length_width#1.length.value",
+    "item_length_width#1.width.value",
+  ].includes(normalizeMarketplaceAttribute(attr));
 }
 
-function buildCellXml(ref, attr, value) {
+function buildCellXml(ref, attr, value, sharedStringWriter) {
   if (value == null || value === "") {
     return "";
   }
@@ -157,15 +242,16 @@ function buildCellXml(ref, attr, value) {
       return `<c r="${ref}"><v>${numberValue}</v></c>`;
     }
   }
-  return `<c r="${ref}" t="inlineStr"><is><t>${escapeXml(value)}</t></is></c>`;
+  return `<c r="${ref}" t="s"><v>${sharedStringWriter.index(value)}</v></c>`;
 }
 
-function buildRowXml(rowNumber, row, attributesByColumn, maxColumn) {
+function buildRowXml(rowNumber, row, attributesByColumn, maxColumn, sharedStringWriter) {
   const cells = [];
+  const normalizedRow = normalizedRowValues(row);
   for (let col = 0; col <= maxColumn; col += 1) {
     const attr = attributesByColumn.get(col);
-    const value = valueForAttribute(row, attr);
-    const cellXml = buildCellXml(`${columnName(col)}${rowNumber}`, attr, value);
+    const value = valueForAttribute(row, normalizedRow, attr);
+    const cellXml = buildCellXml(`${columnName(col)}${rowNumber}`, attr, value, sharedStringWriter);
     if (cellXml) {
       cells.push(cellXml);
     }
@@ -201,7 +287,9 @@ async function fillAmazonTemplateBuffer(templateBuffer, shopifyText, options = {
   }
 
   const sharedStringsFile = zip.file("xl/sharedStrings.xml");
-  const sharedStrings = parseSharedStrings(sharedStringsFile ? await sharedStringsFile.async("string") : "");
+  const sharedStringsXml = sharedStringsFile ? await sharedStringsFile.async("string") : "";
+  const sharedStringWriter = new SharedStringWriter(sharedStringsXml);
+  const sharedStrings = sharedStringWriter.strings;
   const sheetXml = await sheetFile.async("string");
   const rows = parseSheet(sheetXml, sharedStrings);
   const attributeRow = findAttributeRow(rows);
@@ -209,10 +297,11 @@ async function fillAmazonTemplateBuffer(templateBuffer, shopifyText, options = {
   const attributesByColumn = new Map(attributeRow.cells.map((cell) => [cell.col, cell.value]));
   const maxColumn = Math.max(...attributeRow.cells.map((cell) => cell.col), 0);
   const preservedRows = rows.filter((row) => row.rowNumber < dataStartRow).map((row) => row.xml);
-  const generatedRowsXml = result.rows.map((row, index) => buildRowXml(dataStartRow + index, row, attributesByColumn, maxColumn));
+  const generatedRowsXml = result.rows.map((row, index) => buildRowXml(dataStartRow + index, row, attributesByColumn, maxColumn, sharedStringWriter));
   const maxRow = Math.max(dataStartRow + result.rows.length - 1, attributeRow.rowNumber + 1);
 
   zip.file(sheetPath, replaceSheetData(sheetXml, preservedRows, generatedRowsXml, maxColumn, maxRow));
+  zip.file("xl/sharedStrings.xml", sharedStringWriter.toXml());
   const buffer = await zip.generateAsync({
     type: "nodebuffer",
     compression: "DEFLATE",
