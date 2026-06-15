@@ -1197,7 +1197,7 @@
         [amazonAttr.parentage]: parentage || "",
         [amazonAttr.parentSku]: parentage === "Kind" ? parentSku : "",
         [amazonAttr.itemName]: amazonWallArtTitle(product, variant, config),
-        [amazonAttr.titleDifferentiation]: parentage === "Kind" ? size : "",
+        [amazonAttr.titleDifferentiation]: "",
         [amazonAttr.modelNumber]: parentage === "Eltern" ? parentSku : amazonWallArtVariantSku(product, variant, index),
         [amazonAttr.modelName]: titleWithoutAmazonSuffix(product, config),
         [amazonAttr.size]: parentage === "Eltern" ? "" : size,
@@ -1210,6 +1210,8 @@
         [amazonAttr.listPrice]: parentage === "Eltern" ? "" : price,
         [amazonAttr.price]: parentage === "Eltern" ? "" : price,
         [amazonAttr.quantity]: parentage === "Eltern" ? "" : config.quantity,
+        [amazonAttr.fulfillmentChannel]: parentage === "Eltern" ? "" : config.amazonFulfillmentChannel || "DEFAULT",
+        [amazonAttr.leadTime]: parentage === "Eltern" ? "" : config.amazonLeadTimeDays || "3",
       };
     };
 
