@@ -17,7 +17,7 @@
         <div class="actions">
           <button id="refreshBtn" type="button">Vorschau aktualisieren</button>
           <button id="downloadBtn" type="button" class="primary" disabled>eBay CSV herunterladen</button>
-          <button id="downloadAmazonBtn" type="button" disabled>Amazon TSV herunterladen</button>
+          <button id="downloadAmazonTemplateBtn" type="button" disabled>Amazon Vorlage herunterladen</button>
           <a class="logout-link" href="/api/logout">Logout</a>
         </div>
       </header>
@@ -117,8 +117,16 @@
           <div class="platform-block amazon">
             <div class="platform-heading">
               <span class="platform-kicker">Amazon</span>
-              <h2>Amazon TSV Export</h2>
-              <p>Nur für Amazon: WALL_ART, GTIN-Freistellung, Amazon-Zustand und Amazon-Titel.</p>
+              <h2>Amazon Export</h2>
+              <p>Empfohlen: Amazon-XLSM-Vorlage hochladen und als befüllte Vorlage herunterladen.</p>
+            </div>
+
+            <div class="field">
+              <label for="amazonTemplateFile">Amazon XLSM-Vorlage</label>
+              <input id="amazonTemplateFile" type="file" accept=".xlsm,.xlsx,application/vnd.ms-excel.sheet.macroEnabled.12,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+              <p class="hint">
+                Lade hier die von Amazon erzeugte Vorlage oder die von Amazon nach dem Custom-Upload erzeugte Entwurfs-XLSM hoch. Das ist robuster als der Nicht-Amazon-Datei-KI-Upload.
+              </p>
             </div>
 
             <div class="grid two">
@@ -160,11 +168,16 @@
             </div>
             <div class="field">
               <label for="amazonBrowseNode">Amazon Stöbern-Kategorie</label>
-              <input id="amazonBrowseNode" type="text" value="372854011" />
-              <small>Default für Poster/Wandkunst. Falls Amazon eine bessere Kategorie vorschlägt, hier die Browse-Node-ID eintragen.</small>
+              <input id="amazonBrowseNode" type="text" value="Poster &amp; Kunstdrucke (372854011)" />
+              <small>Amazon-Kategorie, nicht deine Shop-Kategorie. Default ist Poster &amp; Kunstdrucke.</small>
+            </div>
+            <div class="field">
+              <label for="amazonVariationTheme">Amazon Variantenmerkmal</label>
+              <input id="amazonVariationTheme" type="text" value="GRÖSSE" />
+              <small>Für deine Poster: Varianten unterscheiden sich in der Größe.</small>
             </div>
             <p class="hint">
-              Beta: erzeugt eine Amazon-WALL_ART-TSV mit Parent/Child-Varianten. Bestand 3 bedeutet: 3 Stück je Variante, nicht 3 Produkte.
+              Wichtig: Bestand 3 bedeutet 3 Stück je Variante. Es begrenzt nicht die Anzahl der Produkte.
             </p>
           </div>
 
@@ -582,10 +595,12 @@
 
           <div class="export-panel amazon-export">
             <div>
-              <h2>Amazon Export Beta</h2>
-              <p>TSV für Amazon-Testupload. Produkt-ID-Felder bleiben leer, wenn du mit GTIN-Freistellung arbeitest.</p>
+              <h2>Amazon Export</h2>
+              <p>Empfohlen ist die befüllte Amazon-Vorlage. TSV bleibt als Testdatei verfügbar.</p>
             </div>
             <div class="inline-actions">
+              <button id="downloadAmazonTemplateBtnSecondary" type="button" class="primary" disabled>Amazon Vorlage herunterladen</button>
+              <button id="amazonTemplateSampleBtn" type="button" class="ghost" disabled>Amazon Test-Vorlage mit 3 Postern</button>
               <button id="downloadAmazonBtnSecondary" type="button" disabled>Amazon TSV herunterladen</button>
               <button id="amazonSampleBtn" type="button" class="ghost" disabled>Amazon Test-TSV mit 3 Postern</button>
             </div>
@@ -642,6 +657,7 @@
       const elements = {
         shopifyFile: document.getElementById("shopifyFile"),
         templateFile: document.getElementById("templateFile"),
+        amazonTemplateFile: document.getElementById("amazonTemplateFile"),
         amazonBrand: document.getElementById("amazonBrand"),
         amazonProductType: document.getElementById("amazonProductType"),
         amazonConditionType: document.getElementById("amazonConditionType"),
@@ -650,6 +666,7 @@
         amazonCountryOfOrigin: document.getElementById("amazonCountryOfOrigin"),
         amazonTitleSuffix: document.getElementById("amazonTitleSuffix"),
         amazonBrowseNode: document.getElementById("amazonBrowseNode"),
+        amazonVariationTheme: document.getElementById("amazonVariationTheme"),
         itemIdMapFile: document.getElementById("itemIdMapFile"),
         categoryId: document.getElementById("categoryId"),
         conditionId: document.getElementById("conditionId"),
@@ -737,7 +754,9 @@
         stats: document.getElementById("stats"),
         downloadBtn: document.getElementById("downloadBtn"),
         downloadBtnSecondary: document.getElementById("downloadBtnSecondary"),
-        downloadAmazonBtn: document.getElementById("downloadAmazonBtn"),
+        downloadAmazonTemplateBtn: document.getElementById("downloadAmazonTemplateBtn"),
+        downloadAmazonTemplateBtnSecondary: document.getElementById("downloadAmazonTemplateBtnSecondary"),
+        amazonTemplateSampleBtn: document.getElementById("amazonTemplateSampleBtn"),
         downloadAmazonBtnSecondary: document.getElementById("downloadAmazonBtnSecondary"),
         refreshBtn: document.getElementById("refreshBtn"),
         addSpecificBtn: document.getElementById("addSpecificBtn"),
@@ -968,7 +987,8 @@
           amazonProductIdType: elements.amazonProductIdType.value.trim() || "GTIN-Freistellung",
           amazonCountryOfOrigin: elements.amazonCountryOfOrigin.value.trim() || "Deutschland",
           amazonTitleSuffix: elements.amazonTitleSuffix.value.trim() || "Poster Wandkunst",
-          amazonBrowseNode: elements.amazonBrowseNode.value.trim() || "372854011",
+          amazonBrowseNode: elements.amazonBrowseNode.value.trim() || "Poster & Kunstdrucke (372854011)",
+          amazonVariationTheme: elements.amazonVariationTheme.value.trim() || "GRÖSSE",
         };
       }
 
@@ -1049,7 +1069,9 @@
         elements.downloadBtn.disabled = disabled;
         elements.downloadBtnSecondary.disabled = disabled;
         elements.sampleBtn.disabled = disabled;
-        elements.downloadAmazonBtn.disabled = amazonDisabled;
+        elements.downloadAmazonTemplateBtn.disabled = amazonDisabled;
+        elements.downloadAmazonTemplateBtnSecondary.disabled = amazonDisabled;
+        elements.amazonTemplateSampleBtn.disabled = amazonDisabled;
         elements.downloadAmazonBtnSecondary.disabled = amazonDisabled;
         elements.amazonSampleBtn.disabled = amazonDisabled;
       }
@@ -1141,6 +1163,17 @@
         URL.revokeObjectURL(url);
       }
 
+      function downloadBlob(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      }
+
       function exportModeSlug() {
         return {
           VerifyAdd: "verify",
@@ -1182,6 +1215,37 @@
           const result = EbayConverter.convertAmazonCustom(state.shopifyText, collectAmazonConfig());
           downloadTsv(result.tsv, "atelier-orlo-amazon-wall-art.tsv");
         }
+      }
+
+      async function downloadAmazonTemplate(sample = false) {
+        const templateFile = elements.amazonTemplateFile.files[0];
+        if (!templateFile) {
+          renderWarnings(["Amazon Vorlage fehlt: Lade zuerst die Amazon-XLSM-Vorlage im Amazon-Bereich hoch."]);
+          return;
+        }
+        const shopifyText = sample ? createSampleShopifyText(3) : state.shopifyText;
+        if (!shopifyText) {
+          renderWarnings(["Shopify CSV fehlt."]);
+          return;
+        }
+
+        const form = new FormData();
+        form.append("amazonTemplate", templateFile, templateFile.name || "amazon-template.xlsm");
+        form.append("shopifyCsv", new Blob([shopifyText], { type: "text/csv;charset=utf-8" }), sample ? "products_export-test-3.csv" : "products_export.csv");
+        form.append("config", JSON.stringify(collectAmazonConfig()));
+        form.append("filename", sample ? "atelier-orlo-amazon-wall-art-template-test-3.xlsm" : "atelier-orlo-amazon-wall-art-template.xlsm");
+
+        const response = await fetch("/api/amazon-template", {
+          method: "POST",
+          body: form,
+        });
+        if (!response.ok) {
+          const message = await response.text();
+          renderWarnings([message || "Amazon-Vorlage konnte nicht erzeugt werden."]);
+          return;
+        }
+        const blob = await response.blob();
+        downloadBlob(blob, sample ? "atelier-orlo-amazon-wall-art-template-test-3.xlsm" : "atelier-orlo-amazon-wall-art-template.xlsm");
       }
 
       setTemplateDefaults();
@@ -1226,6 +1290,7 @@
         elements.amazonCountryOfOrigin,
         elements.amazonTitleSuffix,
         elements.amazonBrowseNode,
+        elements.amazonVariationTheme,
         elements.conditionId,
         elements.quantity,
         elements.maxImages,
@@ -1325,7 +1390,9 @@
         downloadCurrentEbayCsv();
       });
       elements.downloadBtnSecondary.addEventListener("click", downloadCurrentEbayCsv);
-      elements.downloadAmazonBtn.addEventListener("click", downloadCurrentAmazonTsv);
+      elements.downloadAmazonTemplateBtn.addEventListener("click", () => downloadAmazonTemplate(false));
+      elements.downloadAmazonTemplateBtnSecondary.addEventListener("click", () => downloadAmazonTemplate(false));
+      elements.amazonTemplateSampleBtn.addEventListener("click", () => downloadAmazonTemplate(true));
       elements.downloadAmazonBtnSecondary.addEventListener("click", downloadCurrentAmazonTsv);
       elements.sampleBtn.addEventListener("click", () => {
         if (state.shopifyText) {

@@ -122,6 +122,7 @@
     browseNode1: `recommended_browse_nodes[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
     packageLevel: `package_level[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
     modelNumber: `model_number[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
+    modelName: `model_name[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
     manufacturer: `manufacturer[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
     mainProductImage: `main_product_image_locator[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.media_location`,
     otherProductImage1: `other_product_image_locator_1[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.media_location`,
@@ -129,6 +130,9 @@
     otherProductImage3: `other_product_image_locator_3[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.media_location`,
     otherProductImage4: `other_product_image_locator_4[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.media_location`,
     otherProductImage5: `other_product_image_locator_5[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.media_location`,
+    otherProductImage6: `other_product_image_locator_6[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.media_location`,
+    otherProductImage7: `other_product_image_locator_7[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.media_location`,
+    otherProductImage8: `other_product_image_locator_8[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.media_location`,
     productDescription: `product_description[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
     bullet1: `bullet_point[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
     bullet2: `bullet_point[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#2.value`,
@@ -151,6 +155,8 @@
     colorFamily1: `color_family[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
     colorFamily2: `color_family[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#2.value`,
     colorFamily3: `color_family[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#3.value`,
+    colorFamily4: `color_family[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#4.value`,
+    colorFamily5: `color_family[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#5.value`,
     size: `size[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
     theme: `theme[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
     paperSizeValue: `paper_size[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
@@ -168,6 +174,8 @@
     itemWidth: `item_length_width[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.width.value`,
     itemWidthUnit: `item_length_width[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.width.unit`,
     wallArtForm: `wall_art_form[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
+    baseMaterial: `base_material[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
+    isFramed: `is_framed[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
     isOriginalArtwork: `is_original_artwork[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
     conditionType: `condition_type[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
     listPrice: `list_price[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value_with_tax`,
@@ -194,6 +202,7 @@
     amazonAttr.browseNode1,
     amazonAttr.packageLevel,
     amazonAttr.modelNumber,
+    amazonAttr.modelName,
     amazonAttr.manufacturer,
     amazonAttr.mainProductImage,
     amazonAttr.otherProductImage1,
@@ -201,6 +210,9 @@
     amazonAttr.otherProductImage3,
     amazonAttr.otherProductImage4,
     amazonAttr.otherProductImage5,
+    amazonAttr.otherProductImage6,
+    amazonAttr.otherProductImage7,
+    amazonAttr.otherProductImage8,
     amazonAttr.productDescription,
     amazonAttr.bullet1,
     amazonAttr.bullet2,
@@ -223,6 +235,8 @@
     amazonAttr.colorFamily1,
     amazonAttr.colorFamily2,
     amazonAttr.colorFamily3,
+    amazonAttr.colorFamily4,
+    amazonAttr.colorFamily5,
     amazonAttr.size,
     amazonAttr.theme,
     amazonAttr.paperSizeValue,
@@ -240,6 +254,8 @@
     amazonAttr.itemWidth,
     amazonAttr.itemWidthUnit,
     amazonAttr.wallArtForm,
+    amazonAttr.baseMaterial,
+    amazonAttr.isFramed,
     amazonAttr.isOriginalArtwork,
     amazonAttr.conditionType,
     amazonAttr.listPrice,
@@ -1027,10 +1043,38 @@
     return cleanAmazonText(config.amazonCountryOfOrigin || "Deutschland", 80);
   }
 
+  function amazonBrowseNodeValue(config) {
+    const raw = cleanAmazonText(config.amazonBrowseNode || "Poster & Kunstdrucke (372854011)", 120);
+    if (raw === "372854011") {
+      return "Poster & Kunstdrucke (372854011)";
+    }
+    return raw;
+  }
+
+  function normalizeAmazonVariationTheme(value) {
+    const raw = String(value || "").trim();
+    const ascii = raw
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]/gi, "")
+      .toLowerCase();
+    if (!raw || /gr.sse/i.test(raw) || ascii === "grosse" || ascii === "groesse" || ascii === "size") {
+      return "GR\u00d6SSE";
+    }
+    return cleanAmazonText(raw, 80);
+  }
+
+  function amazonVariationTheme(config, hasVariants) {
+    if (!hasVariants) {
+      return "";
+    }
+    return normalizeAmazonVariationTheme(config.amazonVariationTheme);
+  }
+
   function amazonProductIdType(config) {
     const raw = String(config.amazonProductIdType || "").trim();
     if (!raw || /gtin-freistellung|keine produktkennung|ohne produktkennung/i.test(raw)) {
-      return "";
+      return "GTIN-Freistellung";
     }
     return cleanAmazonText(raw, 80);
   }
@@ -1039,11 +1083,16 @@
     return amazonRow(headers, values);
   }
 
+  function titleWithoutAmazonSuffix(product, config) {
+    const brand = cleanAmazonText(config.amazonBrand || product.vendor || "Atelier Orlo", 80);
+    return stripLeadingAmazonBrand(product.title, brand, config);
+  }
+
   function amazonWallArtRowsForProduct(product, config) {
     const variants = product.variants.length ? product.variants : [{ sku: product.handle, price: product.firstPrice, option1Value: "" }];
     const hasVariants = config.amazonUseVariations !== false && variants.length > 1;
     const parentSku = amazonWallArtParentSku(product);
-    const images = buildProductImages(product, config).slice(0, Math.min(6, Number(config.maxImages || 8)));
+    const images = buildProductImages(product, config).slice(0, Math.min(9, Number(config.maxImages || 9)));
     const bullets = amazonBullets(product, config);
     const tags = product.tags || {};
     const brand = cleanAmazonText(config.amazonBrand || product.vendor || "Atelier Orlo", 50);
@@ -1052,11 +1101,11 @@
     const common = {
       [amazonAttr.action]: "Vollständiges Update",
       [amazonAttr.productType]: "WALL_ART",
-      [amazonAttr.variationTheme]: hasVariants ? "PRINT_MEDIA_TYPE/SIZE" : "",
+      [amazonAttr.variationTheme]: amazonVariationTheme(config, hasVariants),
       [amazonAttr.brand]: brand,
       [amazonAttr.productIdType]: amazonProductIdType(config),
       [amazonAttr.productIdValue]: "",
-      [amazonAttr.browseNode1]: config.amazonBrowseNode || "372854011",
+      [amazonAttr.browseNode1]: amazonBrowseNodeValue(config),
       [amazonAttr.packageLevel]: "Einheit",
       [amazonAttr.manufacturer]: manufacturer,
       [amazonAttr.mainProductImage]: images[0] || "",
@@ -1065,6 +1114,9 @@
       [amazonAttr.otherProductImage3]: images[3] || "",
       [amazonAttr.otherProductImage4]: images[4] || "",
       [amazonAttr.otherProductImage5]: images[5] || "",
+      [amazonAttr.otherProductImage6]: images[6] || "",
+      [amazonAttr.otherProductImage7]: images[7] || "",
+      [amazonAttr.otherProductImage8]: images[8] || "",
       [amazonAttr.productDescription]: amazonProductDescription(product, config),
       [amazonAttr.bullet1]: bullets[0],
       [amazonAttr.bullet2]: bullets[1],
@@ -1087,6 +1139,8 @@
       [amazonAttr.colorFamily1]: colorFamilies[0] || "",
       [amazonAttr.colorFamily2]: colorFamilies[1] || "",
       [amazonAttr.colorFamily3]: colorFamilies[2] || "",
+      [amazonAttr.colorFamily4]: colorFamilies[3] || "",
+      [amazonAttr.colorFamily5]: colorFamilies[4] || "",
       [amazonAttr.theme]: amazonTheme(tags),
       [amazonAttr.printMediaType]: "Papier",
       [amazonAttr.paperFinish]: "Matt",
@@ -1097,6 +1151,8 @@
       [amazonAttr.roomType]: "Wohnzimmer",
       [amazonAttr.indoorOutdoorUsage]: "Innenbereich",
       [amazonAttr.wallArtForm]: "Poster",
+      [amazonAttr.baseMaterial]: "Papier",
+      [amazonAttr.isFramed]: "Nein",
       [amazonAttr.isOriginalArtwork]: "Nein",
       [amazonAttr.conditionType]: normalizeAmazonCondition(config.amazonConditionType),
       [amazonAttr.taxCode]: config.amazonProductTaxCode || "A_GEN_STANDARD",
@@ -1117,6 +1173,7 @@
         [amazonAttr.itemName]: amazonWallArtTitle(product, variant, config),
         [amazonAttr.titleDifferentiation]: parentage === "Kind" ? size : "",
         [amazonAttr.modelNumber]: parentage === "Eltern" ? parentSku : amazonWallArtVariantSku(product, variant, index),
+        [amazonAttr.modelName]: titleWithoutAmazonSuffix(product, config),
         [amazonAttr.size]: parentage === "Eltern" ? "" : size,
         [amazonAttr.paperSizeValue]: parentage === "Eltern" ? "" : size.replace(/\s*cm$/i, ""),
         [amazonAttr.paperSizeUnit]: parentage === "Eltern" ? "" : "Zentimeter",
@@ -1294,9 +1351,9 @@
       headers,
       rows,
       warnings: [
-        "Amazon-WALL_ART-TSV: SKU steht als erste Spalte, damit der Nicht-Amazon-Datei-Upload die SKU nicht mit der Aktion verwechselt.",
-        "Bei GTIN-Freistellung bleiben Produkt-ID-Typ und Produkt-ID bewusst leer; das entspricht dem Haken Dieses Produkt hat keine Produktkennung.",
-        "Ursprungsland ist standardmaessig Deutschland. Bitte nur so lassen, wenn das fuer die Amazon-Produktion rechtlich stimmt.",
+        "Fuer Varianten nutze bevorzugt die Amazon-Vorlage-XLSM. Der Nicht-Amazon-Datei-Upload kann Parent/Child-Varianten ignorieren und einzelne Entwuerfe erzeugen.",
+        "Bei GTIN-Freistellung wird der Produkt-ID-Typ gesetzt und die Produkt-ID bleibt leer; das entspricht dem Haken Dieses Produkt hat keine Produktkennung.",
+        "Eine Variantenfamilie braucht technisch Parent- und Child-Zeilen: 3 Produkte mit je 3 Groessen ergeben 12 Tabellenzeilen, aber 3 Produktfamilien.",
       ],
       analysis,
       summary: {
