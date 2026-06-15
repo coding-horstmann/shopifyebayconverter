@@ -12,11 +12,11 @@
       <header class="topbar">
         <div>
           <p class="eyebrow">Atelier Orlo</p>
-          <h1>Shopify zu eBay Varianten CSV</h1>
+          <h1>Shopify zu eBay und Amazon Export</h1>
         </div>
         <div class="actions">
           <button id="refreshBtn" type="button">Vorschau aktualisieren</button>
-          <button id="downloadBtn" type="button" class="primary" disabled>CSV herunterladen</button>
+          <button id="downloadBtn" type="button" class="primary" disabled>eBay CSV herunterladen</button>
           <button id="downloadAmazonBtn" type="button" disabled>Amazon TSV herunterladen</button>
           <a class="logout-link" href="/api/logout">Logout</a>
         </div>
@@ -33,35 +33,6 @@
             <label for="templateFile">eBay Vorlage</label>
             <input id="templateFile" type="file" accept=".csv,text/csv" />
           </div>
-
-          <div class="section-title">
-            <h2>Amazon Export</h2>
-          </div>
-
-          <div class="grid two">
-            <div class="field">
-              <label for="amazonBrand">Amazon Marke</label>
-              <input id="amazonBrand" type="text" value="Atelier Orlo" />
-            </div>
-            <div class="field">
-              <label for="amazonProductType">Amazon Produkttyp</label>
-              <input id="amazonProductType" type="text" value="wall_art" />
-            </div>
-          </div>
-
-          <div class="grid two">
-            <div class="field">
-              <label for="amazonConditionType">Amazon Zustand</label>
-              <input id="amazonConditionType" type="text" value="new_new" />
-            </div>
-            <div class="field">
-              <label for="amazonProductTaxCode">Amazon Steuer-Code</label>
-              <input id="amazonProductTaxCode" type="text" value="A_GEN_STANDARD" />
-            </div>
-          </div>
-          <p class="hint">
-            Beta: erzeugt eine TSV-Datei fuer Amazon Custom Upload. Fuer neue ASINs brauchst du voraussichtlich GTIN-Freistellung und Professional Selling Plan.
-          </p>
 
           <div class="field">
             <label for="itemIdMapFile">eBay Ergebnisdatei / aktive Angebote</label>
@@ -137,6 +108,35 @@
             <input id="prefixItemSpecifics" type="checkbox" checked />
             <span>Artikelmerkmale als C:-Spalten schreiben</span>
           </label>
+
+          <div class="section-title">
+            <h2>Amazon Export</h2>
+          </div>
+
+          <div class="grid two">
+            <div class="field">
+              <label for="amazonBrand">Amazon Marke</label>
+              <input id="amazonBrand" type="text" value="Atelier Orlo" />
+            </div>
+            <div class="field">
+              <label for="amazonProductType">Amazon Produkttyp</label>
+              <input id="amazonProductType" type="text" value="wall_art" />
+            </div>
+          </div>
+
+          <div class="grid two">
+            <div class="field">
+              <label for="amazonConditionType">Amazon Zustand</label>
+              <input id="amazonConditionType" type="text" value="new_new" />
+            </div>
+            <div class="field">
+              <label for="amazonProductTaxCode">Amazon Steuer-Code</label>
+              <input id="amazonProductTaxCode" type="text" value="A_GEN_STANDARD" />
+            </div>
+          </div>
+          <p class="hint">
+            Beta: erzeugt eine TSV-Datei fuer Amazon Custom Upload. Bestand 3 bedeutet: 3 Stueck je Variante, nicht 3 Produkte.
+          </p>
 
           <div class="section-title">
             <h2>Zusatzfotos</h2>
@@ -512,6 +512,28 @@
 
           <div id="warnings" class="warnings" hidden></div>
 
+          <div class="export-panel">
+            <div>
+              <h2>eBay Export</h2>
+              <p>CSV fuer eBay mit Varianten, Preisen, Fotos und Artikelmerkmalen.</p>
+            </div>
+            <div class="inline-actions">
+              <button id="downloadBtnSecondary" type="button" class="primary" disabled>eBay CSV herunterladen</button>
+              <button id="sampleBtn" type="button" class="ghost" disabled>eBay Test-CSV mit 5 Produkten</button>
+            </div>
+          </div>
+
+          <div class="export-panel secondary">
+            <div>
+              <h2>Amazon Export Beta</h2>
+              <p>TSV fuer Amazon-Testupload. Produkt-ID-Felder bleiben leer, wenn du mit GTIN-Freistellung arbeitest.</p>
+            </div>
+            <div class="inline-actions">
+              <button id="downloadAmazonBtnSecondary" type="button" disabled>Amazon TSV herunterladen</button>
+              <button id="amazonSampleBtn" type="button" class="ghost" disabled>Amazon Test-TSV mit 3 Postern</button>
+            </div>
+          </div>
+
           <div class="section-title">
             <h2>Automatische Merkmale</h2>
             <div class="inline-actions">
@@ -523,7 +545,6 @@
 
           <div class="section-title">
             <h2>Vorschau</h2>
-            <button id="sampleBtn" type="button" class="ghost" disabled>Nur 5 Produkte exportieren</button>
           </div>
           <div class="table-wrap">
             <table>
@@ -654,12 +675,15 @@
         warnings: document.getElementById("warnings"),
         stats: document.getElementById("stats"),
         downloadBtn: document.getElementById("downloadBtn"),
+        downloadBtnSecondary: document.getElementById("downloadBtnSecondary"),
         downloadAmazonBtn: document.getElementById("downloadAmazonBtn"),
+        downloadAmazonBtnSecondary: document.getElementById("downloadAmazonBtnSecondary"),
         refreshBtn: document.getElementById("refreshBtn"),
         addSpecificBtn: document.getElementById("addSpecificBtn"),
         selectAllTags: document.getElementById("selectAllTags"),
         selectNoTags: document.getElementById("selectNoTags"),
         sampleBtn: document.getElementById("sampleBtn"),
+        amazonSampleBtn: document.getElementById("amazonSampleBtn"),
       };
 
       function readFile(file) {
@@ -946,13 +970,23 @@
 
       function updateActionLabels() {
         const labels = {
-          VerifyAdd: ["Prüf-CSV herunterladen", "5 Produkte prüfen"],
-          Revise: ["Revise-CSV herunterladen", "5 Angebote bearbeiten"],
-          Add: ["Aktiv-CSV herunterladen", "5 aktive Angebote exportieren"],
+          VerifyAdd: ["eBay Prüf-CSV herunterladen", "eBay Test-CSV mit 5 Produkten"],
+          Revise: ["eBay Revise-CSV herunterladen", "eBay Test-Revise mit 5 Produkten"],
+          Add: ["eBay Aktiv-CSV herunterladen", "eBay Test-CSV mit 5 Produkten"],
         };
         const [downloadLabel, sampleLabel] = labels[elements.uploadAction.value] || labels.VerifyAdd;
         elements.downloadBtn.textContent = downloadLabel;
+        elements.downloadBtnSecondary.textContent = downloadLabel;
         elements.sampleBtn.textContent = sampleLabel;
+      }
+
+      function setExportButtonsDisabled(disabled, amazonDisabled = disabled) {
+        elements.downloadBtn.disabled = disabled;
+        elements.downloadBtnSecondary.disabled = disabled;
+        elements.sampleBtn.disabled = disabled;
+        elements.downloadAmazonBtn.disabled = amazonDisabled;
+        elements.downloadAmazonBtnSecondary.disabled = amazonDisabled;
+        elements.amazonSampleBtn.disabled = amazonDisabled;
       }
 
       function renderPreview(analysis) {
@@ -987,9 +1021,7 @@
           renderStats(null);
           renderWarnings([]);
           renderPreview(null);
-          elements.downloadBtn.disabled = true;
-          elements.downloadAmazonBtn.disabled = true;
-          elements.sampleBtn.disabled = true;
+          setExportButtonsDisabled(true, true);
           return;
         }
 
@@ -1012,15 +1044,11 @@
               : result.warnings,
           );
           renderPreview(result.analysis);
-          elements.downloadBtn.disabled = hasMissingReviseItemIds;
-          elements.downloadAmazonBtn.disabled = false;
-          elements.sampleBtn.disabled = hasMissingReviseItemIds;
+          setExportButtonsDisabled(hasMissingReviseItemIds, false);
         } catch (error) {
           state.result = null;
           renderWarnings([error.message || String(error)]);
-          elements.downloadBtn.disabled = true;
-          elements.downloadAmazonBtn.disabled = true;
-          elements.sampleBtn.disabled = true;
+          setExportButtonsDisabled(true, true);
         }
       }
 
@@ -1056,10 +1084,9 @@
         }[elements.uploadAction.value] || "verify";
       }
 
-      function createSampleCsv() {
-        const config = collectConfig();
+      function createSampleShopifyText(count) {
         const analysis = EbayConverter.analyzeShopify(state.shopifyText);
-        const keepHandles = new Set(analysis.products.slice(0, 5).map((product) => product.handle));
+        const keepHandles = new Set(analysis.products.slice(0, count).map((product) => product.handle));
         const parsed = EbayConverter.parseShopify(state.shopifyText);
         const header = parsed.headers.join(",");
         const rows = parsed.rows
@@ -1068,7 +1095,28 @@
             const value = row[headerName] || "";
             return /[",\r\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
           }).join(","));
-        return EbayConverter.convert([header, ...rows].join("\r\n"), config).csv;
+        return [header, ...rows].join("\r\n");
+      }
+
+      function createSampleCsv() {
+        return EbayConverter.convert(createSampleShopifyText(5), collectConfig()).csv;
+      }
+
+      function createAmazonSampleTsv() {
+        return EbayConverter.convertAmazonCustom(createSampleShopifyText(3), collectAmazonConfig()).tsv;
+      }
+
+      function downloadCurrentEbayCsv() {
+        if (state.result) {
+          downloadCsv(state.result.csv, `atelier-orlo-ebay-variants-${exportModeSlug()}.csv`);
+        }
+      }
+
+      function downloadCurrentAmazonTsv() {
+        if (state.shopifyText) {
+          const result = EbayConverter.convertAmazonCustom(state.shopifyText, collectAmazonConfig());
+          downloadTsv(result.tsv, "atelier-orlo-amazon-custom.tsv");
+        }
       }
 
       setTemplateDefaults();
@@ -1205,19 +1253,19 @@
         updateConversion();
       });
       elements.downloadBtn.addEventListener("click", () => {
-        if (state.result) {
-          downloadCsv(state.result.csv, `atelier-orlo-ebay-variants-${exportModeSlug()}.csv`);
-        }
+        downloadCurrentEbayCsv();
       });
-      elements.downloadAmazonBtn.addEventListener("click", () => {
-        if (state.shopifyText) {
-          const result = EbayConverter.convertAmazonCustom(state.shopifyText, collectAmazonConfig());
-          downloadTsv(result.tsv, "atelier-orlo-amazon-custom.tsv");
-        }
-      });
+      elements.downloadBtnSecondary.addEventListener("click", downloadCurrentEbayCsv);
+      elements.downloadAmazonBtn.addEventListener("click", downloadCurrentAmazonTsv);
+      elements.downloadAmazonBtnSecondary.addEventListener("click", downloadCurrentAmazonTsv);
       elements.sampleBtn.addEventListener("click", () => {
         if (state.shopifyText) {
           downloadCsv(createSampleCsv(), `atelier-orlo-ebay-variants-${exportModeSlug()}-test-5.csv`);
+        }
+      });
+      elements.amazonSampleBtn.addEventListener("click", () => {
+        if (state.shopifyText) {
+          downloadTsv(createAmazonSampleTsv(), "atelier-orlo-amazon-custom-test-3.tsv");
         }
       });
     </script>
