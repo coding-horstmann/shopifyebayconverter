@@ -131,9 +131,20 @@
 
             <div class="grid two">
               <div class="field">
+                <label for="amazonBrandMode">Amazon Markenmodus</label>
+                <select id="amazonBrandMode">
+                  <option value="none" selected>Ohne Marke (Generic)</option>
+                  <option value="brand">Eigene Marke verwenden</option>
+                </select>
+                <small>Für Tests vermeidet Generic die Markenfreigabe für Atelier Orlo.</small>
+              </div>
+              <div class="field">
                 <label for="amazonBrand">Amazon Marke</label>
                 <input id="amazonBrand" type="text" value="Atelier Orlo" />
               </div>
+            </div>
+
+            <div class="grid two">
               <div class="field">
                 <label for="amazonProductType">Amazon Produkttyp</label>
                 <input id="amazonProductType" type="text" value="WALL_ART" />
@@ -658,6 +669,7 @@
         shopifyFile: document.getElementById("shopifyFile"),
         templateFile: document.getElementById("templateFile"),
         amazonTemplateFile: document.getElementById("amazonTemplateFile"),
+        amazonBrandMode: document.getElementById("amazonBrandMode"),
         amazonBrand: document.getElementById("amazonBrand"),
         amazonProductType: document.getElementById("amazonProductType"),
         amazonConditionType: document.getElementById("amazonConditionType"),
@@ -979,6 +991,7 @@
           priceMultiplier: Number(elements.priceMultiplier.value || 1),
           priceAdd: Number(elements.priceAdd.value || 0),
           roundTo: Number(elements.roundTo.value || 0),
+          amazonBrandMode: elements.amazonBrandMode.value || "none",
           amazonBrand: elements.amazonBrand.value.trim() || "Atelier Orlo",
           amazonManufacturer: elements.amazonBrand.value.trim() || "Atelier Orlo",
           amazonProductType: elements.amazonProductType.value.trim() || "WALL_ART",
@@ -1282,6 +1295,7 @@
 
       [
         elements.categoryId,
+        elements.amazonBrandMode,
         elements.amazonBrand,
         elements.amazonProductType,
         elements.amazonConditionType,

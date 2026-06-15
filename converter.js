@@ -86,6 +86,9 @@
     "standard_price",
     "quantity",
     "condition_type",
+    "batteries_required",
+    "batteries_included",
+    "contains_battery_or_cell",
     "main_image_url",
     "other_image_url1",
     "other_image_url2",
@@ -185,6 +188,10 @@
     leadTime: "fulfillment_availability#1.lead_time_to_ship_max_days",
     price: `purchasable_offer[marketplace_id=${AMAZON_DE_MARKETPLACE}][audience=ALL]#1.our_price#1.schedule#1.value_with_tax`,
     countryOfOrigin: `country_of_origin[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
+    batteriesRequired: `batteries_required[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
+    batteriesIncluded: `batteries_included[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
+    containsBatteryOrCell: `contains_battery_or_cell[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
+    hasMultipleBatteryPoweredComponents: `has_multiple_battery_powered_components[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
   };
 
   const AMAZON_WALL_ART_HEADERS = [
@@ -265,6 +272,10 @@
     amazonAttr.leadTime,
     amazonAttr.price,
     amazonAttr.countryOfOrigin,
+    amazonAttr.batteriesRequired,
+    amazonAttr.batteriesIncluded,
+    amazonAttr.containsBatteryOrCell,
+    amazonAttr.hasMultipleBatteryPoweredComponents,
   ];
 
   const DEFAULT_LISTING_TEMPLATE = {
@@ -1088,6 +1099,14 @@
     return stripLeadingAmazonBrand(product.title, brand, config);
   }
 
+  function amazonBrandName(product, config) {
+    const mode = String(config.amazonBrandMode || "none").toLowerCase();
+    if (config.amazonNoBrand === true || ["none", "no-brand", "generic", "ohne-marke"].includes(mode)) {
+      return "Generic";
+    }
+    return cleanAmazonText(config.amazonBrand || product.vendor || "Atelier Orlo", 50);
+  }
+
   function amazonWallArtRowsForProduct(product, config) {
     const variants = product.variants.length ? product.variants : [{ sku: product.handle, price: product.firstPrice, option1Value: "" }];
     const hasVariants = config.amazonUseVariations !== false && variants.length > 1;
@@ -1095,8 +1114,8 @@
     const images = buildProductImages(product, config).slice(0, Math.min(9, Number(config.maxImages || 9)));
     const bullets = amazonBullets(product, config);
     const tags = product.tags || {};
-    const brand = cleanAmazonText(config.amazonBrand || product.vendor || "Atelier Orlo", 50);
-    const manufacturer = cleanAmazonText(config.amazonManufacturer || brand, 80);
+    const brand = amazonBrandName(product, config);
+    const manufacturer = cleanAmazonText(config.amazonManufacturer || product.vendor || "Atelier Orlo", 80);
     const colorFamilies = amazonColorFamilies(tags);
     const common = {
       [amazonAttr.action]: "Vollständiges Update",
@@ -1159,6 +1178,10 @@
       [amazonAttr.fulfillmentChannel]: config.amazonFulfillmentChannel || "DEFAULT",
       [amazonAttr.leadTime]: config.amazonLeadTimeDays || "3",
       [amazonAttr.countryOfOrigin]: amazonOriginCountry(config),
+      [amazonAttr.batteriesRequired]: "Nein",
+      [amazonAttr.batteriesIncluded]: "Nein",
+      [amazonAttr.containsBatteryOrCell]: "Nein",
+      [amazonAttr.hasMultipleBatteryPoweredComponents]: "Nein",
     };
 
     const rowForVariant = (variant, index, parentage) => {
@@ -1225,7 +1248,7 @@
     const images = buildProductImages(product, config).slice(0, Number(config.maxImages || 8));
     const bullets = amazonBullets(product, config);
     const tags = product.tags || {};
-    const brand = cleanAmazonText(config.amazonBrand || product.vendor || "Atelier Orlo", 50);
+    const brand = amazonBrandName(product, config);
     const productType = cleanAmazonText(config.amazonProductType || "wall_art", 80);
     const condition = cleanAmazonText(config.amazonConditionType || "new_new", 40);
     const taxCode = cleanAmazonText(config.amazonProductTaxCode || "A_GEN_STANDARD", 40);
@@ -1244,6 +1267,9 @@
       bullet_point4: bullets[3],
       bullet_point5: bullets[4],
       condition_type: condition,
+      batteries_required: "Nein",
+      batteries_included: "Nein",
+      contains_battery_or_cell: "Nein",
       main_image_url: images[0] || "",
       other_image_url1: images[1] || "",
       other_image_url2: images[2] || "",
@@ -1314,6 +1340,7 @@
       priceMultiplier: 1,
       priceAdd: 0,
       roundTo: 0,
+      amazonBrandMode: "none",
       amazonBrand: "Atelier Orlo",
       amazonManufacturer: "Atelier Orlo",
       amazonProductType: "WALL_ART",

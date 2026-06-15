@@ -31,7 +31,7 @@ function usage() {
     "",
     "Optional:",
     "  --platform ebay|amazon --quantity 3 --max-images 8 --condition 1000 --vat-percent 19 --shipping-profile \"Kostenloser Versand\" --return-profile \"30 Tage Rueckgabe\" --listing-mode variants --action VerifyAdd|Add|Revise --publish --revise --item-id-map ebay-result.csv --extra-images image1|image2 --product-extra-images handle=image1|image2 --extra-position after-main --no-c-prefix --price-multiplier 1 --price-add 0 --round-to 0",
-    "  --platform amazon --amazon-brand \"Atelier Orlo\" --amazon-product-type WALL_ART --amazon-product-id-type \"GTIN-Freistellung\" --amazon-origin-country Deutschland --amazon-title-suffix \"Poster Wandkunst\" --amazon-browse-node \"Poster & Kunstdrucke (372854011)\" --amazon-variation-theme \"GRÖSSE\" --amazon-template amazon-template.xlsm",
+    "  --platform amazon --amazon-brand-mode none|brand --amazon-brand \"Atelier Orlo\" --amazon-product-type WALL_ART --amazon-product-id-type \"GTIN-Freistellung\" --amazon-origin-country Deutschland --amazon-title-suffix \"Poster Wandkunst\" --amazon-browse-node \"Poster & Kunstdrucke (372854011)\" --amazon-variation-theme \"GRÖSSE\" --amazon-template amazon-template.xlsm",
     "  --sample 5",
   ].join("\n");
 }
@@ -86,6 +86,7 @@ async function main() {
       priceMultiplier: Number(args["price-multiplier"] || 1),
       priceAdd: Number(args["price-add"] || 0),
       roundTo: Number(args["round-to"] || 0),
+      amazonBrandMode: args["amazon-brand-mode"] || "none",
       amazonBrand: args["amazon-brand"] || "Atelier Orlo",
       amazonManufacturer: args["amazon-manufacturer"] || args["amazon-brand"] || "Atelier Orlo",
       amazonProductType: args["amazon-product-type"] || "WALL_ART",
