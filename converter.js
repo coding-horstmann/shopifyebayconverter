@@ -105,6 +105,146 @@
     "merchant_shipping_group_name",
   ];
 
+  const AMAZON_DE_MARKETPLACE = "A1PA6795UKMFR9";
+  const AMAZON_DE_LANGUAGE = "de_DE";
+  const amazonAttr = {
+    action: "::record_action",
+    sku: "contribution_sku#1.value",
+    productType: "product_type#1.value",
+    parentage: `parentage_level[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
+    parentSku: `child_parent_sku_relationship[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.parent_sku`,
+    variationTheme: "variation_theme#1.name",
+    itemName: `item_name[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
+    titleDifferentiation: `title_differentiation[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
+    brand: `brand[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
+    productIdType: "amzn1.volt.ca.product_id_type",
+    productIdValue: "amzn1.volt.ca.product_id_value",
+    browseNode1: `recommended_browse_nodes[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
+    packageLevel: `package_level[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
+    modelNumber: `model_number[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
+    manufacturer: `manufacturer[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
+    mainProductImage: `main_product_image_locator[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.media_location`,
+    otherProductImage1: `other_product_image_locator_1[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.media_location`,
+    otherProductImage2: `other_product_image_locator_2[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.media_location`,
+    otherProductImage3: `other_product_image_locator_3[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.media_location`,
+    otherProductImage4: `other_product_image_locator_4[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.media_location`,
+    otherProductImage5: `other_product_image_locator_5[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.media_location`,
+    productDescription: `product_description[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
+    bullet1: `bullet_point[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
+    bullet2: `bullet_point[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#2.value`,
+    bullet3: `bullet_point[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#3.value`,
+    bullet4: `bullet_point[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#4.value`,
+    bullet5: `bullet_point[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#5.value`,
+    specialFeature1: `special_feature[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
+    specialFeature2: `special_feature[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#2.value`,
+    specialFeature3: `special_feature[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#3.value`,
+    specialFeature4: `special_feature[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#4.value`,
+    specialFeature5: `special_feature[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#5.value`,
+    style: `style[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
+    ageRange: `age_range_description[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
+    material1: `material[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
+    material2: `material[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#2.value`,
+    numberOfItems: `number_of_items[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
+    itemPackageQuantity: `item_package_quantity[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
+    subjectCharacter: `subject_character[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
+    color: `color[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
+    size: `size[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
+    theme: `theme[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
+    paperSizeValue: `paper_size[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
+    paperSizeUnit: `paper_size[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.unit`,
+    printMediaType: `print_media_type[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
+    paperFinish: `paper_finish[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
+    orientation: `orientation[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
+    finishType: `finish_type[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
+    unitCountValue: `unit_count[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
+    unitCountType: `unit_count[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.type[language_tag=${AMAZON_DE_LANGUAGE}].value`,
+    roomType: `room_type[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
+    indoorOutdoorUsage: `indoor_outdoor_usage[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
+    itemLength: `item_length_width[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.length.value`,
+    itemLengthUnit: `item_length_width[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.length.unit`,
+    itemWidth: `item_length_width[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.width.value`,
+    itemWidthUnit: `item_length_width[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.width.unit`,
+    wallArtForm: `wall_art_form[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
+    isOriginalArtwork: `is_original_artwork[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
+    conditionType: `condition_type[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
+    listPrice: `list_price[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value_with_tax`,
+    taxCode: "product_tax_code#1.value",
+    fulfillmentChannel: "fulfillment_availability#1.fulfillment_channel_code",
+    quantity: "fulfillment_availability#1.quantity",
+    leadTime: "fulfillment_availability#1.lead_time_to_ship_max_days",
+    price: `purchasable_offer[marketplace_id=${AMAZON_DE_MARKETPLACE}][audience=ALL]#1.our_price#1.schedule#1.value_with_tax`,
+    countryOfOrigin: `country_of_origin[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
+  };
+
+  const AMAZON_WALL_ART_HEADERS = [
+    amazonAttr.action,
+    amazonAttr.sku,
+    amazonAttr.productType,
+    amazonAttr.parentage,
+    amazonAttr.parentSku,
+    amazonAttr.variationTheme,
+    amazonAttr.itemName,
+    amazonAttr.titleDifferentiation,
+    amazonAttr.brand,
+    amazonAttr.productIdType,
+    amazonAttr.productIdValue,
+    amazonAttr.browseNode1,
+    amazonAttr.packageLevel,
+    amazonAttr.modelNumber,
+    amazonAttr.manufacturer,
+    amazonAttr.mainProductImage,
+    amazonAttr.otherProductImage1,
+    amazonAttr.otherProductImage2,
+    amazonAttr.otherProductImage3,
+    amazonAttr.otherProductImage4,
+    amazonAttr.otherProductImage5,
+    amazonAttr.productDescription,
+    amazonAttr.bullet1,
+    amazonAttr.bullet2,
+    amazonAttr.bullet3,
+    amazonAttr.bullet4,
+    amazonAttr.bullet5,
+    amazonAttr.specialFeature1,
+    amazonAttr.specialFeature2,
+    amazonAttr.specialFeature3,
+    amazonAttr.specialFeature4,
+    amazonAttr.specialFeature5,
+    amazonAttr.style,
+    amazonAttr.ageRange,
+    amazonAttr.material1,
+    amazonAttr.material2,
+    amazonAttr.numberOfItems,
+    amazonAttr.itemPackageQuantity,
+    amazonAttr.subjectCharacter,
+    amazonAttr.color,
+    amazonAttr.size,
+    amazonAttr.theme,
+    amazonAttr.paperSizeValue,
+    amazonAttr.paperSizeUnit,
+    amazonAttr.printMediaType,
+    amazonAttr.paperFinish,
+    amazonAttr.orientation,
+    amazonAttr.finishType,
+    amazonAttr.unitCountValue,
+    amazonAttr.unitCountType,
+    amazonAttr.roomType,
+    amazonAttr.indoorOutdoorUsage,
+    amazonAttr.itemLength,
+    amazonAttr.itemLengthUnit,
+    amazonAttr.itemWidth,
+    amazonAttr.itemWidthUnit,
+    amazonAttr.wallArtForm,
+    amazonAttr.isOriginalArtwork,
+    amazonAttr.conditionType,
+    amazonAttr.listPrice,
+    amazonAttr.taxCode,
+    amazonAttr.fulfillmentChannel,
+    amazonAttr.quantity,
+    amazonAttr.leadTime,
+    amazonAttr.price,
+    amazonAttr.countryOfOrigin,
+  ];
+
   const DEFAULT_LISTING_TEMPLATE = {
     enabled: true,
     shopName: "",
@@ -708,6 +848,202 @@
     return makeSku(`${product.handle}-parent`);
   }
 
+  function amazonShortSkuBase(product) {
+    const slug = slugPart(product.handle || product.title || "poster")
+      .replace(/-/g, "")
+      .slice(0, 12)
+      .toUpperCase();
+    return `AO-${slug || "POSTER"}-${shortHash(product.handle || product.title).toUpperCase()}`.slice(0, 24);
+  }
+
+  function amazonWallArtParentSku(product) {
+    return `${amazonShortSkuBase(product)}-P`.slice(0, 32);
+  }
+
+  function amazonVariantCode(value, fallbackIndex) {
+    const raw = String(value || "").trim();
+    const sizeMatch = raw.match(/(\d+(?:[.,]\d+)?)\s*[x×]\s*(\d+(?:[.,]\d+)?)/i);
+    if (sizeMatch) {
+      return `${formatTitleDimension(sizeMatch[1])}X${formatTitleDimension(sizeMatch[2])}`.replace(/[^A-Z0-9]+/gi, "").slice(0, 12);
+    }
+    const slug = slugPart(raw).replace(/-/g, "").toUpperCase().slice(0, 12);
+    return slug || `V${fallbackIndex + 1}`;
+  }
+
+  function amazonWallArtVariantSku(product, variant, index) {
+    return `${amazonShortSkuBase(product)}-${amazonVariantCode(variant && variant.option1Value, index)}`.slice(0, 40);
+  }
+
+  function parseCmDimensions(value) {
+    const match = String(value || "").match(/(\d+(?:[.,]\d+)?)\s*[x×]\s*(\d+(?:[.,]\d+)?)\s*cm/i);
+    if (!match) {
+      return { length: "", width: "" };
+    }
+    const first = Number.parseFloat(String(match[1]).replace(",", "."));
+    const second = Number.parseFloat(String(match[2]).replace(",", "."));
+    if (!Number.isFinite(first) || !Number.isFinite(second)) {
+      return { length: "", width: "" };
+    }
+    return {
+      length: String(Math.max(first, second)).replace(".", ","),
+      width: String(Math.min(first, second)).replace(".", ","),
+    };
+  }
+
+  function amazonPosterSize(product, variant) {
+    const raw = (variant && variant.option1Value) || extractTitleCmSize(product.title);
+    return raw ? cleanAmazonText(raw, 80) : "";
+  }
+
+  function amazonDimensionsFor(product, variant) {
+    const size = amazonPosterSize(product, variant);
+    return parseCmDimensions(size || product.title);
+  }
+
+  function normalizeAmazonCondition(value) {
+    const normalized = String(value || "").trim().toLowerCase();
+    if (!normalized || normalized === "new_new" || normalized === "new" || normalized === "1000") {
+      return "Neu";
+    }
+    if (normalized.includes("gebraucht") || normalized === "used") {
+      return "Gebraucht";
+    }
+    return cleanAmazonText(value, 40);
+  }
+
+  function appendAmazonTitleSuffix(title, suffix, maxLength) {
+    const clean = cleanAmazonText(title, maxLength || 200);
+    const add = cleanAmazonText(suffix, 80);
+    if (!add || clean.toLowerCase().includes(add.toLowerCase())) {
+      return clean;
+    }
+    return cleanAmazonText(`${clean} ${add}`, maxLength || 200);
+  }
+
+  function amazonWallArtTitle(product, variant, config) {
+    const suffix = config.amazonTitleSuffix == null ? "Poster Wandkunst" : config.amazonTitleSuffix;
+    const size = amazonPosterSize(product, variant);
+    const titleWithSize = size && !titleAlreadyContainsSize(product.title, size) ? `${product.title} - ${size}` : product.title;
+    return appendAmazonTitleSuffix(titleWithSize, suffix, 200);
+  }
+
+  function amazonTheme(tags) {
+    return cleanAmazonText(tags.Thema || tags.Motiv || "Vintage Poster", 120);
+  }
+
+  function amazonColor(tags) {
+    return cleanAmazonText(tags.Farbe || "Mehrfarbig", 80);
+  }
+
+  function amazonStyle(tags) {
+    return cleanAmazonText(tags.Kunststil || tags.Stil || "Retro Vintage", 120);
+  }
+
+  function amazonOriginCountry(config) {
+    return cleanAmazonText(config.amazonCountryOfOrigin || "Deutschland", 80);
+  }
+
+  function amazonProductIdType(config) {
+    return cleanAmazonText(config.amazonProductIdType || "GTIN-Freistellung", 80);
+  }
+
+  function amazonWallArtRow(headers, values) {
+    return amazonRow(headers, values);
+  }
+
+  function amazonWallArtRowsForProduct(product, config) {
+    const variants = product.variants.length ? product.variants : [{ sku: product.handle, price: product.firstPrice, option1Value: "" }];
+    const hasVariants = config.amazonUseVariations !== false && variants.length > 1;
+    const parentSku = amazonWallArtParentSku(product);
+    const images = buildProductImages(product, config).slice(0, Math.min(6, Number(config.maxImages || 8)));
+    const bullets = amazonBullets(product, config);
+    const tags = product.tags || {};
+    const brand = cleanAmazonText(config.amazonBrand || product.vendor || "Atelier Orlo", 50);
+    const manufacturer = cleanAmazonText(config.amazonManufacturer || brand, 80);
+    const common = {
+      [amazonAttr.action]: "Vollständiges Update",
+      [amazonAttr.productType]: "WALL_ART",
+      [amazonAttr.variationTheme]: hasVariants ? "PRINT_MEDIA_TYPE/SIZE" : "",
+      [amazonAttr.brand]: brand,
+      [amazonAttr.productIdType]: amazonProductIdType(config),
+      [amazonAttr.productIdValue]: "",
+      [amazonAttr.browseNode1]: config.amazonBrowseNode || "372854011",
+      [amazonAttr.packageLevel]: "Einheit",
+      [amazonAttr.manufacturer]: manufacturer,
+      [amazonAttr.mainProductImage]: images[0] || "",
+      [amazonAttr.otherProductImage1]: images[1] || "",
+      [amazonAttr.otherProductImage2]: images[2] || "",
+      [amazonAttr.otherProductImage3]: images[3] || "",
+      [amazonAttr.otherProductImage4]: images[4] || "",
+      [amazonAttr.otherProductImage5]: images[5] || "",
+      [amazonAttr.productDescription]: amazonProductDescription(product, config),
+      [amazonAttr.bullet1]: bullets[0],
+      [amazonAttr.bullet2]: bullets[1],
+      [amazonAttr.bullet3]: bullets[2],
+      [amazonAttr.bullet4]: bullets[3],
+      [amazonAttr.bullet5]: bullets[4],
+      [amazonAttr.specialFeature1]: "FSC-zertifiziertes Premiumpapier",
+      [amazonAttr.specialFeature2]: "200 g/m² Papiergewicht",
+      [amazonAttr.specialFeature3]: "Matte Oberfläche",
+      [amazonAttr.specialFeature4]: "Hochauflösender Druck",
+      [amazonAttr.specialFeature5]: tags.Epoche ? `Reproduktion eines historischen Originals: ${tags.Epoche}` : "Historische Reproduktion",
+      [amazonAttr.style]: amazonStyle(tags),
+      [amazonAttr.ageRange]: "Erwachsener",
+      [amazonAttr.material1]: "Papier",
+      [amazonAttr.material2]: cleanAmazonText(tags.Materialinfo || "FSC-Premiumpapier", 80),
+      [amazonAttr.numberOfItems]: "1",
+      [amazonAttr.itemPackageQuantity]: "1",
+      [amazonAttr.subjectCharacter]: cleanAmazonText(tags["Künstler"] || tags.Thema || "Vintage Motiv", 120),
+      [amazonAttr.color]: amazonColor(tags),
+      [amazonAttr.theme]: amazonTheme(tags),
+      [amazonAttr.printMediaType]: "Papier",
+      [amazonAttr.paperFinish]: "Matt",
+      [amazonAttr.orientation]: cleanAmazonText(tags.Ausrichtung || "Vertikal", 80),
+      [amazonAttr.finishType]: cleanAmazonText(tags.Finish || "Matt", 80),
+      [amazonAttr.unitCountValue]: "1",
+      [amazonAttr.unitCountType]: "Stück",
+      [amazonAttr.roomType]: "Wohnzimmer",
+      [amazonAttr.indoorOutdoorUsage]: "Innenbereich",
+      [amazonAttr.wallArtForm]: "Poster",
+      [amazonAttr.isOriginalArtwork]: "Nein",
+      [amazonAttr.conditionType]: normalizeAmazonCondition(config.amazonConditionType),
+      [amazonAttr.taxCode]: config.amazonProductTaxCode || "A_GEN_STANDARD",
+      [amazonAttr.fulfillmentChannel]: config.amazonFulfillmentChannel || "DEFAULT",
+      [amazonAttr.leadTime]: config.amazonLeadTimeDays || "3",
+      [amazonAttr.countryOfOrigin]: amazonOriginCountry(config),
+    };
+
+    const rowForVariant = (variant, index, parentage) => {
+      const size = amazonPosterSize(product, variant) || (parentage === "Kind" || !parentage ? "Standard" : "");
+      const dimensions = amazonDimensionsFor(product, variant);
+      const price = formatPrice((variant && variant.price) || product.firstPrice, config);
+      return {
+        ...common,
+        [amazonAttr.sku]: parentage === "Eltern" ? parentSku : hasVariants ? amazonWallArtVariantSku(product, variant, index) : amazonWallArtVariantSku(product, variant, 0),
+        [amazonAttr.parentage]: parentage || "",
+        [amazonAttr.parentSku]: parentage === "Kind" ? parentSku : "",
+        [amazonAttr.itemName]: amazonWallArtTitle(product, variant, config),
+        [amazonAttr.titleDifferentiation]: parentage === "Kind" ? size : "",
+        [amazonAttr.modelNumber]: parentage === "Eltern" ? parentSku : amazonWallArtVariantSku(product, variant, index),
+        [amazonAttr.size]: parentage === "Eltern" ? "" : size,
+        [amazonAttr.paperSizeValue]: parentage === "Eltern" ? "" : size.replace(/\s*cm$/i, ""),
+        [amazonAttr.paperSizeUnit]: parentage === "Eltern" ? "" : "Zentimeter",
+        [amazonAttr.itemLength]: parentage === "Eltern" ? "" : dimensions.length,
+        [amazonAttr.itemLengthUnit]: parentage === "Eltern" || !dimensions.length ? "" : "Zentimeter",
+        [amazonAttr.itemWidth]: parentage === "Eltern" ? "" : dimensions.width,
+        [amazonAttr.itemWidthUnit]: parentage === "Eltern" || !dimensions.width ? "" : "Zentimeter",
+        [amazonAttr.listPrice]: parentage === "Eltern" ? "" : price,
+        [amazonAttr.price]: parentage === "Eltern" ? "" : price,
+        [amazonAttr.quantity]: parentage === "Eltern" ? "" : config.quantity,
+      };
+    };
+
+    if (!hasVariants) {
+      return [rowForVariant(variants[0], 0, "")];
+    }
+    return [rowForVariant(null, 0, "Eltern"), ...variants.map((variant, index) => rowForVariant(variant, index, "Kind"))];
+  }
+
   function amazonBullets(product, config) {
     const tags = product.tags || {};
     const material = tags.Materialinfo || tags.Material || "Mattes 200 g/m² Papier";
@@ -831,10 +1167,16 @@
       roundTo: 0,
       amazonBrand: "Atelier Orlo",
       amazonManufacturer: "Atelier Orlo",
-      amazonProductType: "wall_art",
-      amazonConditionType: "new_new",
+      amazonProductType: "WALL_ART",
+      amazonConditionType: "Neu",
+      amazonProductIdType: "GTIN-Freistellung",
+      amazonTitleSuffix: "Poster Wandkunst",
+      amazonBrowseNode: "372854011",
       amazonProductTaxCode: "A_GEN_STANDARD",
       amazonShippingGroup: "",
+      amazonCountryOfOrigin: "Deutschland",
+      amazonFulfillmentChannel: "DEFAULT",
+      amazonLeadTimeDays: "3",
       amazonUseVariations: true,
       extraImageUrls: "",
       productExtraImageUrls: "",
@@ -842,7 +1184,7 @@
       ...options,
     };
     const analysis = analyzeShopify(shopifyText);
-    const headers = AMAZON_CUSTOM_HEADERS.slice();
+    const headers = AMAZON_WALL_ART_HEADERS.slice();
     const rows = [];
     let productsWithVariants = 0;
     let usedImages = 0;
@@ -852,7 +1194,7 @@
         productsWithVariants += 1;
       }
       usedImages += buildProductImages(product, config).slice(0, Number(config.maxImages || 8)).length;
-      amazonRowsForProduct(product, config).forEach((row) => rows.push(amazonRow(headers, row)));
+      amazonWallArtRowsForProduct(product, config).forEach((row) => rows.push(amazonWallArtRow(headers, row)));
     });
 
     return {
@@ -860,8 +1202,9 @@
       headers,
       rows,
       warnings: [
-        "Amazon-Custom-TSV: Fuer neue ASINs ist in der Regel Professional Selling Plan plus passende Kategorievorlage/GTIN-Freistellung noetig.",
-        "Bei GTIN-Freistellung bleiben external_product_id und external_product_id_type bewusst leer.",
+        "Amazon-WALL_ART-TSV: Nutzt deutsche Amazon-WALL_ART-Attributnamen, kurze SKUs, Parent/Child-Varianten und GTIN-Freistellung.",
+        "Bei GTIN-Freistellung bleibt das Produkt-ID-Feld bewusst leer; der Produkt-ID-Typ steht auf GTIN-Freistellung.",
+        "Ursprungsland ist standardmaessig Deutschland. Bitte nur so lassen, wenn das fuer die Amazon-Produktion rechtlich stimmt.",
       ],
       analysis,
       summary: {

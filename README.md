@@ -113,10 +113,14 @@ Mit `--no-c-prefix` werden Merkmale ohne `C:` geschrieben, wenn eine eBay-Katego
 
 Auf Vercel schützt `APP_PASSWORD` die App über eine Login-Seite. Der Standard-Benutzername ist `atelier`; optional kann er über `APP_USERNAME` geändert werden.
 
-## Amazon Custom TSV Beta
+## Amazon WALL_ART TSV Beta
 
-Die App kann zusätzlich eine `atelier-orlo-amazon-custom.tsv` erzeugen. Diese Datei ist bewusst tab-getrennt, weil Amazon an der gezeigten Upload-Stelle Excel oder TSV erwartet. Ein direkter Shopify-CSV-Upload wird als falsche Header-Zeile verarbeitet.
+Die App kann zusätzlich eine `atelier-orlo-amazon-wall-art.tsv` erzeugen. Diese Datei ist bewusst tab-getrennt, weil Amazon an der gezeigten Upload-Stelle Excel oder TSV erwartet. Ein direkter Shopify-CSV-Upload wird als falsche Header-Zeile verarbeitet und Amazons KI-Konvertierung übernimmt Varianten, Zustand und Angebotsfelder nicht zuverlässig.
 
-Der Amazon-Export erzeugt Parent-/Child-Zeilen fuer Groessenvarianten mit `parent_child`, `parent_sku`, `relationship_type=variation`, `variation_theme=Size`, Bildern, Beschreibung, Bulletpoints, Preis und Bestand. Fuer GTIN-Freistellung bleiben `external_product_id` und `external_product_id_type` leer.
+Der Amazon-Export nutzt jetzt deutsche Amazon-`WALL_ART`-Attributnamen wie `contribution_sku#1.value`, `parentage_level[...]`, `child_parent_sku_relationship[...]`, `variation_theme#1.name`, `condition_type[...]`, `list_price[...]`, `fulfillment_availability#1.quantity` und `country_of_origin[...]`.
 
-Einschraenkung: Fuer neue Amazon-ASINs brauchst du voraussichtlich weiterhin Professional Selling Plan, eine passende Kategorie-/Produkttyp-Freigabe und eine GTIN-Freistellung pro Store/Kategorie oder echte GS1-EANs. Die Custom-TSV ist ein sinnvoller Upload-Test, ersetzt aber nicht die finale Amazon-Kategorievorlage.
+Die Datei erzeugt kurze stabile SKUs, Parent-/Child-Zeilen fuer Groessenvarianten, `product_type=WALL_ART`, `Art der Produkt-ID=GTIN-Freistellung`, `Artikelzustand=Neu`, Listenpreis und Verkaufspreis, Bestand, Produktbilder, Beschreibung, Bulletpoints und `Ursprungsland=Deutschland`. Der Titelzusatz ist standardmaessig `Poster Wandkunst`.
+
+Beim Upload als `Nicht-Amazon-Datei` waehle `Zeile 1` als Kopfzeile, `Spalte A` als SKU-Spalte und `Zeile 2` als Datenzeile. Fuer neue Amazon-ASINs brauchst du voraussichtlich weiterhin Professional Selling Plan, eine passende Kategorie-/Produkttyp-Freigabe und eine GTIN-Freistellung pro Store/Kategorie oder echte GS1-EANs.
+
+Wichtig: `Ursprungsland=Deutschland` ist ein Default. Der Wert muss rechtlich zur tatsaechlichen Amazon-Produktion passen.

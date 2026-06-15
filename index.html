@@ -120,22 +120,38 @@
             </div>
             <div class="field">
               <label for="amazonProductType">Amazon Produkttyp</label>
-              <input id="amazonProductType" type="text" value="wall_art" />
+              <input id="amazonProductType" type="text" value="WALL_ART" />
             </div>
           </div>
 
           <div class="grid two">
             <div class="field">
               <label for="amazonConditionType">Amazon Zustand</label>
-              <input id="amazonConditionType" type="text" value="new_new" />
+              <input id="amazonConditionType" type="text" value="Neu" />
             </div>
             <div class="field">
               <label for="amazonProductTaxCode">Amazon Steuer-Code</label>
               <input id="amazonProductTaxCode" type="text" value="A_GEN_STANDARD" />
             </div>
           </div>
+
+          <div class="grid two">
+            <div class="field">
+              <label for="amazonProductIdType">Amazon Produkt-ID-Typ</label>
+              <input id="amazonProductIdType" type="text" value="GTIN-Freistellung" />
+            </div>
+            <div class="field">
+              <label for="amazonCountryOfOrigin">Amazon Ursprungsland</label>
+              <input id="amazonCountryOfOrigin" type="text" value="Deutschland" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="amazonTitleSuffix">Amazon Titel-Zusatz</label>
+            <input id="amazonTitleSuffix" type="text" value="Poster Wandkunst" />
+          </div>
           <p class="hint">
-            Beta: erzeugt eine TSV-Datei fuer Amazon Custom Upload. Bestand 3 bedeutet: 3 Stueck je Variante, nicht 3 Produkte.
+            Beta: erzeugt eine Amazon-WALL_ART-TSV mit Parent/Child-Varianten. Bestand 3 bedeutet: 3 Stueck je Variante, nicht 3 Produkte.
           </p>
 
           <div class="section-title">
@@ -589,6 +605,9 @@
         amazonProductType: document.getElementById("amazonProductType"),
         amazonConditionType: document.getElementById("amazonConditionType"),
         amazonProductTaxCode: document.getElementById("amazonProductTaxCode"),
+        amazonProductIdType: document.getElementById("amazonProductIdType"),
+        amazonCountryOfOrigin: document.getElementById("amazonCountryOfOrigin"),
+        amazonTitleSuffix: document.getElementById("amazonTitleSuffix"),
         itemIdMapFile: document.getElementById("itemIdMapFile"),
         categoryId: document.getElementById("categoryId"),
         conditionId: document.getElementById("conditionId"),
@@ -901,9 +920,12 @@
           roundTo: Number(elements.roundTo.value || 0),
           amazonBrand: elements.amazonBrand.value.trim() || "Atelier Orlo",
           amazonManufacturer: elements.amazonBrand.value.trim() || "Atelier Orlo",
-          amazonProductType: elements.amazonProductType.value.trim() || "wall_art",
-          amazonConditionType: elements.amazonConditionType.value.trim() || "new_new",
+          amazonProductType: elements.amazonProductType.value.trim() || "WALL_ART",
+          amazonConditionType: elements.amazonConditionType.value.trim() || "Neu",
           amazonProductTaxCode: elements.amazonProductTaxCode.value.trim() || "A_GEN_STANDARD",
+          amazonProductIdType: elements.amazonProductIdType.value.trim() || "GTIN-Freistellung",
+          amazonCountryOfOrigin: elements.amazonCountryOfOrigin.value.trim() || "Deutschland",
+          amazonTitleSuffix: elements.amazonTitleSuffix.value.trim() || "Poster Wandkunst",
         };
       }
 
@@ -1115,7 +1137,7 @@
       function downloadCurrentAmazonTsv() {
         if (state.shopifyText) {
           const result = EbayConverter.convertAmazonCustom(state.shopifyText, collectAmazonConfig());
-          downloadTsv(result.tsv, "atelier-orlo-amazon-custom.tsv");
+          downloadTsv(result.tsv, "atelier-orlo-amazon-wall-art.tsv");
         }
       }
 
@@ -1157,6 +1179,9 @@
         elements.amazonProductType,
         elements.amazonConditionType,
         elements.amazonProductTaxCode,
+        elements.amazonProductIdType,
+        elements.amazonCountryOfOrigin,
+        elements.amazonTitleSuffix,
         elements.conditionId,
         elements.quantity,
         elements.maxImages,
@@ -1265,7 +1290,7 @@
       });
       elements.amazonSampleBtn.addEventListener("click", () => {
         if (state.shopifyText) {
-          downloadTsv(createAmazonSampleTsv(), "atelier-orlo-amazon-custom-test-3.tsv");
+          downloadTsv(createAmazonSampleTsv(), "atelier-orlo-amazon-wall-art-test-3.tsv");
         }
       });
     </script>
