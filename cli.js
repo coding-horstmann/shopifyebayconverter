@@ -30,7 +30,7 @@ function usage() {
     "",
     "Optional:",
     "  --platform ebay|amazon --quantity 3 --max-images 8 --condition 1000 --vat-percent 19 --shipping-profile \"Kostenloser Versand\" --return-profile \"30 Tage Rueckgabe\" --listing-mode variants --action VerifyAdd|Add|Revise --publish --revise --item-id-map ebay-result.csv --extra-images image1|image2 --product-extra-images handle=image1|image2 --extra-position after-main --no-c-prefix --price-multiplier 1 --price-add 0 --round-to 0",
-    "  --platform amazon --amazon-brand \"Atelier Orlo\" --amazon-product-type WALL_ART --amazon-product-id-type \"GTIN-Freistellung\" --amazon-origin-country Deutschland --amazon-title-suffix \"Poster Wandkunst\"",
+    "  --platform amazon --amazon-brand \"Atelier Orlo\" --amazon-product-type WALL_ART --amazon-product-id-type \"GTIN-Freistellung\" --amazon-origin-country Deutschland --amazon-title-suffix \"Poster Wandkunst\" --amazon-browse-node 372854011",
     "  --sample 5",
   ].join("\n");
 }
@@ -93,6 +93,7 @@ function main() {
       amazonProductIdType: args["amazon-product-id-type"] || "GTIN-Freistellung",
       amazonCountryOfOrigin: args["amazon-origin-country"] || "Deutschland",
       amazonTitleSuffix: args["amazon-title-suffix"] || "Poster Wandkunst",
+      amazonBrowseNode: args["amazon-browse-node"] || "372854011",
     });
     fs.mkdirSync(path.dirname(outPath), { recursive: true });
     fs.writeFileSync(outPath, result.tsv, "utf8");

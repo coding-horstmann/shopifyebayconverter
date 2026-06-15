@@ -148,6 +148,9 @@
     itemPackageQuantity: `item_package_quantity[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
     subjectCharacter: `subject_character[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
     color: `color[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
+    colorFamily1: `color_family[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
+    colorFamily2: `color_family[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#2.value`,
+    colorFamily3: `color_family[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#3.value`,
     size: `size[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
     theme: `theme[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
     paperSizeValue: `paper_size[marketplace_id=${AMAZON_DE_MARKETPLACE}][language_tag=${AMAZON_DE_LANGUAGE}]#1.value`,
@@ -177,8 +180,8 @@
   };
 
   const AMAZON_WALL_ART_HEADERS = [
-    amazonAttr.action,
     amazonAttr.sku,
+    amazonAttr.action,
     amazonAttr.productType,
     amazonAttr.parentage,
     amazonAttr.parentSku,
@@ -217,6 +220,9 @@
     amazonAttr.itemPackageQuantity,
     amazonAttr.subjectCharacter,
     amazonAttr.color,
+    amazonAttr.colorFamily1,
+    amazonAttr.colorFamily2,
+    amazonAttr.colorFamily3,
     amazonAttr.size,
     amazonAttr.theme,
     amazonAttr.paperSizeValue,
@@ -914,16 +920,44 @@
   function appendAmazonTitleSuffix(title, suffix, maxLength) {
     const clean = cleanAmazonText(title, maxLength || 200);
     const add = cleanAmazonText(suffix, 80);
-    if (!add || clean.toLowerCase().includes(add.toLowerCase())) {
+    if (!add) {
       return clean;
     }
-    return cleanAmazonText(`${clean} ${add}`, maxLength || 200);
+    const existingWords = new Set(
+      clean
+        .toLowerCase()
+        .split(/[^a-z0-9äöüß]+/i)
+        .filter(Boolean),
+    );
+    const missingWords = add
+      .split(/\s+/)
+      .map((word) => word.trim())
+      .filter((word) => word && !existingWords.has(word.toLowerCase()));
+    if (!missingWords.length) {
+      return clean;
+    }
+    return cleanAmazonText(`${clean} ${missingWords.join(" ")}`, maxLength || 200);
+  }
+
+  function stripLeadingAmazonBrand(title, brand, config) {
+    if (config.amazonStripBrandFromTitle === false) {
+      return title;
+    }
+    const cleanTitleValue = String(title || "").trim();
+    const cleanBrand = String(brand || "").trim();
+    if (!cleanTitleValue || !cleanBrand) {
+      return cleanTitleValue;
+    }
+    const escapedBrand = cleanBrand.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return cleanTitleValue.replace(new RegExp(`^${escapedBrand}\\s*[-–—:|]*\\s*`, "i"), "").trim();
   }
 
   function amazonWallArtTitle(product, variant, config) {
     const suffix = config.amazonTitleSuffix == null ? "Poster Wandkunst" : config.amazonTitleSuffix;
+    const brand = cleanAmazonText(config.amazonBrand || product.vendor || "Atelier Orlo", 80);
     const size = amazonPosterSize(product, variant);
-    const titleWithSize = size && !titleAlreadyContainsSize(product.title, size) ? `${product.title} - ${size}` : product.title;
+    const baseTitle = stripLeadingAmazonBrand(product.title, brand, config);
+    const titleWithSize = size && !titleAlreadyContainsSize(baseTitle, size) ? `${baseTitle} - ${size}` : baseTitle;
     return appendAmazonTitleSuffix(titleWithSize, suffix, 200);
   }
 
@@ -931,8 +965,58 @@
     return cleanAmazonText(tags.Thema || tags.Motiv || "Vintage Poster", 120);
   }
 
+  function normalizeAmazonColor(value) {
+    const raw = String(value || "")
+      .replace(/\b\d+\b/g, "")
+      .replace(/[;|/]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!raw) {
+      return "Mehrfarbig";
+    }
+    const colorMap = [
+      [/beige|creme|sand/i, "Beige"],
+      [/gelb|yellow|gold/i, "Gelb"],
+      [/blau|blue|navy|tuerkis|türkis/i, "Blau"],
+      [/rot|red|burgund|wein/i, "Rot"],
+      [/gruen|grün|green/i, "Grün"],
+      [/rosa|pink|rose/i, "Rosa"],
+      [/orange/i, "Orange"],
+      [/braun|brown/i, "Braun"],
+      [/schwarz|black/i, "Schwarz"],
+      [/weiss|weiß|white/i, "Weiß"],
+      [/grau|gray|grey|silber/i, "Grau"],
+      [/lila|violett|purple/i, "Lila"],
+      [/mehrfarbig|multi|bunt/i, "Mehrfarbig"],
+    ];
+    const matches = [];
+    colorMap.forEach(([pattern, label]) => {
+      if (pattern.test(raw) && !matches.includes(label)) {
+        matches.push(label);
+      }
+    });
+    if (matches.length) {
+      return matches.slice(0, 3).join("; ");
+    }
+    return cleanAmazonText(
+      raw
+        .split(/\s+/)
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+        .join(" "),
+      80,
+    );
+  }
+
   function amazonColor(tags) {
-    return cleanAmazonText(tags.Farbe || "Mehrfarbig", 80);
+    return normalizeAmazonColor(tags.Farbe || tags.Farbfamilie || "Mehrfarbig");
+  }
+
+  function amazonColorFamilies(tags) {
+    return amazonColor(tags)
+      .split(";")
+      .map((part) => cleanAmazonText(part, 40))
+      .filter(Boolean)
+      .slice(0, 3);
   }
 
   function amazonStyle(tags) {
@@ -944,7 +1028,11 @@
   }
 
   function amazonProductIdType(config) {
-    return cleanAmazonText(config.amazonProductIdType || "GTIN-Freistellung", 80);
+    const raw = String(config.amazonProductIdType || "").trim();
+    if (!raw || /gtin-freistellung|keine produktkennung|ohne produktkennung/i.test(raw)) {
+      return "";
+    }
+    return cleanAmazonText(raw, 80);
   }
 
   function amazonWallArtRow(headers, values) {
@@ -960,6 +1048,7 @@
     const tags = product.tags || {};
     const brand = cleanAmazonText(config.amazonBrand || product.vendor || "Atelier Orlo", 50);
     const manufacturer = cleanAmazonText(config.amazonManufacturer || brand, 80);
+    const colorFamilies = amazonColorFamilies(tags);
     const common = {
       [amazonAttr.action]: "Vollständiges Update",
       [amazonAttr.productType]: "WALL_ART",
@@ -995,6 +1084,9 @@
       [amazonAttr.itemPackageQuantity]: "1",
       [amazonAttr.subjectCharacter]: cleanAmazonText(tags["Künstler"] || tags.Thema || "Vintage Motiv", 120),
       [amazonAttr.color]: amazonColor(tags),
+      [amazonAttr.colorFamily1]: colorFamilies[0] || "",
+      [amazonAttr.colorFamily2]: colorFamilies[1] || "",
+      [amazonAttr.colorFamily3]: colorFamilies[2] || "",
       [amazonAttr.theme]: amazonTheme(tags),
       [amazonAttr.printMediaType]: "Papier",
       [amazonAttr.paperFinish]: "Matt",
@@ -1202,8 +1294,8 @@
       headers,
       rows,
       warnings: [
-        "Amazon-WALL_ART-TSV: Nutzt deutsche Amazon-WALL_ART-Attributnamen, kurze SKUs, Parent/Child-Varianten und GTIN-Freistellung.",
-        "Bei GTIN-Freistellung bleibt das Produkt-ID-Feld bewusst leer; der Produkt-ID-Typ steht auf GTIN-Freistellung.",
+        "Amazon-WALL_ART-TSV: SKU steht als erste Spalte, damit der Nicht-Amazon-Datei-Upload die SKU nicht mit der Aktion verwechselt.",
+        "Bei GTIN-Freistellung bleiben Produkt-ID-Typ und Produkt-ID bewusst leer; das entspricht dem Haken Dieses Produkt hat keine Produktkennung.",
         "Ursprungsland ist standardmaessig Deutschland. Bitte nur so lassen, wenn das fuer die Amazon-Produktion rechtlich stimmt.",
       ],
       analysis,
@@ -1708,7 +1800,21 @@
     return Array.from(groups.entries()).map(([handle, records]) => {
       const option1Name = firstValue(records, "Option1 Name") || "Größe";
       const tags = parseTags(firstValue(records, "Tags"));
-      const images = unique(records.map((row) => normalizeUrl(row["Image Src"]))).slice(0, 24);
+      const images = unique(
+        records
+          .map((row, recordIndex) => ({
+            src: normalizeUrl(row["Image Src"]),
+            position: Number.parseInt(row["Image Position"], 10),
+            recordIndex,
+          }))
+          .filter((image) => image.src)
+          .sort((a, b) => {
+            const aPos = Number.isFinite(a.position) ? a.position : Number.MAX_SAFE_INTEGER;
+            const bPos = Number.isFinite(b.position) ? b.position : Number.MAX_SAFE_INTEGER;
+            return aPos - bPos || a.recordIndex - b.recordIndex;
+          })
+          .map((image) => image.src),
+      ).slice(0, 24);
       const variants = [];
       const seenVariants = new Set();
 

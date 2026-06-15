@@ -24,139 +24,171 @@
 
       <section class="workspace">
         <aside class="panel controls">
-          <div class="field">
-            <label for="shopifyFile">Shopify CSV</label>
-            <input id="shopifyFile" type="file" accept=".csv,text/csv" />
+          <div class="platform-block shared">
+            <div class="platform-heading">
+              <span class="platform-kicker">Gemeinsam</span>
+              <h2>Shopify Import</h2>
+              <p>Diese Datei ist die Basis für eBay und Amazon.</p>
+            </div>
+
+            <div class="field">
+              <label for="shopifyFile">Shopify CSV</label>
+              <input id="shopifyFile" type="file" accept=".csv,text/csv" />
+            </div>
           </div>
 
-          <div class="field">
-            <label for="templateFile">eBay Vorlage</label>
-            <input id="templateFile" type="file" accept=".csv,text/csv" />
+          <div class="platform-block ebay">
+            <div class="platform-heading">
+              <span class="platform-kicker">eBay</span>
+              <h2>eBay CSV Export</h2>
+              <p>Nur für eBay: Vorlage, Variantenmodus, eBay-Zustand und Upload-Aktion.</p>
+            </div>
+
+            <div class="field">
+              <label for="templateFile">eBay Vorlage</label>
+              <input id="templateFile" type="file" accept=".csv,text/csv" />
+            </div>
+
+            <div class="field">
+              <label for="itemIdMapFile">eBay Ergebnisdatei / aktive Angebote</label>
+              <input id="itemIdMapFile" type="file" accept=".csv,text/csv" />
+              <p class="hint">
+                Für Revise: eBay-Ergebnis-CSV mit ItemID hochladen, damit bestehende aktive Angebote überschrieben werden.
+              </p>
+            </div>
+
+            <div class="grid two">
+              <div class="field">
+                <label for="categoryId">eBay Kategorie-ID</label>
+                <input id="categoryId" type="text" inputmode="numeric" placeholder="28009 Kunstplakate" />
+              </div>
+              <div class="field">
+                <label for="conditionId">eBay Artikelzustand</label>
+                <select id="conditionId">
+                  <option value="1000" selected>Neu</option>
+                  <option value="3000">Gebraucht</option>
+                  <option value="1500">Neu, sonstige</option>
+                  <option value="2500">Generalüberholt</option>
+                  <option value="7000">Als Ersatzteil / defekt</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid two">
+              <div class="field">
+                <label for="variationTraitName">eBay Variantenname</label>
+                <input id="variationTraitName" type="text" value="Größe" />
+              </div>
+              <div class="field">
+                <label for="format">eBay Format</label>
+                <select id="format">
+                  <option value="FixedPrice" selected>FixedPrice</option>
+                  <option value="Auction">Auction</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="listingMode">eBay Listing-Modus</label>
+              <select id="listingMode">
+                <option value="variants" selected>1 Listing mit Größenvarianten</option>
+                <option value="flat">Eine eBay-Zeile je Größe</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="uploadAction">eBay Upload-Aktion</label>
+              <select id="uploadAction">
+                <option value="VerifyAdd" selected>Nur prüfen - keine Angebote erstellen</option>
+                <option value="Revise">Bestehende aktive Angebote bearbeiten</option>
+                <option value="Add">Aktiv veröffentlichen</option>
+              </select>
+              <p class="hint">
+                Standard ist VerifyAdd. Diese Datei wird bei eBay hochgeladen und nur geprüft. Add veröffentlicht direkt aktive Angebote. Revise benötigt eine eBay-Ergebnisdatei mit ItemID.
+              </p>
+            </div>
+
+            <label class="toggle">
+              <input id="prefixItemSpecifics" type="checkbox" checked />
+              <span>eBay Artikelmerkmale als C:-Spalten schreiben</span>
+            </label>
           </div>
 
-          <div class="field">
-            <label for="itemIdMapFile">eBay Ergebnisdatei / aktive Angebote</label>
-            <input id="itemIdMapFile" type="file" accept=".csv,text/csv" />
+          <div class="platform-block amazon">
+            <div class="platform-heading">
+              <span class="platform-kicker">Amazon</span>
+              <h2>Amazon TSV Export</h2>
+              <p>Nur für Amazon: WALL_ART, GTIN-Freistellung, Amazon-Zustand und Amazon-Titel.</p>
+            </div>
+
+            <div class="grid two">
+              <div class="field">
+                <label for="amazonBrand">Amazon Marke</label>
+                <input id="amazonBrand" type="text" value="Atelier Orlo" />
+              </div>
+              <div class="field">
+                <label for="amazonProductType">Amazon Produkttyp</label>
+                <input id="amazonProductType" type="text" value="WALL_ART" />
+              </div>
+            </div>
+
+            <div class="grid two">
+              <div class="field">
+                <label for="amazonConditionType">Amazon Zustand</label>
+                <input id="amazonConditionType" type="text" value="Neu" />
+              </div>
+              <div class="field">
+                <label for="amazonProductTaxCode">Amazon Steuer-Code</label>
+                <input id="amazonProductTaxCode" type="text" value="A_GEN_STANDARD" />
+              </div>
+            </div>
+
+            <div class="grid two">
+              <div class="field">
+                <label for="amazonProductIdType">Amazon Produkt-ID-Typ</label>
+                <input id="amazonProductIdType" type="text" value="GTIN-Freistellung" />
+              </div>
+              <div class="field">
+                <label for="amazonCountryOfOrigin">Amazon Ursprungsland</label>
+                <input id="amazonCountryOfOrigin" type="text" value="Deutschland" />
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="amazonTitleSuffix">Amazon Titel-Zusatz</label>
+              <input id="amazonTitleSuffix" type="text" value="Poster Wandkunst" />
+            </div>
+            <div class="field">
+              <label for="amazonBrowseNode">Amazon Stöbern-Kategorie</label>
+              <input id="amazonBrowseNode" type="text" value="372854011" />
+              <small>Default für Poster/Wandkunst. Falls Amazon eine bessere Kategorie vorschlägt, hier die Browse-Node-ID eintragen.</small>
+            </div>
             <p class="hint">
-              Für Revise: eBay-Ergebnis-CSV mit ItemID hochladen, damit bestehende aktive Angebote überschrieben werden.
+              Beta: erzeugt eine Amazon-WALL_ART-TSV mit Parent/Child-Varianten. Bestand 3 bedeutet: 3 Stück je Variante, nicht 3 Produkte.
             </p>
           </div>
 
-          <div class="grid two">
-            <div class="field">
-              <label for="categoryId">Category ID</label>
-              <input id="categoryId" type="text" inputmode="numeric" placeholder="28009 Kunstplakate" />
+          <div class="platform-block shared">
+            <div class="platform-heading">
+              <span class="platform-kicker">Gemeinsam</span>
+              <h2>Fotos, Bestand und Preise</h2>
+              <p>Diese Werte werden für beide Exporte verwendet, sofern die Plattform das Feld unterstützt.</p>
             </div>
-            <div class="field">
-              <label for="conditionId">Artikelzustand</label>
-              <select id="conditionId">
-                <option value="1000" selected>Neu</option>
-                <option value="3000">Gebraucht</option>
-                <option value="1500">Neu, sonstige</option>
-                <option value="2500">Generalüberholt</option>
-                <option value="7000">Als Ersatzteil / defekt</option>
-              </select>
-            </div>
-          </div>
 
-          <div class="grid two">
-            <div class="field">
-              <label for="quantity">Menge je Größe</label>
-              <input id="quantity" type="number" min="1" value="3" />
+            <div class="grid two">
+              <div class="field">
+                <label for="quantity">Bestand je Variante</label>
+                <input id="quantity" type="number" min="1" value="3" />
+              </div>
+              <div class="field">
+                <label for="maxImages">Fotos je Listing/Produkt</label>
+                <input id="maxImages" type="number" min="1" max="24" value="8" />
+              </div>
             </div>
-            <div class="field">
-              <label for="maxImages">Fotos je Listing</label>
-              <input id="maxImages" type="number" min="1" max="24" value="8" />
+
+            <div class="section-title">
+              <h2>Gemeinsame Zusatzfotos</h2>
             </div>
-          </div>
-
-          <div class="grid two">
-            <div class="field">
-              <label for="variationTraitName">Variantenname</label>
-              <input id="variationTraitName" type="text" value="Größe" />
-            </div>
-            <div class="field">
-              <label for="format">Format</label>
-              <select id="format">
-                <option value="FixedPrice" selected>FixedPrice</option>
-                <option value="Auction">Auction</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="listingMode">Listing-Modus</label>
-            <select id="listingMode">
-              <option value="variants" selected>1 Listing mit Größenvarianten</option>
-              <option value="flat">Eine eBay-Zeile je Größe</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label for="uploadAction">eBay Upload-Aktion</label>
-            <select id="uploadAction">
-              <option value="VerifyAdd" selected>Nur prüfen - keine Angebote erstellen</option>
-              <option value="Revise">Bestehende aktive Angebote bearbeiten</option>
-              <option value="Add">Aktiv veröffentlichen</option>
-            </select>
-            <p class="hint">
-              Standard ist VerifyAdd. Diese Datei wird bei eBay hochgeladen und nur geprüft. Add veröffentlicht direkt aktive Angebote. Revise benötigt eine eBay-Ergebnisdatei mit ItemID.
-            </p>
-          </div>
-
-          <label class="toggle">
-            <input id="prefixItemSpecifics" type="checkbox" checked />
-            <span>Artikelmerkmale als C:-Spalten schreiben</span>
-          </label>
-
-          <div class="section-title">
-            <h2>Amazon Export</h2>
-          </div>
-
-          <div class="grid two">
-            <div class="field">
-              <label for="amazonBrand">Amazon Marke</label>
-              <input id="amazonBrand" type="text" value="Atelier Orlo" />
-            </div>
-            <div class="field">
-              <label for="amazonProductType">Amazon Produkttyp</label>
-              <input id="amazonProductType" type="text" value="WALL_ART" />
-            </div>
-          </div>
-
-          <div class="grid two">
-            <div class="field">
-              <label for="amazonConditionType">Amazon Zustand</label>
-              <input id="amazonConditionType" type="text" value="Neu" />
-            </div>
-            <div class="field">
-              <label for="amazonProductTaxCode">Amazon Steuer-Code</label>
-              <input id="amazonProductTaxCode" type="text" value="A_GEN_STANDARD" />
-            </div>
-          </div>
-
-          <div class="grid two">
-            <div class="field">
-              <label for="amazonProductIdType">Amazon Produkt-ID-Typ</label>
-              <input id="amazonProductIdType" type="text" value="GTIN-Freistellung" />
-            </div>
-            <div class="field">
-              <label for="amazonCountryOfOrigin">Amazon Ursprungsland</label>
-              <input id="amazonCountryOfOrigin" type="text" value="Deutschland" />
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="amazonTitleSuffix">Amazon Titel-Zusatz</label>
-            <input id="amazonTitleSuffix" type="text" value="Poster Wandkunst" />
-          </div>
-          <p class="hint">
-            Beta: erzeugt eine Amazon-WALL_ART-TSV mit Parent/Child-Varianten. Bestand 3 bedeutet: 3 Stueck je Variante, nicht 3 Produkte.
-          </p>
-
-          <div class="section-title">
-            <h2>Zusatzfotos</h2>
-          </div>
 
           <div class="field">
             <label for="extraImageUrls">Zusatzfoto-URLs</label>
@@ -202,20 +234,28 @@
             <label for="vatPercent">MwSt. in Prozent</label>
             <input id="vatPercent" type="number" min="0" max="100" step="0.01" value="19" />
           </div>
+          </div>
+
+          <div class="platform-block ebay ebay-details">
+            <div class="platform-heading">
+              <span class="platform-kicker">eBay</span>
+              <h2>eBay Beschreibung & Compliance</h2>
+              <p>HTML-Listing, eBay-GPSR, internationale Versandspalten und globale eBay-Merkmale.</p>
+            </div>
 
           <div class="field">
-            <label for="titleSuffix">Titel-Zusatz</label>
+            <label for="titleSuffix">eBay Titel-Zusatz</label>
             <input id="titleSuffix" type="text" placeholder="z. B. Poster Wandkunst" />
             <small>Wird mit Leerzeichen an jeden eBay-Titel angehängt. Der Export bleibt auf 80 Zeichen begrenzt.</small>
           </div>
 
           <div class="field">
-            <label for="descriptionSuffix">Beschreibung Zusatz</label>
+            <label for="descriptionSuffix">eBay Beschreibung Zusatz</label>
             <textarea id="descriptionSuffix" rows="4" placeholder="Optionaler Text für alle Listings"></textarea>
           </div>
 
           <div class="section-title">
-            <h2>Listing-Design</h2>
+            <h2>eBay Listing-Design</h2>
           </div>
 
           <label class="toggle">
@@ -347,7 +387,7 @@
           </div>
 
           <div class="section-title">
-            <h2>Produkthersteller</h2>
+            <h2>eBay Produkthersteller</h2>
           </div>
           <p class="hint">
             eBay-GPSR-Spalten werden nur geschrieben, wenn Name, Straße, Ort, PLZ und Land vollständig sind.
@@ -402,7 +442,7 @@
           </div>
 
           <div class="section-title">
-            <h2>EU-verantwortliche Person</h2>
+            <h2>eBay EU-verantwortliche Person</h2>
           </div>
           <p class="hint">
             Falls der Hersteller nicht in EU oder Nordirland sitzt, kann eBay diese GPSR-Angaben verlangen.
@@ -457,7 +497,7 @@
           </div>
 
           <div class="section-title">
-            <h2>Internationaler Versand</h2>
+            <h2>eBay Internationaler Versand</h2>
           </div>
 
           <div class="section-title">
@@ -500,10 +540,11 @@
           </div>
 
           <div class="section-title">
-            <h2>Globale Merkmale</h2>
+            <h2>eBay Globale Merkmale</h2>
             <button id="addSpecificBtn" type="button" class="ghost">Zeile hinzufügen</button>
           </div>
           <div id="globalSpecifics" class="specifics"></div>
+          </div>
         </aside>
 
         <section class="panel output">
@@ -528,10 +569,10 @@
 
           <div id="warnings" class="warnings" hidden></div>
 
-          <div class="export-panel">
+          <div class="export-panel ebay-export">
             <div>
               <h2>eBay Export</h2>
-              <p>CSV fuer eBay mit Varianten, Preisen, Fotos und Artikelmerkmalen.</p>
+              <p>CSV für eBay mit Varianten, Preisen, Fotos und Artikelmerkmalen.</p>
             </div>
             <div class="inline-actions">
               <button id="downloadBtnSecondary" type="button" class="primary" disabled>eBay CSV herunterladen</button>
@@ -539,10 +580,10 @@
             </div>
           </div>
 
-          <div class="export-panel secondary">
+          <div class="export-panel amazon-export">
             <div>
               <h2>Amazon Export Beta</h2>
-              <p>TSV fuer Amazon-Testupload. Produkt-ID-Felder bleiben leer, wenn du mit GTIN-Freistellung arbeitest.</p>
+              <p>TSV für Amazon-Testupload. Produkt-ID-Felder bleiben leer, wenn du mit GTIN-Freistellung arbeitest.</p>
             </div>
             <div class="inline-actions">
               <button id="downloadAmazonBtnSecondary" type="button" disabled>Amazon TSV herunterladen</button>
@@ -608,6 +649,7 @@
         amazonProductIdType: document.getElementById("amazonProductIdType"),
         amazonCountryOfOrigin: document.getElementById("amazonCountryOfOrigin"),
         amazonTitleSuffix: document.getElementById("amazonTitleSuffix"),
+        amazonBrowseNode: document.getElementById("amazonBrowseNode"),
         itemIdMapFile: document.getElementById("itemIdMapFile"),
         categoryId: document.getElementById("categoryId"),
         conditionId: document.getElementById("conditionId"),
@@ -926,6 +968,7 @@
           amazonProductIdType: elements.amazonProductIdType.value.trim() || "GTIN-Freistellung",
           amazonCountryOfOrigin: elements.amazonCountryOfOrigin.value.trim() || "Deutschland",
           amazonTitleSuffix: elements.amazonTitleSuffix.value.trim() || "Poster Wandkunst",
+          amazonBrowseNode: elements.amazonBrowseNode.value.trim() || "372854011",
         };
       }
 
@@ -1182,6 +1225,7 @@
         elements.amazonProductIdType,
         elements.amazonCountryOfOrigin,
         elements.amazonTitleSuffix,
+        elements.amazonBrowseNode,
         elements.conditionId,
         elements.quantity,
         elements.maxImages,
