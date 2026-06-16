@@ -152,8 +152,30 @@
               <div class="field">
                 <label for="amazonManufacturer">Amazon Hersteller</label>
                 <input id="amazonManufacturer" type="text" value="Gelato" />
-                <small>Technisches Herstellerfeld im Amazon-Feed. Rechtlich bitte pruefen, ob Gelato hier korrekt ist.</small>
+                <small>Nur Herstellername. Komplette GPSR-Kontakte kommen in die separaten Amazon-GPSR-Felder.</small>
               </div>
+            </div>
+
+            <div class="grid two">
+              <div class="field">
+                <label for="amazonGpsrManufacturerEmail">Amazon GPSR Hersteller-E-Mail</label>
+                <input id="amazonGpsrManufacturerEmail" type="email" placeholder="support@example.com" />
+                <small>Wird in das Amazon-Feld gpsr_manufacturer_reference geschrieben.</small>
+              </div>
+              <div class="field">
+                <label for="amazonGpsrResponsiblePartyEmail">Amazon GPSR verantwortliche Person</label>
+                <input id="amazonGpsrResponsiblePartyEmail" type="email" placeholder="compliance@example.com" />
+                <small>Amazon erwartet hier laut Feed-Attribut eine elektronische Kontaktadresse.</small>
+              </div>
+            </div>
+            <div class="field">
+              <label for="amazonGpsrSafetyAttestation">Amazon GPSR Sicherheitsbestätigung</label>
+              <select id="amazonGpsrSafetyAttestation">
+                <option value="" selected>Nicht setzen</option>
+                <option value="Ja">Ja, keine weiteren Sicherheits-/Warninformationen erforderlich</option>
+                <option value="Nein">Nein</option>
+              </select>
+              <small>Nur setzen, wenn das rechtlich für deine Poster zutrifft. Adresse/Telefon kann diese Vorlage nicht als eigene Amazon-Spalten schreiben.</small>
             </div>
 
             <div class="grid two">
@@ -686,6 +708,9 @@
         amazonBrand: document.getElementById("amazonBrand"),
         amazonProductType: document.getElementById("amazonProductType"),
         amazonManufacturer: document.getElementById("amazonManufacturer"),
+        amazonGpsrManufacturerEmail: document.getElementById("amazonGpsrManufacturerEmail"),
+        amazonGpsrResponsiblePartyEmail: document.getElementById("amazonGpsrResponsiblePartyEmail"),
+        amazonGpsrSafetyAttestation: document.getElementById("amazonGpsrSafetyAttestation"),
         amazonConditionType: document.getElementById("amazonConditionType"),
         amazonProductTaxCode: document.getElementById("amazonProductTaxCode"),
         amazonProductIdType: document.getElementById("amazonProductIdType"),
@@ -1009,6 +1034,9 @@
           amazonBrandMode: elements.amazonBrandMode.value || "none",
           amazonBrand: elements.amazonBrand.value.trim() || "Atelier Orlo",
           amazonManufacturer: elements.amazonManufacturer.value.trim() || "Gelato",
+          amazonGpsrManufacturerEmail: elements.amazonGpsrManufacturerEmail.value.trim(),
+          amazonGpsrResponsiblePartyEmail: elements.amazonGpsrResponsiblePartyEmail.value.trim(),
+          amazonGpsrSafetyAttestation: elements.amazonGpsrSafetyAttestation.value,
           amazonProductType: elements.amazonProductType.value.trim() || "WALL_ART",
           amazonConditionType: elements.amazonConditionType.value.trim() || "Neu",
           amazonProductTaxCode: elements.amazonProductTaxCode.value.trim() || "A_GEN_STANDARD",
@@ -1315,6 +1343,9 @@
         elements.amazonBrand,
         elements.amazonProductType,
         elements.amazonManufacturer,
+        elements.amazonGpsrManufacturerEmail,
+        elements.amazonGpsrResponsiblePartyEmail,
+        elements.amazonGpsrSafetyAttestation,
         elements.amazonConditionType,
         elements.amazonProductTaxCode,
         elements.amazonProductIdType,

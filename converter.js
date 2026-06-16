@@ -188,6 +188,9 @@
     leadTime: "fulfillment_availability#1.lead_time_to_ship_max_days",
     price: `purchasable_offer[marketplace_id=${AMAZON_DE_MARKETPLACE}][audience=ALL]#1.our_price#1.schedule#1.value_with_tax`,
     countryOfOrigin: `country_of_origin[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
+    dsaResponsiblePartyAddress: `dsa_responsible_party_address[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
+    gpsrSafetyAttestation: `gpsr_safety_attestation[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
+    gpsrManufacturerEmail: `gpsr_manufacturer_reference[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.gpsr_manufacturer_email_address`,
     batteriesRequired: `batteries_required[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
     batteriesIncluded: `batteries_included[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.value`,
     batteryLifePercentage: `supplemental_condition_information[marketplace_id=${AMAZON_DE_MARKETPLACE}]#1.battery_life_percentage`,
@@ -273,6 +276,9 @@
     amazonAttr.leadTime,
     amazonAttr.price,
     amazonAttr.countryOfOrigin,
+    amazonAttr.dsaResponsiblePartyAddress,
+    amazonAttr.gpsrSafetyAttestation,
+    amazonAttr.gpsrManufacturerEmail,
     amazonAttr.batteryLifePercentage,
     amazonAttr.batteriesRequired,
     amazonAttr.batteriesIncluded,
@@ -898,6 +904,32 @@
     return maxLength && clean.length > maxLength ? clean.slice(0, maxLength).trim() : clean;
   }
 
+  function cleanAmazonEmail(value) {
+    return cleanAmazonText(value, 254);
+  }
+
+  function amazonBooleanValue(value) {
+    const normalized = String(value == null ? "" : value).trim().toLowerCase();
+    if (!normalized) {
+      return "";
+    }
+    if (["1", "true", "yes", "ja", "y"].includes(normalized)) {
+      return "Ja";
+    }
+    if (["0", "false", "no", "nein", "n"].includes(normalized)) {
+      return "Nein";
+    }
+    return cleanAmazonText(value, 20);
+  }
+
+  function amazonGpsrManufacturerEmail(config) {
+    return cleanAmazonEmail(config.amazonGpsrManufacturerEmail || (config.manufacturer && config.manufacturer.email) || "");
+  }
+
+  function amazonGpsrResponsiblePartyEmail(config) {
+    return cleanAmazonEmail(config.amazonGpsrResponsiblePartyEmail || (config.responsiblePerson && config.responsiblePerson.email) || "");
+  }
+
   function amazonSizeName(value, fallback) {
     return cleanAmazonText(value || fallback || "Standard", 80);
   }
@@ -1265,6 +1297,9 @@
         [amazonAttr.quantity]: parentage === "Eltern" ? "" : config.quantity,
         [amazonAttr.fulfillmentChannel]: parentage === "Eltern" ? "" : config.amazonFulfillmentChannel || "DEFAULT",
         [amazonAttr.leadTime]: parentage === "Eltern" ? "" : config.amazonLeadTimeDays || "3",
+        [amazonAttr.gpsrManufacturerEmail]: amazonGpsrManufacturerEmail(config),
+        [amazonAttr.dsaResponsiblePartyAddress]: amazonGpsrResponsiblePartyEmail(config),
+        [amazonAttr.gpsrSafetyAttestation]: amazonBooleanValue(config.amazonGpsrSafetyAttestation),
       };
     };
 
@@ -1432,6 +1467,9 @@
       amazonLeadTimeDays: "3",
       amazonUseVariations: true,
       amazonVariantOrder: "price-asc",
+      amazonGpsrManufacturerEmail: "",
+      amazonGpsrResponsiblePartyEmail: "",
+      amazonGpsrSafetyAttestation: "",
       extraImageUrls: "",
       productExtraImageUrls: "",
       extraImagesPosition: "after-main",
