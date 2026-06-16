@@ -845,6 +845,18 @@
       .trim();
   }
 
+  function toParagraphText(html) {
+    return stripScripts(html)
+      .replace(/<\/(p|div|li|h[1-6])>/gi, "\n\n")
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/[ \t]+/g, " ")
+      .replace(/\n[ \t]+/g, "\n")
+      .replace(/[ \t]+\n/g, "\n")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+  }
+
   function cleanColor(value, fallback) {
     const color = String(value || "").trim();
     return /^#[0-9a-f]{6}$/i.test(color) ? color : fallback;
@@ -871,6 +883,17 @@
       .replace(/\t/g, " ")
       .replace(/\r?\n/g, " ")
       .replace(/\s+/g, " ")
+      .trim();
+    return maxLength && clean.length > maxLength ? clean.slice(0, maxLength).trim() : clean;
+  }
+
+  function cleanAmazonDescriptionText(value, maxLength) {
+    const clean = String(value || "")
+      .replace(/\t/g, " ")
+      .split(/\r?\n/)
+      .map((line) => line.replace(/\s+/g, " ").trim())
+      .join("\n")
+      .replace(/\n{3,}/g, "\n\n")
       .trim();
     return maxLength && clean.length > maxLength ? clean.slice(0, maxLength).trim() : clean;
   }
@@ -933,6 +956,35 @@
   function amazonDimensionsFor(product, variant) {
     const size = amazonPosterSize(product, variant);
     return parseCmDimensions(size || product.title);
+  }
+
+  function numericPriceValue(value) {
+    const price = Number.parseFloat(String(value || "").replace(",", "."));
+    return Number.isFinite(price) ? price : Number.MAX_SAFE_INTEGER;
+  }
+
+  function variantArea(product, variant) {
+    const dimensions = amazonDimensionsFor(product, variant);
+    const length = Number.parseFloat(String(dimensions.length || "").replace(",", "."));
+    const width = Number.parseFloat(String(dimensions.width || "").replace(",", "."));
+    return Number.isFinite(length) && Number.isFinite(width) ? length * width : Number.MAX_SAFE_INTEGER;
+  }
+
+  function orderAmazonVariants(product, variants, config) {
+    if (String(config.amazonVariantOrder || "price-asc") === "shopify") {
+      return variants.slice();
+    }
+    return variants
+      .map((variant, index) => ({ variant, index }))
+      .sort((left, right) => {
+        const priceDiff = numericPriceValue(left.variant && left.variant.price) - numericPriceValue(right.variant && right.variant.price);
+        if (priceDiff !== 0) {
+          return priceDiff;
+        }
+        const areaDiff = variantArea(product, left.variant) - variantArea(product, right.variant);
+        return areaDiff || left.index - right.index;
+      })
+      .map((entry) => entry.variant);
   }
 
   function normalizeAmazonCondition(value) {
@@ -1110,7 +1162,8 @@
   }
 
   function amazonWallArtRowsForProduct(product, config) {
-    const variants = product.variants.length ? product.variants : [{ sku: product.handle, price: product.firstPrice, option1Value: "" }];
+    const sourceVariants = product.variants.length ? product.variants : [{ sku: product.handle, price: product.firstPrice, option1Value: "" }];
+    const variants = orderAmazonVariants(product, sourceVariants, config);
     const hasVariants = config.amazonUseVariations !== false && variants.length > 1;
     const parentSku = amazonWallArtParentSku(product);
     const images = buildProductImages(product, config).slice(0, Math.min(9, Number(config.maxImages || 9)));
@@ -1226,16 +1279,34 @@
     const material = tags.Materialinfo || tags.Material || "Mattes 200 g/m² Papier";
     const artist = tags["Künstler"] ? `Motiv/Künstler: ${tags["Künstler"]}.` : "Kuratiertes Vintage-Postermotiv.";
     const theme = tags.Thema ? `Thema: ${tags.Thema}.` : "Dekorative Wandkunst für Wohnräume, Büro und Galerie-Wände.";
-    const sizeText = "Mehrere Größenvarianten verfügbar.";
-    const frameText = tags.Rahmung || tags.Rahmenstil ? `Rahmung: ${tags.Rahmung || tags.Rahmenstil}.` : "Lieferung ohne Rahmen.";
+    const sizeText = "Mehrere Größenvarianten verfügbar, passend für kleine und große Wandflächen.";
+    const frameText = tags.Rahmung || tags.Rahmenstil ? `Ungerahmt geliefert: ${tags.Rahmung || tags.Rahmenstil}.` : "Ungerahmt geliefert; Rahmen und Dekoration sind nicht enthalten.";
     const printText = `Hochwertiger Kunstdruck auf ${material}.`;
     return [printText, artist, theme, sizeText, frameText].map((bullet) => cleanAmazonText(bullet, config.amazonBulletLength || 500));
   }
 
   function amazonProductDescription(product, config) {
-    const plain = toPlainText(product.description);
+    const tags = product.tags || {};
+    const shopifyText = toParagraphText(product.description);
+    const material = tags.Materialinfo || tags.Material || "mattes 200 g/m² Papier";
+    const artist = tags["Künstler"] ? `Motiv und Künstler: ${tags["Künstler"]}.` : "";
+    const theme = tags.Thema ? `Thema: ${tags.Thema}.` : "";
+    const style = amazonStyle(tags) ? `Stil: ${amazonStyle(tags)}.` : "";
+    const reproduction = tags.Epoche ? `Historische Reproduktion eines Motivs aus der Epoche ${tags.Epoche}.` : "Moderne Reproduktion eines historischen Vintage-Motivs.";
+    const frame = tags.Rahmung || tags.Rahmenstil ? `Rahmung: ${tags.Rahmung || tags.Rahmenstil}.` : "Lieferung ohne Rahmen.";
     const fallback = "Moderne Reproduktion eines ausgewählten Vintage-Poster-Motivs. Gedruckt auf mattem Papier. Rahmen und Dekoration sind nicht enthalten.";
-    return cleanAmazonText(plain || fallback, config.amazonDescriptionLength || 1900);
+    const details = [
+      "Produktdetails:",
+      `Hochwertiger Kunstdruck auf ${material}.`,
+      reproduction,
+      artist,
+      theme,
+      style,
+      frame,
+      "Rahmen, Möbel und Dekoration auf Produktfotos sind nicht im Lieferumfang enthalten.",
+    ].filter(Boolean);
+    const text = [shopifyText || fallback, details.join("\n")].filter(Boolean).join("\n\n");
+    return cleanAmazonDescriptionText(text, config.amazonDescriptionLength || 1900);
   }
 
   function amazonRow(headers, values) {
@@ -1247,7 +1318,8 @@
   }
 
   function amazonRowsForProduct(product, config) {
-    const variants = product.variants.length ? product.variants : [{ sku: product.handle, price: product.firstPrice, option1Value: "" }];
+    const sourceVariants = product.variants.length ? product.variants : [{ sku: product.handle, price: product.firstPrice, option1Value: "" }];
+    const variants = orderAmazonVariants(product, sourceVariants, config);
     const hasVariants = config.amazonUseVariations !== false && variants.length > 1;
     const parentSku = amazonParentSku(product);
     const images = buildProductImages(product, config).slice(0, Number(config.maxImages || 8));
@@ -1347,7 +1419,7 @@
       roundTo: 0,
       amazonBrandMode: "none",
       amazonBrand: "Atelier Orlo",
-      amazonManufacturer: "Atelier Orlo",
+      amazonManufacturer: "Gelato",
       amazonProductType: "WALL_ART",
       amazonConditionType: "Neu",
       amazonProductIdType: "GTIN-Freistellung",
@@ -1359,6 +1431,7 @@
       amazonFulfillmentChannel: "DEFAULT",
       amazonLeadTimeDays: "3",
       amazonUseVariations: true,
+      amazonVariantOrder: "price-asc",
       extraImageUrls: "",
       productExtraImageUrls: "",
       extraImagesPosition: "after-main",

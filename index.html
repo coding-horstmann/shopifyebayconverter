@@ -149,6 +149,11 @@
                 <label for="amazonProductType">Amazon Produkttyp</label>
                 <input id="amazonProductType" type="text" value="WALL_ART" />
               </div>
+              <div class="field">
+                <label for="amazonManufacturer">Amazon Hersteller</label>
+                <input id="amazonManufacturer" type="text" value="Gelato" />
+                <small>Technisches Herstellerfeld im Amazon-Feed. Rechtlich bitte pruefen, ob Gelato hier korrekt ist.</small>
+              </div>
             </div>
 
             <div class="grid two">
@@ -186,6 +191,14 @@
               <label for="amazonVariationTheme">Amazon Variantenmerkmal</label>
               <input id="amazonVariationTheme" type="text" value="GRÖSSE" />
               <small>Für deine Poster: Varianten unterscheiden sich in der Größe.</small>
+            </div>
+            <div class="field">
+              <label for="amazonVariantOrder">Amazon Hauptvariante</label>
+              <select id="amazonVariantOrder">
+                <option value="price-asc" selected>Kleinste / guenstigste Variante zuerst</option>
+                <option value="shopify">Shopify-Reihenfolge beibehalten</option>
+              </select>
+              <small>Amazon entscheidet die Anzeige final selbst, aber die Feed-Reihenfolge priorisiert die kleinste Variante.</small>
             </div>
             <p class="hint">
               Wichtig: Bestand 3 bedeutet 3 Stück je Variante. Es begrenzt nicht die Anzahl der Produkte.
@@ -235,8 +248,8 @@
 
           <div class="field">
             <label for="extraImagesPositionIndex">Exakte Position der Zusatzfotos</label>
-            <input id="extraImagesPositionIndex" type="number" min="1" step="1" placeholder="z. B. 4" />
-            <small>Optional. 1 = ganz vorne, 2 = nach dem Hauptfoto, 4 = an vierter Stelle.</small>
+            <input id="extraImagesPositionIndex" type="number" min="1" step="1" placeholder="z. B. 3" />
+            <small>Optional. 1 = ganz vorne, 2 = nach dem Hauptfoto, 3 = an dritter Stelle, z. B. fuer eine Infografik.</small>
           </div>
 
           <div class="grid three">
@@ -672,6 +685,7 @@
         amazonBrandMode: document.getElementById("amazonBrandMode"),
         amazonBrand: document.getElementById("amazonBrand"),
         amazonProductType: document.getElementById("amazonProductType"),
+        amazonManufacturer: document.getElementById("amazonManufacturer"),
         amazonConditionType: document.getElementById("amazonConditionType"),
         amazonProductTaxCode: document.getElementById("amazonProductTaxCode"),
         amazonProductIdType: document.getElementById("amazonProductIdType"),
@@ -679,6 +693,7 @@
         amazonTitleSuffix: document.getElementById("amazonTitleSuffix"),
         amazonBrowseNode: document.getElementById("amazonBrowseNode"),
         amazonVariationTheme: document.getElementById("amazonVariationTheme"),
+        amazonVariantOrder: document.getElementById("amazonVariantOrder"),
         itemIdMapFile: document.getElementById("itemIdMapFile"),
         categoryId: document.getElementById("categoryId"),
         conditionId: document.getElementById("conditionId"),
@@ -993,7 +1008,7 @@
           roundTo: Number(elements.roundTo.value || 0),
           amazonBrandMode: elements.amazonBrandMode.value || "none",
           amazonBrand: elements.amazonBrand.value.trim() || "Atelier Orlo",
-          amazonManufacturer: elements.amazonBrand.value.trim() || "Atelier Orlo",
+          amazonManufacturer: elements.amazonManufacturer.value.trim() || "Gelato",
           amazonProductType: elements.amazonProductType.value.trim() || "WALL_ART",
           amazonConditionType: elements.amazonConditionType.value.trim() || "Neu",
           amazonProductTaxCode: elements.amazonProductTaxCode.value.trim() || "A_GEN_STANDARD",
@@ -1002,6 +1017,7 @@
           amazonTitleSuffix: elements.amazonTitleSuffix.value.trim() || "Poster Wandkunst",
           amazonBrowseNode: elements.amazonBrowseNode.value.trim() || "Poster & Kunstdrucke (372854011)",
           amazonVariationTheme: elements.amazonVariationTheme.value.trim() || "GRÖSSE",
+          amazonVariantOrder: elements.amazonVariantOrder.value || "price-asc",
         };
       }
 
@@ -1298,6 +1314,7 @@
         elements.amazonBrandMode,
         elements.amazonBrand,
         elements.amazonProductType,
+        elements.amazonManufacturer,
         elements.amazonConditionType,
         elements.amazonProductTaxCode,
         elements.amazonProductIdType,
@@ -1305,6 +1322,7 @@
         elements.amazonTitleSuffix,
         elements.amazonBrowseNode,
         elements.amazonVariationTheme,
+        elements.amazonVariantOrder,
         elements.conditionId,
         elements.quantity,
         elements.maxImages,
